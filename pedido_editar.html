@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Editar Pedido - Nonna DB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5D1927", "background-light": "#f8f6f6", "brand-pink": "#FEBDC6" },
+                fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                borderRadius: {"DEFAULT": "0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: 'Montserrat', sans-serif; background-color: #FEBDC6; }
+</style>
+</head>
+<body class="bg-brand-pink min-h-screen font-display">
+<main class="max-w-4xl mx-auto px-6 py-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div class="space-y-1">
+            <nav class="flex items-center gap-2 text-primary/70 text-sm font-medium mb-2">
+                <a href="pedidos.html" class="hover:underline">Pedidos</a>
+                <span class="material-symbols-outlined text-xs">chevron_right</span>
+                <span class="text-slate-900">Editar</span>
+            </nav>
+            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">EDITAR PEDIDO</h1>
+            <p class="text-slate-700">Actualice la información logística y de costos del pedido</p>
+        </div>
+        <a href="pedidos.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 font-bold rounded-lg shadow-sm border border-slate-200 hover:bg-slate-50 transition-all text-sm">← Volver a la lista</a>
+    </div>
+    <div class="bg-white rounded-2xl shadow-xl shadow-primary/5 overflow-hidden">
+        <div class="p-8 border-b border-slate-100 bg-slate-50/50">
+            <div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">edit_note</span><h2 class="text-lg font-bold text-slate-900">Información General</h2></div>
+        </div>
+        <form id="form-editar" class="p-8 space-y-8">
+            <div class="grid grid-cols-1 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cliente</label>
+                    <select id="id_cliente" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Dirección</label>
+                    <select id="id_direccion" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-700">Fecha y Hora de Entrega</label>
+                        <input id="fecha_entrega" type="datetime-local" class="w-full h-12 px-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-700">Estado del Pedido</label>
+                        <select id="id_estado" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Comentarios internos</label>
+                    <textarea id="comentario" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" rows="3" placeholder="Notas para el equipo..."></textarea>
+                </div>
+                <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                    <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">payments</span><h2 class="text-lg font-bold text-slate-900">Detalles de Cobro</h2></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="block text-sm font-bold text-slate-700">Subtotal ($)</label><input id="subtotal" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl"></div>
+                        <div><label class="block text-sm font-bold text-slate-700">Total ($)</label><input id="total" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row items-center justify-between p-6 border-t border-slate-100 gap-6">
+                <div class="flex items-center gap-4"><div class="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary"><span class="material-symbols-outlined">receipt_long</span></div><div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</p><p id="total-preview" class="text-2xl font-black text-slate-900">$0.00</p></div></div>
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <a href="pedidos.html" class="flex-1 md:flex-none px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors">Cancelar</a>
+                    <button type="submit" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2">💾 Actualizar pedido</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+    function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const pedidoId = urlParams.get('id');
+    if (!pedidoId) { alert('No se especificó pedido'); window.location.href='pedidos.html'; }
+
+    let clientes = [];
+    let direcciones = [];
+
+    async function cargarClientes(selectedId) {
+        const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
+        if (res.ok) clientes = await res.json();
+        const select = document.getElementById('id_cliente');
+        select.innerHTML = '<option value="">Seleccione cliente</option>';
+        clientes.forEach(c => { const opt = document.createElement('option'); opt.value = c.id_cliente; opt.textContent = `${c.nombre} ${c.apellido}`.trim(); if (selectedId && c.id_cliente == selectedId) opt.selected = true; select.appendChild(opt); });
+    }
+
+    async function cargarDirecciones(selectedId) {
+        const select = document.getElementById('id_direccion');
+        select.innerHTML = '<option value="">Seleccione dirección</option>';
+        try {
+            const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
+            if (res.ok) {
+                const todas = await res.json();
+                const clienteId = document.getElementById('id_cliente').value;
+                const filtradas = todas.filter(d => d.id_cliente == clienteId);
+                filtradas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id_direccion; opt.textContent = d.direccion || `Dir ${d.id_direccion}`; if (selectedId && d.id_direccion == selectedId) opt.selected = true; select.appendChild(opt); });
+            }
+        } catch(e) {}
+    }
+
+    async function cargarEstados(selectedId) {
+        let estadosList = [];
+        try {
+            const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
+            if (res.ok) estadosList = await res.json();
+        } catch(e) {}
+        if (estadosList.length === 0) estadosList = [{ id_estado: 1, descripcion: 'Pendiente' }, { id_estado: 2, descripcion: 'Preparación' }, { id_estado: 3, descripcion: 'Enviado' }, { id_estado: 4, descripcion: 'Entregado' }, { id_estado: 5, descripcion: 'Cancelado' }];
+        const select = document.getElementById('id_estado');
+        select.innerHTML = '<option value="">Seleccione estado</option>';
+        estadosList.forEach(e => { const opt = document.createElement('option'); opt.value = e.id_estado; opt.textContent = e.descripcion; if (selectedId && e.id_estado == selectedId) opt.selected = true; select.appendChild(opt); });
+    }
+
+    async function obtenerPedido() {
+        const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error('Pedido no encontrado');
+        return res.json();
+    }
+
+    async function cargarDatos() {
+        const pedido = await obtenerPedido();
+        await cargarClientes(pedido.id_cliente);
+        await cargarDirecciones(pedido.id_direccion);
+        await cargarEstados(pedido.id_estado);
+        document.getElementById('fecha_entrega').value = pedido.fecha_entrega ? pedido.fecha_entrega.slice(0,16) : '';
+        document.getElementById('comentario').value = pedido.comentario || '';
+        document.getElementById('subtotal').value = pedido.subtotal || 0;
+        document.getElementById('total').value = pedido.total || 0;
+        actualizarPreview();
+    }
+
+    function actualizarPreview() {
+        const total = parseFloat(document.getElementById('total').value) || 0;
+        document.getElementById('total-preview').innerText = `$${total.toFixed(2)}`;
+    }
+    document.getElementById('subtotal').addEventListener('input', actualizarPreview);
+    document.getElementById('total').addEventListener('input', actualizarPreview);
+    document.getElementById('id_cliente').addEventListener('change', (e) => { if(e.target.value) cargarDirecciones(); });
+
+    async function actualizarPedido(event) {
+        event.preventDefault();
+        const datos = {
+            id_direccion: parseInt(document.getElementById('id_direccion').value),
+            id_estado: parseInt(document.getElementById('id_estado').value),
+            id_cliente: parseInt(document.getElementById('id_cliente').value),
+            fecha_entrega: new Date(document.getElementById('fecha_entrega').value).toISOString(),
+            fecha_pedido: new Date().toISOString(),
+            comentario: document.getElementById('comentario').value,
+            tipo_entrega: true,
+            subtotal: parseFloat(document.getElementById('subtotal').value) || 0,
+            total: parseFloat(document.getElementById('total').value) || 0
+        };
+        try {
+            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(datos) });
+            if (!res.ok) throw new Error((await res.json()).detail);
+            alert('Pedido actualizado');
+            window.location.href = 'pedidos.html';
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    document.getElementById('form-editar').addEventListener('submit', actualizarPedido);
+    cargarDatos();
+</script>
+</body>
+</html>

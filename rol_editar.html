@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1926",
+                    "accent-pink": "#FEBDC6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1315",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Editar Rol - Nonna DB</title>
+</head>
+<body class="font-display bg-accent-pink min-h-screen flex flex-col">
+<main class="flex-1 flex items-center justify-center p-6 sm:p-12">
+    <div class="w-full max-w-[560px] bg-white rounded-xl shadow-2xl p-8 md:p-12">
+        <div class="mb-10 text-center">
+            <span class="material-symbols-outlined text-primary text-5xl mb-4"></span>
+            <h1 class="text-primary text-3xl font-black leading-tight tracking-[-0.033em] uppercase">Editar Rol</h1>
+            <p class="text-slate-500 text-base font-normal mt-2">Gestión de privilegios de acceso al sistema</p>
+        </div>
+        <form id="form-editar" class="space-y-6">
+            <div class="space-y-2">
+                <label class="block text-primary text-sm font-bold leading-normal uppercase tracking-wider">Descripción del Rol</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-primary/60">
+                        <span class="material-symbols-outlined text-lg"></span>
+                    </span>
+                    <input id="descripcion" class="form-input block w-full pl-11 rounded-lg border-slate-200 text-slate-900 focus:border-primary focus:ring-primary/20 h-14 text-base font-normal transition-all" placeholder="Ej. Administrador" required>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                <button type="submit" class="flex-1 flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-14 px-6 bg-primary text-white text-base font-bold transition-all hover:bg-primary/90 hover:shadow-lg active:scale-95">
+                    <span class="material-symbols-outlined text-lg"></span>
+                    <span>Guardar Cambios</span>
+                </button>
+                <a href="roles.html" class="flex-1 flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-14 px-6 bg-white border-2 border-primary text-primary text-base font-bold transition-all hover:bg-primary/5 active:scale-95">
+                    <span class="material-symbols-outlined text-lg"></span>
+                    <span>Cancelar</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const rolId = urlParams.get('id');
+    if (!rolId) {
+        alert('No se especificó qué rol editar.');
+        window.location.href = 'roles.html';
+    }
+
+    async function cargarRol() {
+        try {
+            const res = await fetch(`${API_BASE}/rol/${rolId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            const rol = await res.json();
+            document.getElementById('descripcion').value = rol.descripcion || '';
+        } catch (error) {
+            alert('Error al cargar rol: ' + error.message);
+            window.location.href = 'roles.html';
+        }
+    }
+
+    async function actualizarRol(event) {
+        event.preventDefault();
+        const descripcion = document.getElementById('descripcion').value.trim();
+        if (!descripcion) {
+            alert('La descripción es obligatoria');
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE}/rol/${rolId}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({ descripcion })
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al actualizar');
+            }
+            alert('Rol actualizado correctamente');
+            window.location.href = 'roles.html';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+
+    document.getElementById('form-editar').addEventListener('submit', actualizarRol);
+    cargarRol();
+</script>
+</body>
+</html>

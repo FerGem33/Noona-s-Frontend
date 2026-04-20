@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#ec5b13", "brand-maroon": "#800000", "brand-pink": "#FEBDC6" },
+                fontFamily: { "display": ["Public Sans"] },
+            },
+        },
+    }
+</script>
+</head>
+<body class="bg-brand-pink min-h-screen flex items-center justify-center p-4">
+<div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+    <div class="p-8 flex flex-col items-center text-center">
+        <div class="mb-6"><div class="bg-primary/10 rounded-full p-6"><span class="material-symbols-outlined text-primary text-6xl">warning</span></div></div>
+        <h3 class="text-slate-900 text-2xl font-bold mb-4">¿Eliminar esta cotización?</h3>
+        <p class="text-slate-500 mb-8">Esta acción no se puede deshacer.</p>
+        <div class="flex flex-col gap-3 w-full">
+            <button id="btn-eliminar" class="bg-brand-maroon text-white py-3 rounded-xl font-bold">Sí, Eliminar</button>
+            <a href="cotizaciones.html" class="border-2 border-slate-200 py-3 rounded-xl font-bold">No, Cancelar</a>
+        </div>
+    </div>
+</div>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const cotizacionId = parseInt(urlParams.get('id'));
+    if (!cotizacionId) { alert('No se especificó'); window.location.href = 'cotizaciones.html'; }
+    function eliminar() {
+        let cotizaciones = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
+        cotizaciones = cotizaciones.filter(c => c.id_cotizacion !== cotizacionId);
+        localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+        alert('Cotización eliminada');
+        window.location.href = 'cotizaciones.html';
+    }
+    document.getElementById('btn-eliminar').addEventListener('click', eliminar);
+</script>
+</body>
+</html>

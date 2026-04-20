@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#FEBDC6", "accent": "#5D1927", "background-light": "#f8f5f6", "background-dark": "#230f12" },
+                fontFamily: { "display": ["Montserrat"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Nonna - Editar Cotización</title>
+</head>
+<body class="font-display bg-primary min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+    <div class="px-8 pt-4"><a href="cotizaciones.html" class="inline-flex items-center gap-1 text-accent font-semibold hover:underline">← Volver</a></div>
+    <main class="flex-1 p-8 flex justify-center">
+        <div class="max-w-6xl w-full flex flex-col gap-6">
+            <div class="flex flex-col gap-1"><h1 class="text-accent text-4xl font-black tracking-tight">Editar Cotización</h1><p class="text-accent/70 text-lg">Modifique los productos y cantidades.</p></div>
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden p-8 flex flex-col gap-8">
+                <!-- Cliente (readonly) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="text-accent font-semibold text-sm">Cliente</label><input id="cliente_nombre" class="w-full h-14 px-4 rounded-lg border-2 border-primary/30 bg-slate-50" readonly></div>
+                </div>
+                <!-- Product selector (similar a nueva) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div class="md:col-span-2"><label class="text-accent font-semibold text-sm">Agregar Producto</label>
+                        <select id="select-producto" class="w-full h-14 pl-4 pr-10 rounded-lg border-2 border-primary/30 focus:border-accent">...</select>
+                    </div>
+                    <div><label>Cantidad</label><div class="flex gap-3"><input id="cantidad" type="number" value="1" class="w-full h-14 px-4 rounded-lg border"><button id="btn-agregar" class="h-14 px-6 bg-accent text-white rounded-lg">Añadir</button></div></div>
+                </div>
+                <!-- Tabla de productos (se llena con los existentes) -->
+                <div class="border-2 border-primary/10 rounded-xl overflow-hidden">
+                    <table class="w-full text-left"><thead><tr class="bg-primary/10"><th>Producto</th><th class="text-center">Cantidad</th><th class="text-right">Precio</th><th class="text-right">Subtotal</th><th class="text-center">Acción</th></tr></thead>
+                    <tbody id="tabla-productos"></tbody>
+                    <tfoot><tr class="bg-primary/5"><td colspan="3" class="text-right font-bold">TOTAL</td><td id="total-td" class="text-right font-black text-accent text-2xl">$0.00</td><td></td></tr></tfoot>
+                    </table>
+                </div>
+                <div class="flex justify-end"><button id="btn-actualizar" class="px-10 py-3 bg-accent text-white font-bold rounded-lg shadow-lg">Actualizar Cotización</button></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+    function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const cotizacionId = urlParams.get('id');
+    if (!cotizacionId) { alert('No se especificó cotización'); window.location.href = 'cotizaciones.html'; }
+
+    let productosCatalogo = [];
+    let productosSeleccionados = [];
+
+    async function cargarDatos() {
+        // Obtener cotización y sus productos
+        const resCot = await fetch(`${API_BASE}/cotizacion/${cotizacionId}`, { headers: getHeaders() });
+        if (!resCot.ok) { alert('Error cargando cotización'); return; }
+        const cot = await resCot.json();
+        // Cargar cliente
+        const resCli = await fetch(`${API_BASE}/cliente/${cot.id_cliente}`, { headers: getHeaders() });
+        if (resCli.ok) {
+            const cli = await resCli.json();
+            document.getElementById('cliente_nombre').value = `${cli.nombre} ${cli.apellido}`;
+        }
+        // Cargar productos asociados 
+        const resProd = await fetch(`${API_BASE}/cotizacion_producto/?id_cotizacion=${cotizacionId}`, { headers: getHeaders() });
+        if (resProd.ok) {
+            const rels = await resProd.json();
+            for (const rel of rels) {
+                const prodRes = await fetch(`${API_BASE}/producto/${rel.id_producto}`, { headers: getHeaders() });
+                if (prodRes.ok) {
+                    const prod = await prodRes.json();
+                    productosSeleccionados.push({
+                        id_producto: prod.id_producto,
+                        nombre: prod.descripcion,
+                        precio: parseFloat(prod.precio_unitario),
+                        cantidad: rel.cantidad
+                    });
+                }
+            }
+        }
+        actualizarTabla();
+        await cargarProductosCatalogo();
+    }
+
+    async function cargarProductosCatalogo() {
+        const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+        if (res.ok) {
+            productosCatalogo = await res.json();
+            const select = document.getElementById('select-producto');
+            select.innerHTML = '<option value="">Seleccione...</option>';
+            productosCatalogo.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id_producto;
+                opt.textContent = `${p.descripcion} - $${p.precio_unitario}`;
+                opt.dataset.precio = p.precio_unitario;
+                opt.dataset.nombre = p.descripcion;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    function actualizarTabla() {
+        const tbody = document.getElementById('tabla-productos');
+        let total = 0;
+        if (productosSeleccionados.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos</td></tr>'; document.getElementById('total-td').innerText = '$0.00'; return; }
+        tbody.innerHTML = '';
+        productosSeleccionados.forEach((p, idx) => {
+            const subtotal = p.precio * p.cantidad;
+            total += subtotal;
+            const fila = `<tr><td class="px-6 py-5">${escapeHtml(p.nombre)}</td><td class="text-center"><input type="number" class="cantidad-input w-20 text-center border rounded" data-idx="${idx}" value="${p.cantidad}"></td><td class="text-right">$${p.precio.toFixed(2)}</td><td class="text-right">$${subtotal.toFixed(2)}</td><td class="text-center"><button class="btn-eliminar" data-idx="${idx}"><span class="material-symbols-outlined">delete</span></button></td></tr>`;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        document.getElementById('total-td').innerText = `$${total.toFixed(2)}`;
+        document.querySelectorAll('.cantidad-input').forEach(inp => {
+            inp.addEventListener('change', (e) => {
+                const idx = parseInt(inp.dataset.idx);
+                productosSeleccionados[idx].cantidad = parseInt(inp.value) || 1;
+                actualizarTabla();
+            });
+        });
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                productosSeleccionados.splice(idx, 1);
+                actualizarTabla();
+            });
+        });
+    }
+
+    document.getElementById('btn-agregar').addEventListener('click', () => {
+        const select = document.getElementById('select-producto');
+        const id = parseInt(select.value);
+        if (!id) return;
+        const cantidad = parseInt(document.getElementById('cantidad').value);
+        const opt = select.options[select.selectedIndex];
+        const precio = parseFloat(opt.dataset.precio);
+        const nombre = opt.dataset.nombre;
+        const existente = productosSeleccionados.find(p => p.id_producto === id);
+        if (existente) existente.cantidad += cantidad;
+        else productosSeleccionados.push({ id_producto: id, nombre, precio, cantidad });
+        actualizarTabla();
+        select.value = '';
+        document.getElementById('cantidad').value = '1';
+    });
+
+    document.getElementById('btn-actualizar').addEventListener('click', async () => {
+        const total = productosSeleccionados.reduce((a,b)=> a + (b.precio*b.cantidad), 0);
+        // Actualizar cabecera
+        await fetch(`${API_BASE}/cotizacion/${cotizacionId}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify({ total }) });
+        // Eliminar relaciones antiguas y volver a crear
+        const oldRels = await fetch(`${API_BASE}/cotizacion_producto/?id_cotizacion=${cotizacionId}`, { headers: getHeaders() });
+        if (oldRels.ok) {
+            const olds = await oldRels.json();
+            for (const old of olds) {
+                await fetch(`${API_BASE}/cotizacion_producto/${old.id_cotizacion}/${old.id_producto}`, { method: 'DELETE', headers: getHeaders() });
+            }
+        }
+        for (const p of productosSeleccionados) {
+            await fetch(`${API_BASE}/cotizacion_producto/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ id_cotizacion: parseInt(cotizacionId), id_producto: p.id_producto, cantidad: p.cantidad, precio_unitario: p.precio }) });
+        }
+        alert('Cotización actualizada');
+        window.location.href = 'cotizaciones.html';
+    });
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    cargarDatos();
+</script>
+</body>
+</html>

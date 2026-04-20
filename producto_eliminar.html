@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "accent-pink": "#FEBDC6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Nonna - Confirmar Eliminación</title>
+</head>
+<body class="font-display bg-accent-pink min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-[1280px] min-h-[960px] flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden p-8 flex flex-col items-center">
+        <!-- Header -->
+        <div class="w-full flex items-center mb-6 border-b border-primary/10 pb-4 justify-center">
+            <div class="flex items-center gap-2 text-primary">
+                <span class="material-symbols-outlined text-3xl font-bold">restaurant</span>
+                <h2 class="text-xl font-bold leading-tight tracking-tight">Nonna</h2>
+            </div>
+        </div>
+        
+        <!-- Imagen del producto -->
+        <div class="mb-6 flex justify-center">
+            <div class="w-40 h-40 rounded-xl bg-primary/5 flex items-center justify-center overflow-hidden shadow-md border border-primary/10">
+                <img id="imagen-producto" class="w-full h-full object-cover hidden" alt="Imagen del producto">
+                <div id="sin-imagen" class="flex flex-col items-center text-primary/50">
+                    <span class="material-symbols-outlined text-5xl">image_not_supported</span>
+                    <span class="text-xs mt-1">Sin imagen</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advertencia -->
+        <div class="mb-6 flex justify-center">
+            <div class="bg-primary/5 rounded-full p-6">
+                <span class="material-symbols-outlined text-primary text-6xl">warning</span>
+            </div>
+        </div>
+        
+        <!-- Mensaje -->
+        <div class="text-center mb-6">
+            <h1 class="text-slate-900 text-2xl font-bold leading-tight tracking-tight mb-4">¿Seguro que deseas eliminar?</h1>
+            <p class="text-slate-600 text-base leading-relaxed" id="mensaje-producto">Cargando información del producto...</p>
+        </div>
+        
+        <!-- Botones -->
+        <div class="w-full flex flex-col gap-3">
+            <button id="btn-eliminar" class="w-full h-14 flex items-center justify-center rounded-xl bg-primary text-white text-lg font-bold tracking-wide hover:opacity-90 transition-opacity">Eliminar</button>
+            <a href="productos.html" class="w-full h-14 flex items-center justify-center rounded-xl border-2 border-primary bg-white text-primary text-lg font-bold tracking-wide hover:bg-primary/5 transition-colors">Cancelar</a>
+        </div>
+        
+        <div class="mt-8">
+            <div class="w-12 h-1 bg-accent-pink rounded-full mx-auto"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const SERVER_BASE = 'http://3.15.13.161:8000';  // para imágenes
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productoId = urlParams.get('id');
+    if (!productoId) {
+        alert('No se especificó qué producto eliminar');
+        window.location.href = 'productos.html';
+    }
+
+    async function obtenerProducto(id) {
+        const res = await fetch(`${API_BASE}/producto/${id}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+    }
+
+    async function eliminarProducto(id) {
+        const res = await fetch(`${API_BASE}/producto/${id}`, { method: 'DELETE', headers: getHeaders() });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Error al eliminar');
+        }
+        return res.json();
+    }
+
+    async function cargarDatos() {
+        try {
+            const prod = await obtenerProducto(productoId);
+            // Mensaje
+            document.getElementById('mensaje-producto').innerHTML = `Esta acción no se puede deshacer. El producto <strong class="text-primary">“${escapeHtml(prod.descripcion)}”</strong> se borrará permanentemente.`;
+            
+            // Imagen
+            const imgElement = document.getElementById('imagen-producto');
+            const sinImgDiv = document.getElementById('sin-imagen');
+            
+            if (prod.image_url && prod.image_url !== "null" && prod.image_url.trim() !== "") {
+                // Construir URL absoluta
+                let imagenUrl = prod.image_url;
+                if (imagenUrl.startsWith('/')) {
+                    imagenUrl = SERVER_BASE + imagenUrl;
+                }
+                imgElement.src = imagenUrl;
+                imgElement.onload = () => {
+                    imgElement.classList.remove('hidden');
+                    sinImgDiv.classList.add('hidden');
+                };
+                imgElement.onerror = () => {
+                    imgElement.classList.add('hidden');
+                    sinImgDiv.classList.remove('hidden');
+                };
+                // Forzar carga
+                imgElement.src = imagenUrl;
+            } else {
+                imgElement.classList.add('hidden');
+                sinImgDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('mensaje-producto').innerHTML = 'Error al cargar el producto. Puede que ya no exista.';
+            document.getElementById('imagen-producto').classList.add('hidden');
+            document.getElementById('sin-imagen').classList.remove('hidden');
+        }
+    }
+
+    document.getElementById('btn-eliminar').addEventListener('click', async () => {
+        if (confirm('¿Estás absolutamente seguro? Esta acción es irreversible.')) {
+            try {
+                await eliminarProducto(productoId);
+                alert('Producto eliminado correctamente');
+                window.location.href = 'productos.html';
+            } catch (error) {
+                alert('Error al eliminar: ' + error.message);
+            }
+        }
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    cargarDatos();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#221014",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Eliminar Rol - Nonna DB</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-background-dark/40 backdrop-blur-sm px-4">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl border-2 border-primary/20 overflow-hidden">
+        <div class="p-8 text-center">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-6">
+                <span class="material-symbols-outlined text-4xl font-bold">delete_forever</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-primary tracking-tight mb-3">¿ELIMINAR ROL?</h2>
+            <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed mb-6">
+                ¿Estás seguro de que deseas eliminar este rol? <br>
+                <span class="font-medium">Esta acción no se puede deshacer</span> y podría afectar a los usuarios asignados.
+            </p>
+            <div class="bg-primary/5 rounded-lg py-3 px-4 mb-8 border border-primary/10">
+                <p class="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">Rol a eliminar</p>
+                <p id="nombre-rol" class="text-xl font-bold text-slate-900 dark:text-slate-100">Cargando...</p>
+            </div>
+            <div class="flex flex-col gap-3">
+                <button id="btn-eliminar" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl">delete</span>
+                    Sí, Eliminar Rol
+                </button>
+                <a href="roles.html" class="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3.5 px-6 rounded-lg border border-slate-200 dark:border-slate-700 transition-all text-center">
+                    No, Cancelar
+                </a>
+            </div>
+        </div>
+        <div class="h-1.5 w-full bg-primary"></div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const rolId = urlParams.get('id');
+    if (!rolId) {
+        alert('No se especificó qué rol eliminar.');
+        window.location.href = 'roles.html';
+    }
+
+    async function cargarRol() {
+        try {
+            const res = await fetch(`${API_BASE}/rol/${rolId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            const rol = await res.json();
+            document.getElementById('nombre-rol').innerText = rol.descripcion || 'Rol sin nombre';
+        } catch (error) {
+            console.error(error);
+            document.getElementById('nombre-rol').innerText = 'Error al cargar datos';
+        }
+    }
+
+    async function eliminarRol() {
+        try {
+            const res = await fetch(`${API_BASE}/rol/${rolId}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al eliminar');
+            }
+            alert('Rol eliminado correctamente');
+            window.location.href = 'roles.html';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+
+    document.getElementById('btn-eliminar').addEventListener('click', () => {
+        if (confirm('¿Estás absolutamente seguro? Esta acción es irreversible.')) {
+            eliminarRol();
+        }
+    });
+
+    cargarRol();
+</script>
+</body>
+</html>

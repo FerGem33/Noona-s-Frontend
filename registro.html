@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">        
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5d1927",
+                        "background-light": "#ffd1dc",
+                        "background-dark": "#1f1316",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+</script>
+<title>Nonna - Iniciar Sesión</title>
+<style>
+    /* Estilos para los mensajes centrales */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -40%);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+    }
+    
+    .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .animate-fadeOut {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
+    
+    .animate-slideIn {
+        animation: slideIn 0.3s ease-out;
+    }
+</style>
+</head>
+<body class="dark:bg-background-dark font-display antialiased" style="background-color: #FEBDC6;">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4">
+    <!-- Main Login Card -->
+    <div class="w-full max-w-[440px] bg-white dark:bg-slate-900 rounded-xl shadow-xl shadow-primary/5 overflow-hidden border border-primary/5">
+        <div class="px-8 pt-12 flex flex-col items-center pb-12">
+            <!-- Logo Section -->
+            <div class="mb-8 text-center">
+                <h1 class="text-primary dark:text-slate-100 tracking-tight text-4xl font-bold leading-tight">
+                    Nonna
+                </h1>
+                <div class="flex items-center justify-center gap-1.5 mt-2">
+                    <p class="text-primary/60 dark:text-slate-400 text-sm font-medium">Hecho con amor por Elisa de Valle</p>
+                    <span class="material-symbols-outlined text-primary text-sm">favorite</span>
+                </div>
+            </div>
+            
+            <!-- Form Section -->
+            <div class="w-full space-y-6">
+                <!-- User ID Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-slate-700 dark:text-slate-200 text-sm font-semibold px-1">Nombre de Usuario</label>
+                    <div class="relative">
+                        <input id="username" class="form-input flex w-full rounded-lg text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 text-base transition-all placeholder:text-slate-400" placeholder="Ingrese su nombre de usuario" type="text">
+                    </div>
+                </div>
+                
+                <!-- Password Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-slate-700 dark:text-slate-200 text-sm font-semibold px-1">
+                        Contraseña
+                    </label>
+                    <div class="relative flex items-stretch">
+                        <!-- Campo de contraseña con ID para identificarlo fácilmente -->
+                        <input id="password" class="form-input flex w-full rounded-lg rounded-r-none border-r-0 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 text-base transition-all placeholder:text-slate-400" placeholder="••••••••" type="password">
+                        <!-- Botón para mostrar/ocultar contraseña con ID específico -->
+                        <button id="togglePasswordBtn" class="flex items-center justify-center px-4 rounded-r-lg border border-l-0 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:text-primary transition-colors" type="button">
+                            <span id="visibilityIcon" class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                    
+                </div>
+                
+
+                <!-- Submit Button - Ahora con ID específico para evitar conflictos -->
+                <div class="pt-2">
+                    <button id="loginBtn" class="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold tracking-wide transition-all hover:bg-primary/90 active:scale-[0.98]" type="button">
+                        <span>Iniciar Sesión</span>
+                        <span class="material-symbols-outlined ml-2 text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            
+            
+           
+        </div>
+    </div>
+    
+    <!-- Decorative Background Element (Subtle) -->
+    <div class="fixed top-0 left-0 w-full h-full -z-10 opacity-30 pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl"></div>
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // FUNCIÓN PARA MOSTRAR MENSAJES CENTRALES CON BOTÓN OK
+    // ============================================
+    function mostrarMensajeCentral(titulo, tipo, mensaje = '') {
+        // Colores según el tipo de mensaje
+        const colores = {
+            success: {
+                bg: 'bg-green-500',
+                icono: 'check_circle',
+                botonBg: 'bg-green-600 hover:bg-green-700'
+            },
+            error: {
+                bg: 'bg-red-500',
+                icono: 'error',
+                botonBg: 'bg-red-600 hover:bg-red-700'
+            },
+            warning: {
+                bg: 'bg-yellow-500',
+                icono: 'warning',
+                botonBg: 'bg-yellow-600 hover:bg-yellow-700'
+            },
+            info: {
+                bg: 'bg-blue-500',
+                icono: 'info',
+                botonBg: 'bg-blue-600 hover:bg-blue-700'
+            }
+        };
+        
+        const color = colores[tipo] || colores.info;
+        
+        // Crear overlay oscuro
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-[1000] animate-fadeIn';
+        
+        // Crear el contenedor del mensaje
+        const mensajeDiv = document.createElement('div');
+        mensajeDiv.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1001] ${color.bg} text-white rounded-xl p-6 min-w-[320px] max-w-[400px] shadow-2xl animate-slideIn`;
+        
+        // Contenido del mensaje
+        mensajeDiv.innerHTML = `
+            <div class="flex flex-col items-center text-center">
+                <div class="mb-4">
+                    <span class="material-symbols-outlined text-5xl">${color.icono}</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2">${titulo}</h3>
+                ${mensaje ? `<p class="text-sm opacity-90 mb-6">${mensaje}</p>` : ''}
+                <button id="btnCerrarMensaje" class="${color.botonBg} text-white px-6 py-2 rounded-lg font-semibold transition-all transform hover:scale-105">
+                    Entendido
+                </button>
+            </div>
+        `;
+        
+        // Agregar al body
+        document.body.appendChild(overlay);
+        document.body.appendChild(mensajeDiv);
+        
+        // Función para cerrar el mensaje
+        function cerrarMensaje() {
+            mensajeDiv.classList.add('animate-fadeOut');
+            overlay.classList.add('animate-fadeOut');
+            setTimeout(() => {
+                if (mensajeDiv.parentNode) mensajeDiv.remove();
+                if (overlay.parentNode) overlay.remove();
+            }, 300);
+        }
+        
+        // Evento para el botón OK
+        const btnCerrar = mensajeDiv.querySelector('#btnCerrarMensaje');
+        btnCerrar.addEventListener('click', cerrarMensaje);
+        
+        // Cerrar al hacer clic en el overlay
+        overlay.addEventListener('click', cerrarMensaje);
+    }
+
+    // ============================================
+    // FUNCIONALIDAD DEL BOTÓN DE MOSTRAR CONTRASEÑA
+    // ============================================
+    // Seleccionamos los elementos del DOM relacionados con la contraseña
+    const passwordInput = document.getElementById('password');      // Campo de entrada de contraseña
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');  // Botón para mostrar/ocultar
+    const visibilityIcon = document.getElementById('visibilityIcon');        // Icono del botón
+    
+    // Variable para controlar el estado de visibilidad (false = oculta, true = visible)
+    let isPasswordVisible = false;
+    
+    // Agregamos evento click al botón de mostrar/ocultar contraseña
+    togglePasswordBtn.addEventListener('click', function(e) {
+        e.preventDefault();  // Prevenir cualquier comportamiento por defecto del botón
+        e.stopPropagation(); // Evitar que el evento se propague a otros elementos
+        
+        // Cambiamos el estado de visibilidad
+        isPasswordVisible = !isPasswordVisible;
+        
+        // Cambiamos el tipo del input según el estado
+        if (isPasswordVisible) {
+            // Si está visible, cambiamos a tipo "text" para mostrar la contraseña
+            passwordInput.type = 'text';
+            // Cambiamos el icono a "visibility_off" para indicar que se puede ocultar
+            visibilityIcon.textContent = 'visibility_off';
+        } else {
+            // Si está oculta, cambiamos a tipo "password" para ocultar la contraseña
+            passwordInput.type = 'password';
+            // Cambiamos el icono a "visibility" para indicar que se puede mostrar
+            visibilityIcon.textContent = 'visibility';
+        }
+    });
+    
+    // ============================================
+    // FUNCIONALIDAD DEL LOGIN
+    // ============================================
+    // Seleccionamos el botón de login por su ID específico
+    const loginButton = document.getElementById('loginBtn');
+    
+    // Agregamos evento click al botón de login
+    loginButton.addEventListener('click', function(e) {
+        e.preventDefault();  // Prevenir cualquier comportamiento por defecto
+        
+        // Obtenemos los valores ingresados por el usuario
+        const username = document.getElementById('username').value;  // Valor del campo usuario
+        const password = document.getElementById('password').value;  // Valor del campo contraseña
+        
+        // Validamos que los campos no estén vacíos
+        if (!username || !password) {
+            mostrarMensajeCentral(
+                '⚠️ Campos incompletos',
+                'warning',
+                'Por favor, complete todos los campos para continuar.'
+            );
+            return;  // Salimos de la función si hay campos vacíos
+        }
+        
+        // Preparamos los datos para enviar al servidor en formato x-www-form-urlencoded
+        const data = new URLSearchParams();
+        data.append("grant_type", "");
+        data.append("username", username);
+        data.append("password", password);
+        data.append("scope", "");
+        data.append("client_id", "");
+        data.append("client_secret", "");
+        
+        // Realizamos la petición POST al servidor de autenticación
+        fetch("http://3.15.13.161:8000/api/auth/login", {
+            method: "POST",                                              // Método HTTP POST
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",    // Tipo de contenido para formularios
+                "accept": "application/json"                            // Aceptamos respuesta en JSON
+            },
+            body: data                                                  // Enviamos los datos del formulario
+        })
+        .then(res => {
+            // Verificamos si la respuesta fue exitosa (status 200-299)
+            if (!res.ok) {
+                throw new Error(`Error HTTP: ${res.status}`);
+            }
+            return res.json();  // Convertimos la respuesta a JSON
+        })
+        .then(data => {
+            console.log("Respuesta del servidor:", data);
+            
+            // Verificamos si la respuesta contiene un token de acceso
+            if (data.access_token) {
+                // Guardamos el token en localStorage para futuras peticiones autenticadas
+                localStorage.setItem("token", data.access_token);
+
+                fetch(`http://3.15.13.161:8000/api/auth/usuario/${username}`,{
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${data.access_token}`
+                    }
+
+                })
+                .then(res2 => {
+                    if (!res2.ok) {
+                        throw new Error(`Error HTTP: ${res2.status}`);
+                    }
+                    return res2.json(); 
+                })
+                .then(data2 => {
+                    localStorage.setItem("id_usuario", data2.id_usuario);
+                    localStorage.setItem("usuario", data2.nombre);
+                    localStorage.setItem("id_rol", data2.id_rol);
+                    localStorage.setItem("rol", data2.rol);
+                    
+                    // ============================================
+                    // REDIRECCIÓN SEGÚN EL ROL DEL USUARIO
+                    // ============================================
+                    const rolUsuario = (data2.rol || "").toLowerCase();
+                    
+                    if (rolUsuario === "repartidor") {
+                        // Si el usuario es repartidor, redirige a calendario2.html
+                        window.location.href = "/calendario2.html";
+                    } else {
+                        // Para cualquier otro rol (admin, usuario normal, etc.), redirige a menuprincipal.html
+                        window.location.href = "/menuprincipal.html";
+                    }
+                })
+                .catch(err2 => {
+                    console.error("Inicio de sesión exitoso, pero hubo un error al obtener datos del usuario:", err2);
+                    mostrarMensajeCentral(
+                        '⚠️ Error al obtener datos',
+                        'error',
+                        'Hubo un problema al cargar la información del usuario. Por favor, intente nuevamente.'
+                    );
+                })
+
+                // Redirigir a otra página después del login exitoso
+                
+            } else {
+                // Si no hay token, las credenciales son incorrectas
+                mostrarMensajeCentral(
+                    '❌ Credenciales incorrectas',
+                    'error',
+                    'Por favor, verifique su usuario y contraseña e intente nuevamente.'
+                );
+            }
+        })
+        .catch(err => {
+            // Manejamos cualquier error de red o de servidor
+            console.error("Error en la petición:", err);
+            mostrarMensajeCentral(
+                '⚠️ Error de conexión',
+                'error',
+                'Verifique que los datos ingresados sean correctos y vuelva a intentarlo.'
+            );
+        });
+
+        
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#FEBDC6", "accent": "#5D1927" },
+                fontFamily: { "display": ["Montserrat"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Nonna - Nueva Cotización</title>
+</head>
+<body class="font-display bg-primary min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+    <div class="px-8 pt-4"><a href="cotizaciones.html" class="inline-flex items-center gap-1 text-accent font-semibold hover:underline">← Volver</a></div>
+    <main class="flex-1 p-8 flex justify-center">
+        <div class="max-w-6xl w-full flex flex-col gap-6">
+            <div class="flex flex-col gap-1">
+                <h1 class="text-accent text-4xl font-black tracking-tight">Nueva Cotización</h1>
+                <p class="text-accent/70 text-lg">Configure los productos y cantidades para el cliente.</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden p-8 flex flex-col gap-8">
+                <!-- Cliente -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="text-accent font-semibold text-sm">Cliente *</label>
+                        <select id="id_cliente" class="w-full h-14 px-4 rounded-lg border-2 border-primary/30 focus:border-accent focus:ring-0">
+                            <option value="">Cargando clientes...</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Productos -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div class="md:col-span-2"><label class="text-accent font-semibold text-sm">Producto</label>
+                        <select id="select-producto" class="w-full h-14 pl-4 pr-10 rounded-lg border-2 border-primary/30 focus:border-accent">
+                            <option value="">Seleccione producto...</option>
+                        </select>
+                    </div>
+                    <div><label>Cantidad</label><div class="flex gap-3"><input id="cantidad" type="number" value="1" class="w-full h-14 px-4 rounded-lg border"><button id="btn-agregar" class="h-14 px-6 bg-accent text-white rounded-lg">Añadir</button></div></div>
+                </div>
+                <!-- Tabla de productos seleccionados -->
+                <div class="border-2 border-primary/10 rounded-xl overflow-hidden">
+                    <table class="w-full"><thead><tr class="bg-primary/10"><th>Producto</th><th class="text-center">Cantidad</th><th class="text-right">Precio</th><th class="text-right">Subtotal</th><th class="text-center">Acción</th></tr></thead>
+                    <tbody id="tabla-productos"></tbody>
+                    <tfoot><tr class="bg-primary/5"><td colspan="3" class="text-right font-bold">TOTAL</td><td id="total-td" class="text-right font-black text-accent text-2xl">$0.00</td><td></td></tr></tfoot>
+                    </table>
+                </div>
+                <div class="flex justify-end"><button id="btn-generar" class="px-10 py-3 bg-accent text-white font-bold rounded-lg shadow-lg">Generar Cotización</button></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let productosCatalogo = [];
+    let productosSeleccionados = [];
+
+    async function cargarClientes() {
+        try {
+            const res = await fetch('http://3.15.13.161:8000/api/cliente/', { headers: { 'Authorization': 'Bearer TU_TOKEN' } });
+            if (res.ok) {
+                const clientes = await res.json();
+                const select = document.getElementById('id_cliente');
+                select.innerHTML = '<option value="">Seleccione un cliente</option>';
+                clientes.forEach(c => { select.appendChild(new Option(`${c.nombre} ${c.apellido}`, c.id_cliente)); });
+                return;
+            }
+        } catch(e) {}
+        // Fallback
+        const select = document.getElementById('id_cliente');
+        select.innerHTML = '<option value="">Seleccione un cliente</option><option value="1">Cliente Ejemplo 1</option><option value="2">Cliente Ejemplo 2</option>';
+    }
+
+    async function cargarProductos() {
+        try {
+            const res = await fetch('http://3.15.13.161:8000/api/producto/', { headers: { 'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1IiwiZXhwIjoxNzc2MDUwODA0fQ.R2PzKoeGJjVYe3flsQNrrkfZF3RF-Grlk1u-h4OkaF0' } });
+            if (res.ok) {
+                productosCatalogo = await res.json();
+                const select = document.getElementById('select-producto');
+                select.innerHTML = '<option value="">Seleccione...</option>';
+                productosCatalogo.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id_producto;
+                    opt.textContent = `${p.descripcion} - $${p.precio_unitario}`;
+                    opt.dataset.precio = p.precio_unitario;
+                    opt.dataset.nombre = p.descripcion;
+                    select.appendChild(opt);
+                });
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    function actualizarTabla() {
+        const tbody = document.getElementById('tabla-productos');
+        let total = 0;
+        if (productosSeleccionados.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10">No hay productos agregados.</td></tr>';
+            document.getElementById('total-td').innerText = '$0.00';
+            return;
+        }
+        tbody.innerHTML = '';
+        productosSeleccionados.forEach((p, idx) => {
+            const subtotal = p.precio * p.cantidad;
+            total += subtotal;
+            const fila = `<tr>
+                <td class="px-6 py-5">${escapeHtml(p.nombre)}</td>
+                <td class="text-center">${p.cantidad}</td>
+                <td class="text-right">$${p.precio.toFixed(2)}</td>
+                <td class="text-right">$${subtotal.toFixed(2)}</td>
+                <td class="text-center"><button class="btn-eliminar" data-idx="${idx}"><span class="material-symbols-outlined">delete</span></button></td>
+            </tr>`;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        document.getElementById('total-td').innerText = `$${total.toFixed(2)}`;
+        document.querySelectorAll('.btn-eliminar').forEach(btn => btn.addEventListener('click', (e) => {
+            const idx = parseInt(btn.dataset.idx);
+            productosSeleccionados.splice(idx, 1);
+            actualizarTabla();
+        }));
+    }
+
+    document.getElementById('btn-agregar').addEventListener('click', () => {
+        const select = document.getElementById('select-producto');
+        const id = parseInt(select.value);
+        if (!id) { alert('Seleccione un producto'); return; }
+        const cantidad = parseInt(document.getElementById('cantidad').value);
+        const opt = select.options[select.selectedIndex];
+        const precio = parseFloat(opt.dataset.precio);
+        const nombre = opt.dataset.nombre;
+        const existente = productosSeleccionados.find(p => p.id_producto === id);
+        if (existente) existente.cantidad += cantidad;
+        else productosSeleccionados.push({ id_producto: id, nombre, precio, cantidad });
+        actualizarTabla();
+        select.value = '';
+        document.getElementById('cantidad').value = '1';
+    });
+
+    document.getElementById('btn-generar').addEventListener('click', () => {
+        const id_cliente = parseInt(document.getElementById('id_cliente').value);
+        if (!id_cliente) { alert('Seleccione un cliente'); return; }
+        if (productosSeleccionados.length === 0) { alert('Agregue productos'); return; }
+        const total = productosSeleccionados.reduce((a,b)=> a + (b.precio*b.cantidad), 0);
+        // Guardar en localStorage
+        let cotizaciones = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
+        const newId = cotizaciones.length ? Math.max(...cotizaciones.map(c=>c.id_cotizacion)) + 1 : 1;
+        const nuevaCot = {
+            id_cotizacion: newId,
+            id_cliente: id_cliente,
+            total: total,
+            fecha: new Date().toISOString(),
+            productos: productosSeleccionados.map(p => ({ id_producto: p.id_producto, cantidad: p.cantidad, precio_unitario: p.precio }))
+        };
+        cotizaciones.push(nuevaCot);
+        localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+        alert(`Cotización #${newId} creada`);
+        window.location.href = `cotizacion_previa.html?id=${newId}`;
+    });
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    cargarClientes();
+    cargarProductos();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#5d1926", "background-light": "#febdc6", "background-dark": "#1f1315" },
+                fontFamily: { "display": ["Plus Jakarta Sans"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Registro de Nuevo Usuario - Nonna DB</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-screen-h antialiased text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+    <header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 bg-white/80 backdrop-blur-md px-10 py-4 dark:bg-background-dark/80">
+        <div class="flex items-center gap-4">
+            <a href="usuarios.html" class="flex items-center justify-center rounded-full p-2 text-primary hover:bg-primary/10 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="size-8 text-primary">
+                    <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-primary text-xl font-bold leading-tight tracking-tight">Nonna DB</h2>
+            </div>
+        </div>
+    </header>
+    <main class="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
+        <div class="w-full max-w-2xl">
+            <nav class="flex items-center gap-2 mb-8 text-sm font-medium text-primary/70">
+                <a href="usuarios.html" class="hover:text-primary">Usuarios</a>
+                <span class="material-symbols-outlined text-xs">chevron_right</span>
+                <span class="text-primary font-bold">Registrar Nuevo Usuario</span>
+            </nav>
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-white/20">
+                <div class="p-8 border-b border-primary/10">
+                    <h1 class="text-primary dark:text-primary/90 text-2xl font-bold tracking-tight">REGISTRAR NUEVO USUARIO</h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-2">Complete la información requerida para el alta del nuevo perfil administrativo o de logística.</p>
+                </div>
+                <form id="form-usuario" class="p-8 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="block text-primary font-semibold text-sm mb-2">Nombre Completo</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">person</span>
+                                <input id="nombre" class="w-full pl-10 pr-4 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all dark:bg-slate-800" placeholder="Ej. Juan Pérez" type="text" required>
+                            </div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-primary font-semibold text-sm mb-2">Rol del Usuario</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">badge</span>
+                                <select id="id_rol" class="w-full pl-10 pr-4 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all dark:bg-slate-800" required>
+                                    <option value="">Cargando roles...</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary/40 pointer-events-none">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-primary font-semibold text-sm mb-2">Contraseña</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">lock</span>
+                                <input id="contrasena" class="w-full pl-10 pr-12 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all dark:bg-slate-800" placeholder="••••••••" type="password" required>
+                                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors toggle-password">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-6 flex flex-col sm:flex-row items-center gap-4">
+                        <button type="submit" class="w-full sm:flex-1 bg-primary text-white font-bold py-3.5 px-6 rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-xl">person_add</span>
+                            Crear Usuario
+                        </button>
+                        <a href="usuarios.html" class="w-full sm:w-auto border-2 border-primary text-primary font-bold py-3 px-8 rounded-lg hover:bg-primary/5 transition-all text-center">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+                <div class="bg-primary/5 p-6 border-t border-primary/10">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary mt-0.5">info</span>
+                        <div class="text-xs text-primary/80 leading-relaxed">
+                            <p class="font-bold mb-1">Nota de seguridad:</p>
+                            <p>Las contraseñas deben contener al menos 8 caracteres, incluyendo una letra mayúscula y un número para garantizar la integridad del sistema Nonna DB.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    async function listarRoles() {
+        const res = await fetch(`${API_BASE}/rol/`, { headers: getHeaders() });
+        if (!res.ok) throw new Error('Error al cargar roles');
+        return res.json();
+    }
+
+    async function crearUsuario(datos) {
+        const res = await fetch(`${API_BASE}/usuario/`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(datos)
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Error al crear usuario');
+        }
+        return res.json();
+    }
+
+    async function cargarRoles() {
+        try {
+            const roles = await listarRoles();
+            const select = document.getElementById('id_rol');
+            select.innerHTML = '<option value="">Seleccione un rol</option>';
+            roles.forEach(rol => {
+                const option = document.createElement('option');
+                option.value = rol.id_rol;
+                option.textContent = rol.descripcion || `Rol ${rol.id_rol}`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error(error);
+            document.getElementById('id_rol').innerHTML = '<option value="">Error al cargar roles</option>';
+        }
+    }
+
+    document.getElementById('form-usuario').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('nombre').value.trim();
+        const id_rol = parseInt(document.getElementById('id_rol').value);
+        const contrasena = document.getElementById('contrasena').value;
+
+        if (!nombre) { alert('El nombre es obligatorio'); return; }
+        if (!id_rol) { alert('Seleccione un rol'); return; }
+        if (!contrasena) { alert('La contraseña es obligatoria'); return; }
+
+        try {
+            await crearUsuario({ nombre, id_rol, contrasena });
+            alert('Usuario creado correctamente');
+            window.location.href = 'usuarios.html';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.querySelector('.material-symbols-outlined').innerText = 'visibility_off';
+            } else {
+                input.type = 'password';
+                btn.querySelector('.material-symbols-outlined').innerText = 'visibility';
+            }
+        });
+    });
+
+    cargarRoles();
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Direcciones del Cliente - Nonna</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { primary: "#5D1927", "background-light": "#FEBDC6", "background-dark": "#2D0A11" },
+                fontFamily: { display: ["Inter", "sans-serif"] },
+                borderRadius: { DEFAULT: "0.75rem" },
+            },
+        },
+    };
+</script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans min-h-screen">
+<header class="w-full py-4 px-6 lg:px-12 flex justify-between items-center bg-white/30 dark:bg-black/20 backdrop-blur-md sticky top-0 z-50 border-b border-primary/10">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">
+            <span class="material-icons-outlined">restaurant</span>
+        </div>
+        <span class="text-2xl font-bold text-primary dark:text-white">Nonna</span>
+    </div>
+    <a href="clientes.html" class="flex items-center gap-2 px-4 py-2 text-primary dark:text-pink-200 hover:bg-white/40 dark:hover:bg-white/10 rounded-full transition-all font-medium">
+        <span class="material-icons-outlined text-sm">arrow_back</span>
+        Volver a clientes
+    </a>
+</header>
+<main class="max-w-4xl mx-auto px-6 lg:px-12 py-10">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-primary">Direcciones del Cliente</h1>
+        <p id="cliente-nombre" class="text-primary/70 mt-1">Cargando...</p>
+    </div>
+    <div class="bg-white dark:bg-neutral-900/80 rounded-2xl shadow-xl p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-slate-800 dark:text-white">Lista de Direcciones</h2>
+            <button id="btn-agregar" class="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90">
+                <span class="material-icons-outlined">add</span> Nueva Dirección
+            </button>
+        </div>
+        <div id="lista-direcciones" class="space-y-4">
+            <p class="text-slate-500">Cargando direcciones...</p>
+        </div>
+    </div>
+</main>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const clienteId = urlParams.get('id');
+    if (!clienteId) {
+        alert('No se especificó cliente');
+        window.location.href = 'clientes.html';
+    }
+
+    let clienteNombre = '';
+
+    async function cargarCliente() {
+        try {
+            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { headers: getHeaders() });
+            if (res.ok) {
+                const cliente = await res.json();
+                clienteNombre = `${cliente.nombre} ${cliente.apellido}`.trim();
+                document.getElementById('cliente-nombre').innerText = clienteNombre;
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function cargarDirecciones() {
+        try {
+            const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const todas = await res.json();
+            const misDirecciones = todas.filter(d => d.id_cliente == clienteId);
+            const container = document.getElementById('lista-direcciones');
+            if (misDirecciones.length === 0) {
+                container.innerHTML = '<p class="text-slate-500">No hay direcciones registradas para este cliente.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            misDirecciones.forEach(dir => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-primary/10';
+                div.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-slate-800 dark:text-white">${escapeHtml(dir.descripcion)}</p>
+                        <p class="text-xs text-slate-500">ID: ${dir.id_direccion}</p>
+                    </div>
+                    <button class="eliminar-direccion text-red-500 hover:bg-red-50 p-2 rounded-full" data-id="${dir.id_direccion}">
+                        <span class="material-icons-outlined">delete</span>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            document.querySelectorAll('.eliminar-direccion').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (confirm('¿Eliminar esta dirección?')) {
+                        await fetch(`${API_BASE}/direccion/${btn.dataset.id}`, { method: 'DELETE', headers: getHeaders() });
+                        cargarDirecciones();
+                    }
+                });
+            });
+        } catch(e) {
+            document.getElementById('lista-direcciones').innerHTML = '<p class="text-red-500">Error al cargar direcciones</p>';
+        }
+    }
+
+    function mostrarModalAgregar() {
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+        modalDiv.innerHTML = `
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Nueva Dirección</h3>
+                <textarea id="nueva-descripcion" class="w-full border rounded-xl p-3" rows="3" placeholder="Calle, número, colonia, ciudad, CP..."></textarea>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button id="cancelar-modal" class="px-4 py-2 border rounded-xl">Cancelar</button>
+                    <button id="confirmar-modal" class="px-4 py-2 bg-primary text-white rounded-xl">Guardar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        modalDiv.querySelector('#cancelar-modal').onclick = () => modalDiv.remove();
+        modalDiv.querySelector('#confirmar-modal').onclick = async () => {
+            const descripcion = modalDiv.querySelector('#nueva-descripcion').value.trim();
+            if (!descripcion) { alert('La dirección es obligatoria'); return; }
+            try {
+                await fetch(`${API_BASE}/direccion/`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ id_cliente: parseInt(clienteId), descripcion })
+                });
+                modalDiv.remove();
+                cargarDirecciones();
+            } catch(e) { alert('Error al guardar'); }
+        };
+    }
+
+    document.getElementById('btn-agregar').addEventListener('click', mostrarModalAgregar);
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+
+    cargarCliente();
+    cargarDirecciones();
+</script>
+</body>
+</html>

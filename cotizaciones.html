@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: { "primary": "#FEBDC6", "accent": "#5D1927", "background-light": "#f8f5f6", "background-dark": "#230f12" },
+                fontFamily: { "display": ["Montserrat"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Nonna - Gestión de Cotizaciones</title>
+</head>
+<body class="font-display bg-primary min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+    <div class="px-8 pt-4">
+        <a href="index.html" class="inline-flex items-center gap-1 text-accent font-semibold hover:underline">
+            <span class="text-xl">←</span>
+            <span class="text-sm uppercase tracking-wide">CRUD's del Sistema</span>
+        </a>
+    </div>
+    <main class="flex-1 p-8 flex justify-center">
+        <div class="max-w-6xl w-full flex flex-col gap-6">
+            <div class="flex flex-col gap-1">
+                <h1 class="text-accent text-4xl font-black tracking-tight">Gestión de Cotizaciones</h1>
+                <p class="text-accent/70 text-lg">Administra presupuestos y cotizaciones generadas.</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-accent/5 border-b border-accent/10">
+                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider text-right">Total</th>
+                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider text-center">Acciones</th>
+                             </tr>
+                        </thead>
+                        <tbody id="tabla-cotizaciones" class="divide-y divide-accent/5">
+                            <tr><td colspan="4" class="text-center py-10 text-accent/50">Cargando cotizaciones...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <a href="cotizacion_nuevo.html" class="bg-accent text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-accent/30 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined">add</span> Nueva Cotización
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let clientesMap = {};
+
+    async function cargarClientes() {
+        try {
+            const res = await fetch('http://3.15.13.161:8000/api/cliente/', {
+                headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1IiwiZXhwIjoxNzc2MDUwODA0fQ.R2PzKoeGJjVYe3flsQNrrkfZF3RF-Grlk1u-h4OkaF0' }
+            });
+            if (res.ok) {
+                const clientes = await res.json();
+                clientesMap = {};
+                clientes.forEach(c => { clientesMap[c.id_cliente] = `${c.nombre} ${c.apellido}`.trim(); });
+                return;
+            }
+        } catch(e) {}
+        // Fallback: clientes de ejemplo
+        clientesMap = { 1: 'Cliente Ejemplo 1', 2: 'Cliente Ejemplo 2' };
+    }
+
+    function obtenerCotizaciones() {
+        const stored = localStorage.getItem('cotizaciones');
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    function guardarCotizaciones(cotizaciones) {
+        localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+    }
+
+    function renderizarTabla() {
+        const cotizaciones = obtenerCotizaciones();
+        const tbody = document.getElementById('tabla-cotizaciones');
+        if (!cotizaciones.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-accent/50">No hay cotizaciones. Crea la primera!</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        cotizaciones.forEach(cot => {
+            const total = cot.total ? `$${parseFloat(cot.total).toFixed(2)}` : '$0.00';
+            const clienteNombre = clientesMap[cot.id_cliente] || `Cliente ${cot.id_cliente}`;
+            const fila = `
+                <tr class="hover:bg-accent/5 transition-colors">
+                    <td class="px-6 py-4 text-accent font-mono">${cot.id_cotizacion}</td>
+                    <td class="px-6 py-4 text-slate-800 font-semibold">${escapeHtml(clienteNombre)}</td>
+                    <td class="px-6 py-4 text-right text-accent font-bold">${total}</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center gap-2">
+                            <a href="cotizacion_previa.html?id=${cot.id_cotizacion}" class="p-2 text-accent/60 hover:text-accent hover:bg-accent/10 rounded-lg transition-all" title="Ver detalle">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </a>
+                            <a href="cotizacion_editar.html?id=${cot.id_cotizacion}" class="p-2 text-accent/60 hover:text-accent hover:bg-accent/10 rounded-lg transition-all" title="Editar">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <a href="cotizacion_eliminar.html?id=${cot.id_cotizacion}" class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                                <span class="material-symbols-outlined">delete</span>
+                            </a>
+                        </div>
+                    </td>
+                 </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+    }
+
+    async function cargarPagina() {
+        await cargarClientes();
+        renderizarTabla();
+    }
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    cargarPagina();
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "brand-pink": "#FEBDC6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<title>Editar Receta - Nonna</title>
+</head>
+<body class="bg-[#FEBDC6] font-display min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[1280px] min-h-[960px] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4 text-primary">
+            <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-2xl">restaurant_menu</span>
+            </div>
+            <div>
+                <h2 class="text-slate-900 text-2xl font-extrabold tracking-tight">Nonna</h2>
+                <p class="text-slate-500 text-xs">Editar Receta</p>
+            </div>
+        </div>
+        <a href="recetas.html" class="flex items-center justify-center rounded-full size-10 bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50 space-y-8">
+        <div>
+            <h1 class="text-slate-900 text-3xl font-extrabold tracking-tight">Editar Receta</h1>
+            <p class="text-slate-500 mt-1 text-base">Actualiza los detalles e ingredientes de tu preparación secreta.</p>
+        </div>
+        <!-- Información Básica -->
+        <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="material-symbols-outlined text-primary">info</span>
+                <h2 class="text-lg font-bold text-slate-900">Información Básica</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">ID de Receta</label>
+                    <input id="id_receta" class="w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3 text-slate-500 font-mono text-sm cursor-not-allowed" readonly>
+                    <p class="text-[10px] text-slate-400 italic">Identificador único no editable.</p>
+                </div>
+                <div class="md:col-span-2 flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Descripción de la Receta</label>
+                    <input id="descripcion" class="w-full border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej: Pasta fresca artesanal...">
+                </div>
+            </div>
+        </section>
+        <!-- Ingredientes -->
+        <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">inventory_2</span>
+                    <h2 class="text-lg font-bold text-slate-900">Ingredientes y Productos</h2>
+                </div>
+                <span id="total-ingredientes" class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">0 Items</span>
+            </div>
+            <!-- Formulario para agregar -->
+            <div class="grid grid-cols-12 gap-4 p-5 bg-slate-50 rounded-xl mb-8 items-end border border-slate-100">
+                <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Seleccionar Materia Prima</label>
+                    <select id="select-materia" class="w-full appearance-none rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm">
+                        <option value="">Cargando materias primas...</option>
+                    </select>
+                </div>
+                <div class="col-span-6 md:col-span-3 flex flex-col gap-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Cantidad</label>
+                    <input id="cantidad" type="number" step="0.01" class="w-full rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm" placeholder="Ej. 1.5">
+                </div>
+                <div class="col-span-6 md:col-span-3">
+                    <button id="btn-agregar" class="w-full h-[42px] bg-primary text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md shadow-primary/20">
+                        <span class="material-symbols-outlined text-lg">add</span> Añadir
+                    </button>
+                </div>
+            </div>
+            <!-- Tabla de ingredientes actuales -->
+            <div class="overflow-hidden border border-slate-100 rounded-xl">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+                            <th class="px-6 py-4">Materia Prima</th>
+                            <th class="px-6 py-4">Cantidad</th>
+                            <th class="px-6 py-4 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ingredientes" class="divide-y divide-slate-50">
+                        <tr><td colspan="3" class="text-center py-4 text-slate-400">Cargando ingredientes...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="recetas.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button id="btn-guardar" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:opacity-95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined text-xl">check_circle</span> Guardar Cambios
+        </button>
+    </footer>
+</div>
+
+<script>
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const recetaId = urlParams.get('id');
+    if (!recetaId) {
+        alert('No se especificó receta');
+        window.location.href = 'recetas.html';
+    }
+
+    let todasMaterias = [];          // lista de materias primas disponibles
+    let ingredientesActuales = [];   // { id_materia, nombre, cantidad }
+
+    // Cargar materias primas 
+    async function cargarMaterias() {
+        try {
+            const res = await fetch(`${API_BASE}/materia_prima/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            todasMaterias = await res.json();
+            const select = document.getElementById('select-materia');
+            select.innerHTML = '<option value="">Seleccionar materia prima...</option>';
+            todasMaterias.forEach(mp => {
+                const opt = document.createElement('option');
+                opt.value = mp.id_materia;
+                opt.textContent = mp.descripcion;
+                select.appendChild(opt);
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    // Cargar ingredientes actuales de esta receta
+    async function cargarIngredientes() {
+        try {
+            const res = await fetch(`${API_BASE}/receta_materia_prima/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const todasRelaciones = await res.json();
+            const misIngredientes = todasRelaciones.filter(rel => rel.id_receta == recetaId);
+            ingredientesActuales = [];
+            for (const rel of misIngredientes) {
+                const mpRes = await fetch(`${API_BASE}/materia_prima/${rel.id_materia}`, { headers: getHeaders() });
+                if (!mpRes.ok) continue;
+                const mp = await mpRes.json();
+                ingredientesActuales.push({
+                    id_materia: rel.id_materia,
+                    nombre: mp.descripcion,
+                    cantidad: rel.cantidad
+                });
+            }
+            renderizarTablaIngredientes();
+        } catch(e) {
+            console.error(e);
+            document.getElementById('tabla-ingredientes').innerHTML = '<tr><td colspan="3" class="text-center py-4 text-red-500">Error al cargar ingredientes</td></tr>';
+        }
+    }
+
+    function renderizarTablaIngredientes() {
+        const tbody = document.getElementById('tabla-ingredientes');
+        if (ingredientesActuales.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">No hay ingredientes registrados</td></tr>';
+            document.getElementById('total-ingredientes').innerText = '0 Items';
+            return;
+        }
+        tbody.innerHTML = '';
+        ingredientesActuales.forEach((ing, idx) => {
+            const fila = `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="size-8 rounded bg-primary/5 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-sm">package</span></div><span class="font-semibold text-slate-700">${escapeHtml(ing.nombre)}</span></div></td>
+                    <td class="px-6 py-4 text-slate-600 font-medium">${ing.cantidad}</td>
+                    <td class="px-6 py-4 text-right"><button class="eliminar-ingrediente text-slate-300 hover:text-red-600 transition-colors" data-idx="${idx}"><span class="material-symbols-outlined">delete</span></button></td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        document.getElementById('total-ingredientes').innerText = `${ingredientesActuales.length} Items`;
+        document.querySelectorAll('.eliminar-ingrediente').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                const ing = ingredientesActuales[idx];
+                if (confirm('¿Eliminar este ingrediente de la receta?')) {
+                    try {
+                        const resDel = await fetch(`${API_BASE}/receta_materia_prima/${recetaId}/${ing.id_materia}`, { method: 'DELETE', headers: getHeaders() });
+                        if (resDel.ok) {
+                            ingredientesActuales.splice(idx, 1);
+                            renderizarTablaIngredientes();
+                        } else {
+                            alert('Error al eliminar');
+                        }
+                    } catch(e) { alert('Error de conexión'); }
+                }
+            });
+        });
+    }
+
+    // Agregar nuevo ingrediente
+    async function agregarIngrediente() {
+        const idMateria = parseInt(document.getElementById('select-materia').value);
+        const cantidad = parseFloat(document.getElementById('cantidad').value);
+        if (!idMateria) { alert('Seleccione una materia prima'); return; }
+        if (isNaN(cantidad) || cantidad <= 0) { alert('Cantidad válida requerida'); return; }
+        const materia = todasMaterias.find(m => m.id_materia === idMateria);
+        if (!materia) return;
+
+        // Verificar si ya existe en la receta
+        const existente = ingredientesActuales.find(i => i.id_materia === idMateria);
+        if (existente) {
+            // Podrías actualizar la cantidad, pero mejor lo manejas como actualización
+            if (confirm('Este ingrediente ya existe. ¿Deseas aumentar la cantidad?')) {
+                const nuevaCantidad = existente.cantidad + cantidad;
+                await actualizarIngrediente(idMateria, nuevaCantidad);
+            }
+            return;
+        }
+        // Crear nueva relación
+        try {
+            const res = await fetch(`${API_BASE}/receta_materia_prima/`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    id_receta: parseInt(recetaId),
+                    id_materia: idMateria,
+                    cantidad: cantidad,
+                    precio_diseno: 0,
+                    precio_envio: 0
+                })
+            });
+            if (!res.ok) throw new Error();
+            alert('Ingrediente agregado');
+            await cargarIngredientes(); // recargar lista
+            document.getElementById('select-materia').value = '';
+            document.getElementById('cantidad').value = '';
+        } catch(e) {
+            alert('Error al agregar ingrediente');
+        }
+    }
+
+    async function actualizarIngrediente(idMateria, nuevaCantidad) {
+        try {
+            const res = await fetch(`${API_BASE}/receta_materia_prima/${recetaId}/${idMateria}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    id_receta: parseInt(recetaId),
+                    id_materia: idMateria,
+                    cantidad: nuevaCantidad,
+                    precio_diseno: 0,
+                    precio_envio: 0
+                })
+            });
+            if (!res.ok) throw new Error();
+            alert('Cantidad actualizada');
+            await cargarIngredientes();
+        } catch(e) { alert('Error al actualizar'); }
+    }
+
+    // Cargar datos de la receta y luego ingredientes
+    async function cargarReceta() {
+        try {
+            const res = await fetch(`${API_BASE}/receta/recetas/${recetaId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const receta = await res.json();
+            document.getElementById('id_receta').value = receta.id_receta;
+            document.getElementById('descripcion').value = receta.descripcion || '';
+        } catch(e) {
+            alert('Error al cargar receta');
+            window.location.href = 'recetas.html';
+        }
+    }
+
+    async function actualizarReceta() {
+        const descripcion = document.getElementById('descripcion').value.trim();
+        if (!descripcion) { alert('La descripción es obligatoria'); return; }
+        try {
+            const res = await fetch(`${API_BASE}/receta/recetas/${recetaId}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({ descripcion })
+            });
+            if (!res.ok) throw new Error();
+            alert('Receta actualizada');
+            window.location.href = 'recetas.html';
+        } catch(e) {
+            alert('Error al actualizar receta');
+        }
+    }
+
+    document.getElementById('btn-agregar').addEventListener('click', agregarIngrediente);
+    document.getElementById('btn-guardar').addEventListener('click', actualizarReceta);
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+
+    cargarMaterias();
+    cargarReceta();
+    cargarIngredientes();
+</script>
+</body>
+</html>

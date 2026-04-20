@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#5d1927",
+                    "brand-pink": "#FEBDC6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
+                },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: "Plus Jakarta Sans", sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+</style>
+</head>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="layout-container w-full max-w-[1280px] h-[960px] flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-[560px] overflow-hidden flex flex-col">
+        <!-- Icon and Header Section -->
+        <div class="p-8 flex flex-col items-center text-center border-b border-primary/10">
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-5xl">warning</span>
+            </div>
+            <h2 class="text-slate-900 text-2xl font-bold leading-tight mb-2">
+                ¿Seguro que deseas eliminar esta Materia Prima?
+            </h2>
+            <p class="text-slate-600 text-base max-w-[400px]" id="mensaje-peligro">
+                Esta acción no se puede deshacer. El insumo será removido permanentemente de tu inventario.
+            </p>
+        </div>
+        <!-- Details Preview (cargado dinámicamente) -->
+        <div class="px-8 py-6 bg-background-light" id="detalle-container">
+            <div class="flex items-center gap-4 bg-white p-4 rounded-lg border border-primary/5">
+                <div class="w-16 h-16 bg-cover bg-center rounded-lg flex-shrink-0" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCSv72a0FDyNvyHlK5BQYe5cM_gGVQGD24prYKODDrJuKHX_9xNu9_S2f0bUGgxdhgFNiXfObwLEbIIUZdiu_ekFUSRw9EFAcJOuHSFyEa47TfrVM08kj9rz5jv2wimTsQPOjVAiFEOCOVcy6hsw-lFjOSXBWvxnZNOjUwt8MfyRRk9JWQv6Bi0te9VHIoaU_XwH6J_K20WOn7IsWdeduhKoWcc1b4XW_7rMx8kkPjWeJvd42H_V_01Hku-UUs7uByFN1av7Bq1L7Mt');"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-primary uppercase tracking-wider">Materia Prima</p>
+                    <p id="nombre-materia" class="text-slate-900 font-medium">Cargando...</p>
+                    <p id="stock-materia" class="text-slate-500 text-sm">Stock actual: --</p>
+                </div>
+            </div>
+        </div>
+        <!-- Actions Footer -->
+        <div class="p-8 flex flex-col sm:flex-row gap-4">
+            <a id="cancelar-btn" href="materia_prima.html" class="flex-1 h-12 px-6 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary/5 transition-colors flex items-center justify-center">
+                Cancelar
+            </a>
+            <button id="confirmar-eliminar" class="flex-1 h-12 px-6 rounded-lg bg-primary text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined mr-2 text-xl">delete</span>
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIGURACIÓN ====================
+    const API_BASE = 'http://3.15.13.161:8000/api';
+    const TOKEN = localStorage.token;
+
+    function getHeaders() {
+        return {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // Obtener ID desde la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const materiaId = urlParams.get('id');
+    if (!materiaId) {
+        alert('No se especificó qué materia prima eliminar. Redirigiendo al listado.');
+        window.location.href = 'materia_prima.html';
+    }
+
+    // ==================== API FUNCTIONS ====================
+    async function obtenerMateria(id) {
+        const res = await fetch(`${API_BASE}/materia_prima/${id}`, { headers: getHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+        return res.json();
+    }
+
+    async function eliminarMateria(id) {
+        const res = await fetch(`${API_BASE}/materia_prima/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Error al eliminar');
+        }
+        return res.json();
+    }
+
+    // ==================== CARGAR DATOS PARA MOSTRAR ====================
+    async function cargarDatos() {
+        try {
+            const materia = await obtenerMateria(materiaId);
+            const nombre = materia.descripcion || 'Sin nombre';
+            const stock = materia.stock_actual || 0;
+            // Obtener nombre de la unidad (si está disponible)
+            let unidadTexto = '';
+            if (materia.id_unidad) {
+                try {
+                    const unidadesRes = await fetch(`${API_BASE}/unidad_medida/`, { headers: getHeaders() });
+                    const unidades = await unidadesRes.json();
+                    const unidad = unidades.find(u => u.id_unidad === materia.id_unidad);
+                    if (unidad) {
+                        unidadTexto = unidad.abreviatura || unidad.descripcion || '';
+                    }
+                } catch(e) { console.warn(e); }
+            }
+            document.getElementById('nombre-materia').innerText = nombre;
+            document.getElementById('stock-materia').innerHTML = `Stock actual: ${stock} ${unidadTexto}`;
+            // Actualizar el mensaje de advertencia con el nombre real
+            const mensajePeligro = document.getElementById('mensaje-peligro');
+            mensajePeligro.innerHTML = `Esta acción no se puede deshacer. El insumo <span class="font-semibold text-primary">${escapeHtml(nombre)}</span> será removido permanentemente de tu inventario.`;
+        } catch (error) {
+            console.error(error);
+            alert('Error al cargar los datos: ' + error.message);
+            window.location.href = 'materia_prima.html';
+        }
+    }
+
+    // ==================== ELIMINAR ====================
+    const confirmarBtn = document.getElementById('confirmar-eliminar');
+    confirmarBtn.addEventListener('click', async () => {
+        if (confirm('¿Estás absolutamente seguro? Esta acción es irreversible.')) {
+            try {
+                await eliminarMateria(materiaId);
+                alert('Materia prima eliminada correctamente');
+                window.location.href = 'materia_prima.html';
+            } catch (error) {
+                alert('Error al eliminar: ' + error.message);
+            }
+        }
+    });
+
+    // ==================== ESCAPE HTML ====================
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Inicializar
+    cargarDatos();
+</script>
+</body>
+</html>
