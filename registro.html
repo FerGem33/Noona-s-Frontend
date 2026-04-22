@@ -100,18 +100,16 @@
                         Contraseña
                     </label>
                     <div class="relative flex items-stretch">
-                        <!-- Campo de contraseña con ID para identificarlo fácilmente -->
+                        <!-- Campo de contraseña -->
                         <input id="password" class="form-input flex w-full rounded-lg rounded-r-none border-r-0 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 text-base transition-all placeholder:text-slate-400" placeholder="••••••••" type="password">
-                        <!-- Botón para mostrar/ocultar contraseña con ID específico -->
+                        <!-- Botón para mostrar/ocultar contraseña (UN SOLO BOTÓN) -->
                         <button id="togglePasswordBtn" class="flex items-center justify-center px-4 rounded-r-lg border border-l-0 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:text-primary transition-colors" type="button">
                             <span id="visibilityIcon" class="material-symbols-outlined">visibility</span>
                         </button>
                     </div>
-                    
                 </div>
-                
 
-                <!-- Submit Button - Ahora con ID específico para evitar conflictos -->
+                <!-- Submit Button -->
                 <div class="pt-2">
                     <button id="loginBtn" class="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold tracking-wide transition-all hover:bg-primary/90 active:scale-[0.98]" type="button">
                         <span>Iniciar Sesión</span>
@@ -119,9 +117,6 @@
                     </button>
                 </div>
             </div>
-            
-            
-           
         </div>
     </div>
     
@@ -208,34 +203,31 @@
     }
 
     // ============================================
-    // FUNCIONALIDAD DEL BOTÓN DE MOSTRAR CONTRASEÑA
+    // FUNCIONALIDAD DEL BOTÓN DE MOSTRAR CONTRASEÑA (UN SOLO BOTÓN)
     // ============================================
     // Seleccionamos los elementos del DOM relacionados con la contraseña
-    const passwordInput = document.getElementById('password');      // Campo de entrada de contraseña
-    const togglePasswordBtn = document.getElementById('togglePasswordBtn');  // Botón para mostrar/ocultar
-    const visibilityIcon = document.getElementById('visibilityIcon');        // Icono del botón
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const visibilityIcon = document.getElementById('visibilityIcon');
     
-    // Variable para controlar el estado de visibilidad (false = oculta, true = visible)
+    // Variable para controlar el estado de visibilidad
     let isPasswordVisible = false;
     
-    // Agregamos evento click al botón de mostrar/ocultar contraseña
+    // Evento click del botón para mostrar/ocultar contraseña
     togglePasswordBtn.addEventListener('click', function(e) {
-        e.preventDefault();  // Prevenir cualquier comportamiento por defecto del botón
-        e.stopPropagation(); // Evitar que el evento se propague a otros elementos
+        e.preventDefault();
+        e.stopPropagation();
         
-        // Cambiamos el estado de visibilidad
+        // Cambiamos el estado
         isPasswordVisible = !isPasswordVisible;
         
-        // Cambiamos el tipo del input según el estado
         if (isPasswordVisible) {
-            // Si está visible, cambiamos a tipo "text" para mostrar la contraseña
+            // Mostrar contraseña
             passwordInput.type = 'text';
-            // Cambiamos el icono a "visibility_off" para indicar que se puede ocultar
             visibilityIcon.textContent = 'visibility_off';
         } else {
-            // Si está oculta, cambiamos a tipo "password" para ocultar la contraseña
+            // Ocultar contraseña
             passwordInput.type = 'password';
-            // Cambiamos el icono a "visibility" para indicar que se puede mostrar
             visibilityIcon.textContent = 'visibility';
         }
     });
@@ -243,28 +235,23 @@
     // ============================================
     // FUNCIONALIDAD DEL LOGIN
     // ============================================
-    // Seleccionamos el botón de login por su ID específico
     const loginButton = document.getElementById('loginBtn');
     
-    // Agregamos evento click al botón de login
     loginButton.addEventListener('click', function(e) {
-        e.preventDefault();  // Prevenir cualquier comportamiento por defecto
+        e.preventDefault();
         
-        // Obtenemos los valores ingresados por el usuario
-        const username = document.getElementById('username').value;  // Valor del campo usuario
-        const password = document.getElementById('password').value;  // Valor del campo contraseña
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
         
-        // Validamos que los campos no estén vacíos
         if (!username || !password) {
             mostrarMensajeCentral(
                 '⚠️ Campos incompletos',
                 'warning',
                 'Por favor, complete todos los campos para continuar.'
             );
-            return;  // Salimos de la función si hay campos vacíos
+            return;
         }
         
-        // Preparamos los datos para enviar al servidor en formato x-www-form-urlencoded
         const data = new URLSearchParams();
         data.append("grant_type", "");
         data.append("username", username);
@@ -273,28 +260,24 @@
         data.append("client_id", "");
         data.append("client_secret", "");
         
-        // Realizamos la petición POST al servidor de autenticación
         fetch("http://3.15.13.161:8000/api/auth/login", {
-            method: "POST",                                              // Método HTTP POST
+            method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",    // Tipo de contenido para formularios
-                "accept": "application/json"                            // Aceptamos respuesta en JSON
+                "Content-Type": "application/x-www-form-urlencoded",
+                "accept": "application/json"
             },
-            body: data                                                  // Enviamos los datos del formulario
+            body: data
         })
         .then(res => {
-            // Verificamos si la respuesta fue exitosa (status 200-299)
             if (!res.ok) {
                 throw new Error(`Error HTTP: ${res.status}`);
             }
-            return res.json();  // Convertimos la respuesta a JSON
+            return res.json();
         })
         .then(data => {
             console.log("Respuesta del servidor:", data);
             
-            // Verificamos si la respuesta contiene un token de acceso
             if (data.access_token) {
-                // Guardamos el token en localStorage para futuras peticiones autenticadas
                 localStorage.setItem("token", data.access_token);
 
                 fetch(`http://3.15.13.161:8000/api/auth/usuario/${username}`,{
@@ -302,7 +285,6 @@
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${data.access_token}`
                     }
-
                 })
                 .then(res2 => {
                     if (!res2.ok) {
@@ -316,16 +298,11 @@
                     localStorage.setItem("id_rol", data2.id_rol);
                     localStorage.setItem("rol", data2.rol);
                     
-                    // ============================================
-                    // REDIRECCIÓN SEGÚN EL ROL DEL USUARIO
-                    // ============================================
                     const rolUsuario = (data2.rol || "").toLowerCase();
                     
                     if (rolUsuario === "repartidor") {
-                        // Si el usuario es repartidor, redirige a calendario2.html
                         window.location.href = "/calendario2.html";
                     } else {
-                        // Para cualquier otro rol (admin, usuario normal, etc.), redirige a menuprincipal.html
                         window.location.href = "/menuprincipal.html";
                     }
                 })
@@ -337,11 +314,7 @@
                         'Hubo un problema al cargar la información del usuario. Por favor, intente nuevamente.'
                     );
                 })
-
-                // Redirigir a otra página después del login exitoso
-                
             } else {
-                // Si no hay token, las credenciales son incorrectas
                 mostrarMensajeCentral(
                     '❌ Credenciales incorrectas',
                     'error',
@@ -350,16 +323,13 @@
             }
         })
         .catch(err => {
-            // Manejamos cualquier error de red o de servidor
             console.error("Error en la petición:", err);
             mostrarMensajeCentral(
-                '⚠️ Error de conexión',
+                '⚠️ Error de constraseña o usuario',
                 'error',
                 'Verifique que los datos ingresados sean correctos y vuelva a intentarlo.'
             );
         });
-
-        
     });
 </script>
 </body>
