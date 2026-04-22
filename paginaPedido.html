@@ -138,7 +138,7 @@
 <body>
 
 <header>
-  <a href="index.html">
+  <a href="catalogo.html">
     <img src="assests/logoNoonas.jpg" alt="Logo Noonas" class="logo" onerror="this.src='https://placehold.co/200x200?text=Noonas'">
   </a>
   <div class="header-center">
@@ -149,8 +149,8 @@
 </header>
 
 <nav>
-  <a href="index.html#pasteles">Pasteles</a>
-  <a href="index.html#contacto">Contacto</a>
+  <a href="catalogo.html#pasteles">Pasteles</a>
+  <a href="catalogo.html#contacto">Contacto</a>
 </nav>
 
 <main>
@@ -205,14 +205,14 @@
       
       if (!idPedido) {
         container.innerHTML = `<div class="error-message">❌ No se especificó un número de pedido.</div>
-                               <a href="index.html" class="btn-volver">← Volver al inicio</a>`;
+                               <a href="catalogo.html" class="btn-volver">← Volver al inicio</a>`;
         return;
       }
       
       const token = getAuthToken();
       if (!token) {
         container.innerHTML = `<div class="error-message">🔐 No hay token de autenticación. <br> Por favor inicia sesión para ver tus pedidos.</div>
-                               <a href="index.html" class="btn-volver">← Volver</a>`;
+                               <a href="catalogo.html" class="btn-volver">← Volver</a>`;
         return;
       }
       
@@ -245,7 +245,7 @@
       } catch (error) {
         console.error('Error al obtener pedido:', error);
         container.innerHTML = `<div class="error-message">❌ ${escapeHtml(error.message)}</div>
-                               <a href="index.html" class="btn-volver">← Volver al inicio</a>`;
+                               <a href="catalogo.html" class="btn-volver">← Volver al inicio</a>`;
       }
     }
     
@@ -322,7 +322,7 @@
         </div>
         
         <div style="display: flex; gap: 1rem; justify-content: center;">
-          <a href="index.html" class="btn-volver">← Seguir comprando</a>
+          <a href="catalogo.html" class="btn-volver">← Seguir comprando</a>
         </div>
       `;
       
