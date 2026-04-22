@@ -8,7 +8,7 @@
   <style>
     /* Estilos adicionales usando las variables de styles.css */
     .pedido-container {
-      max-width: 700px;
+      max-width: 750px;
       margin: 2rem auto;
       background: #ffffff;
       padding: 2rem;
@@ -51,6 +51,37 @@
     }
     .detalle-valor {
       color: #3e2c1e;
+    }
+    .productos-lista {
+      margin: 1.5rem 0;
+      background: rgba(254, 189, 198, 0.05);
+      padding: 1rem 1.5rem;
+      border-radius: 16px;
+      border: 1px dashed var(--primary);
+    }
+    .productos-lista h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--bg-dark);
+      margin-bottom: 0.8rem;
+      font-size: 1.3rem;
+    }
+    .productos-lista ul {
+      list-style: none;
+      padding-left: 0.5rem;
+    }
+    .productos-lista li {
+      padding: 0.3rem 0;
+      border-bottom: 1px dotted #ecc9d0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .productos-lista li:last-child {
+      border-bottom: none;
+    }
+    .productos-lista li::before {
+      content: "🧁";
+      font-size: 1.1rem;
     }
     .total-box {
       background: rgba(254, 189, 198, 0.15);
@@ -229,24 +260,22 @@
       const estadoTexto = estados[pedido.id_estado] || `Estado #${pedido.id_estado}`;
       const tipoEntregaTexto = pedido.tipo_entrega ? '🏠 A domicilio' : '🏪 Recoger en tienda';
       
-      // --- NUEVO: Obtener nombre del cliente y dirección desde objetos anidados ---
-      let nombreCliente = '—';
-      if (pedido.cliente) {
-        // Prueba con distintos posibles nombres de campo
-        nombreCliente = pedido.cliente.nombre || pedido.cliente.nombre_completo || 
-                        `${pedido.cliente.nombres || ''} ${pedido.cliente.apellidos || ''}`.trim() ||
-                        `Cliente #${pedido.id_cliente}`;
-      } else {
-        nombreCliente = `Cliente #${pedido.id_cliente}`;
-      }
+      // Cliente y dirección: el endpoint ya devuelve strings "cliente" y "direccion"
+      const nombreCliente = pedido.cliente || `Cliente #${pedido.id_cliente}`;
+      const direccionCompleta = pedido.direccion || `Dirección #${pedido.id_direccion}`;
       
-      let direccionCompleta = '—';
-      if (pedido.direccion) {
-        const dir = pedido.direccion;
-        direccionCompleta = `${dir.calle || ''} ${dir.numero || ''}, ${dir.colonia || ''}, ${dir.ciudad || ''}, ${dir.cp || ''}`.replace(/^,|,$/g, '').trim();
-        if (!direccionCompleta) direccionCompleta = `Dirección #${pedido.id_direccion}`;
-      } else {
-        direccionCompleta = `Dirección #${pedido.id_direccion}`;
+      // Construir lista de productos (si existe el array)
+      let productosHtml = '';
+      if (Array.isArray(pedido.productos) && pedido.productos.length > 0) {
+        const items = pedido.productos.map(p => `<li>${escapeHtml(p)}</li>`).join('');
+        productosHtml = `
+          <div class="productos-lista">
+            <h3>🧁 Productos del pedido</h3>
+            <ul>
+              ${items}
+            </ul>
+          </div>
+        `;
       }
       
       const html = `
@@ -257,10 +286,10 @@
         
         <div class="detalle-grid">
           <span class="detalle-label">Cliente:</span>
-          <span class="detalle-valor">${escapeHtml(pedido.cliente)}</span>
+          <span class="detalle-valor">${escapeHtml(nombreCliente)}</span>
           
           <span class="detalle-label">Dirección:</span>
-          <span class="detalle-valor">${escapeHtml(pedido.direccion)}</span>
+          <span class="detalle-valor">${escapeHtml(direccionCompleta)}</span>
           
           <span class="detalle-label">Fecha de pedido:</span>
           <span class="detalle-valor">${formatearFecha(pedido.fecha_pedido)}</span>
@@ -278,6 +307,8 @@
           ${escapeHtml(pedido.comentario)}
         </div>
         ` : ''}
+        
+        ${productosHtml}
         
         <div class="total-box">
           <div style="display:flex; justify-content: space-between;">
