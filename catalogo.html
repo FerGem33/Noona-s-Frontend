@@ -33,17 +33,15 @@
   <section id="pasteles">
     <h2>Nuestros Pasteles</h2>
     <div id="productosGrid" class="grid">
-      <!-- Aquí se cargarán dinámicamente los productos desde el endpoint -->
       <div class="loading-message">🍰 Cargando deliciosos pasteles...</div>
     </div>
   </section>
 
   <section id="contacto">
     <h2>Contáctanos</h2>
-    <p>WhatsApp: <a href="https://wa.me/528443479313">+52 844 347 9313</a> 
-    <p>Instagram: <a href="https://www.instagram.com/nonna_slw/?hl=es" target="_blank" rel="noopener noreferrer">@nonna_slw</a>
-      </p>
-    · <span>¡Pregunta por tus pasteles favoritos!</span>
+    <p>WhatsApp: <a href="https://wa.me/528443479313">+52 844 347 9313</a></p>
+    <p>Instagram: <a href="https://www.instagram.com/nonna_slw/?hl=es" target="_blank" rel="noopener noreferrer">@nonna_slw</a></p>
+    <span>¡Pregunta por tus pasteles favoritos!</span>
   </section>
 </main>
 
@@ -52,16 +50,9 @@
 </footer>
 
 <script>
-  // ================= CONFIGURACIÓN DEL API =================
   const API_BASE_URL = 'http://3.15.13.161:8000';
   const PRODUCTOS_ENDPOINT = '/api/producto/';
 
-  // Función para obtener el token desde localStorage
-  function getAuthToken() {
-    return localStorage.getItem('token');
-  }
-
-  // Función para construir URL de imagen completa
   function getFullImageUrl(imageUrl) {
     if (!imageUrl) return null;
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
@@ -72,7 +63,6 @@
     return base + relativePath;
   }
 
-  // Carga de productos (idéntica a la original)
   async function cargarProductos() {
     const gridContainer = document.getElementById('productosGrid');
     if (!gridContainer) return;
@@ -80,17 +70,9 @@
     gridContainer.innerHTML = `<div class="loading-message">⏳ Cargando nuestros pasteles artesanales...</div>`;
 
     try {
-      const token = getAuthToken();
-      if (!token) {
-        gridContainer.innerHTML = `<div class="error-message">⚠️ No se encontró token de autenticación. Por favor inicia sesión (token guardado en localStorage).</div>`;
-        console.error('Token no encontrado en localStorage');
-        return;
-      }
-
       const response = await fetch(`${API_BASE_URL}${PRODUCTOS_ENDPOINT}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
@@ -101,12 +83,12 @@
         try {
           const errorData = await response.json();
           errorDetail = errorData.message || errorData.detail || JSON.stringify(errorData);
-        } catch(e) { /* ignore */ }
+        } catch(e) {}
         throw new Error(`HTTP ${response.status}: ${errorDetail}`);
       }
 
       const productos = await response.json();
-      
+
       if (!Array.isArray(productos)) {
         throw new Error('La respuesta del API no es una lista de productos');
       }
@@ -120,18 +102,18 @@
 
     } catch (error) {
       console.error('Error al cargar productos:', error);
-      gridContainer.innerHTML = `<div class="error-message">🍪 Lo sentimos, no pudimos cargar los pasteles. <br> Detalle: ${escapeHtml(error.message)} <br> Verifica conexión o token.</div>`;
+      gridContainer.innerHTML = `<div class="error-message">🍪 Lo sentimos, no pudimos cargar los pasteles. <br> Detalle: ${escapeHtml(error.message)} <br> Verifica tu conexión.</div>`;
     }
   }
 
   function renderizarProductos(productos, container) {
     let cardsHtml = '';
-    
+
     for (const prod of productos) {
       const idProducto = prod.id_producto ?? '?';
       let nombreProducto = `Pastel #${idProducto}`;
       let descripcionLarga = prod.descripcion || 'Delicioso pastel artesanal, horneado con amor y los mejores ingredientes.';
-      
+
       if (prod.descripcion && prod.descripcion.trim().length > 0) {
         let possibleName = prod.descripcion.trim();
         if (possibleName.length > 45) {
@@ -141,13 +123,13 @@
       } else {
         nombreProducto = `Especial Noonas`;
       }
-      
+
       let precioRaw = prod.precio_unitario;
       let precioFormateado = '$' + (parseFloat(precioRaw)?.toFixed(2) ?? '0.00');
       if (isNaN(parseFloat(precioRaw))) {
         precioFormateado = precioRaw || '$ consultar';
       }
-      
+
       let imagenSrc = '';
       const imageUrlRaw = prod.image_url;
       if (imageUrlRaw && typeof imageUrlRaw === 'string' && imageUrlRaw.trim() !== '') {
@@ -157,10 +139,10 @@
       } else {
         imagenSrc = 'https://placehold.co/600x400/FFF0E4/B45F2B?text=🍰+Noonas';
       }
-      
+
       const isActive = prod.activo !== undefined ? prod.activo : true;
       const inactiveBadge = !isActive ? '<span style="background:#e0cbbc; font-size:0.7rem; padding:2px 8px; border-radius:50px; margin-left:0.5rem;">Próximamente</span>' : '';
-      
+
       cardsHtml += `
         <div class="card">
           <img src="${escapeHtml(imagenSrc)}" 
@@ -176,7 +158,7 @@
         </div>
       `;
     }
-    
+
     container.innerHTML = cardsHtml;
   }
 
@@ -190,33 +172,23 @@
       .replace(/'/g, '&#39;');
   }
 
-  // =============== NUEVA FUNCIÓN DE BÚSQUEDA DE PEDIDO ===============
   async function buscarPedido() {
     const idInput = document.getElementById('orderInput');
     const id = idInput.value.trim();
     const result = document.getElementById('orderResult');
-    
+
     if (!id) {
       result.textContent = '🍰 Ingresa un número de pedido.';
       result.className = 'msg-error';
       return;
     }
 
-    // Validar que sea un número entero positivo
     if (!/^\d+$/.test(id)) {
       result.textContent = '❌ El número de pedido debe ser un valor numérico.';
       result.className = 'msg-error';
       return;
     }
 
-    const token = getAuthToken();
-    if (!token) {
-      result.textContent = '🔐 No hay token de autenticación. Inicia sesión primero.';
-      result.className = 'msg-error';
-      return;
-    }
-
-    // Mostrar mensaje de "buscando..."
     result.textContent = '🔎 Buscando pedido...';
     result.className = 'msg-info';
 
@@ -224,7 +196,6 @@
       const response = await fetch(`${API_BASE_URL}/api/pedidos/${id}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
       });
@@ -232,8 +203,6 @@
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error(`Pedido #${id} no encontrado.`);
-        } else if (response.status === 401 || response.status === 403) {
-          throw new Error('No autorizado. Verifica tu sesión.');
         } else {
           let errorMsg = `Error ${response.status}`;
           try {
@@ -245,12 +214,7 @@
       }
 
       const pedidoData = await response.json();
-      
-      // Opcional: guardar datos en sessionStorage para que paginaPedido no tenga que volver a consultar
-      // Pero es más robusto consultar de nuevo en la página de detalles.
       sessionStorage.setItem('pedidoCache', JSON.stringify(pedidoData));
-      
-      // Redirigir a la página de detalles pasando el ID
       window.location.href = `paginaPedido.html?id=${encodeURIComponent(id)}`;
 
     } catch (error) {
@@ -259,17 +223,11 @@
       result.className = 'msg-error';
     }
   }
-  
-  // Exponer al ámbito global
+
   window.buscarPedido = buscarPedido;
 
-  // Cargar productos al iniciar
   document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
-    const tokenExists = getAuthToken();
-    if (!tokenExists) {
-      console.warn('No hay token en localStorage, asegúrate de guardarlo con key "token"');
-    }
   });
 </script>
 </body>
