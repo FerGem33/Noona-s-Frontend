@@ -11,7 +11,17 @@
         darkMode: "class",
         theme: {
             extend: {
-                colors: { "primary": "#5D1927", "background-light": "#f8f5f6", "accent-pink": "#FEBDC6" },
+                colors: { 
+                    "primary": "#5D1927", 
+                    "background-light": "#f8f5f6", 
+                    "accent-pink": "#FEBDC6",
+                    "order-green": "#86efac",
+                    "order-orange": "#fdba74",
+                    "order-red": "#fca5a5",
+                    "order-blue": "#93c5fd",
+                    "order-purple": "#c4b5fd",
+                    "order-yellow": "#FFFF00"
+                },
                 fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
                 borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
             },
@@ -26,15 +36,15 @@
         <div class="flex flex-col gap-2">
             <div class="flex items-center gap-4">
                 <h1 id="titulo-pedido" class="text-primary text-3xl font-black tracking-tight">DETALLES DEL PEDIDO</h1>
-                <span id="estado-badge" class="px-4 py-1.5 bg-amber-100 text-amber-800 text-sm font-extrabold rounded-full uppercase tracking-wider">Cargando...</span>
+                <span id="estado-badge" class="px-4 py-1.5 text-sm font-extrabold rounded-full uppercase tracking-wider">Cargando...</span>
             </div>
-            <div class="flex items-center gap-2 text-slate-500 font-medium"><span class="material-symbols-outlined text-sm">link</span><span>Cotización asociada: <a id="cotizacion-link" class="text-primary hover:underline font-bold" href="#">#---</a></span></div>
+            <div class="flex items-center gap-2 text-slate-500 font-medium"><span class="material-symbols-outlined text-sm"></span><span>Cotización asociada: <a id="cotizacion-link" class="text-primary hover:underline font-bold" href="#">#---</a></span></div>
         </div>
     </div>
     <div class="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div class="space-y-8">
             <div class="space-y-4">
-                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary">person</span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Información del Cliente</h3></div>
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary"></span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Información del Cliente</h3></div>
                 <div class="grid gap-4">
                     <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Nombre del cliente</span><p id="cliente-nombre" class="text-slate-900 font-semibold text-lg">-</p></div>
                     <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Teléfono / Correo</span><p id="cliente-contacto" class="text-slate-900 font-semibold">-</p></div>
@@ -42,29 +52,29 @@
                 </div>
             </div>
             <div class="space-y-4">
-                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary">description</span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Descripción del pedido</h3></div>
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary"></span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Descripción del pedido</h3></div>
                 <div class="bg-slate-50 p-4 rounded-xl"><p id="comentario-pedido" class="text-slate-700 text-sm leading-relaxed">-</p></div>
             </div>
         </div>
         <div class="space-y-8">
             <div class="space-y-4">
-                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary">calendar_today</span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Detalles de Entrega</h3></div>
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary"></span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Detalles de Entrega</h3></div>
                 <div class="grid grid-cols-2 gap-6">
                     <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Fecha de entrega</span><p id="fecha-entrega" class="text-slate-900 font-bold text-lg">-</p></div>
-                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Estado</span><p id="estado-texto" class="text-slate-900 font-bold text-lg flex items-center gap-2"><span class="size-2 rounded-full bg-amber-500"></span>-</p></div>
+                    <div><span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Estado</span><p id="estado-texto" class="text-slate-900 font-bold text-lg flex items-center gap-2"><span class="size-2 rounded-full"></span>-</p></div>
                 </div>
             </div>
             <div class="space-y-4">
-                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary">comment</span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Comentarios adicionales</h3></div>
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary"></span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Comentarios adicionales</h3></div>
                 <div class="bg-primary/5 p-4 rounded-xl border-l-4 border-primary"><p id="comentario-extra" class="text-primary/80 text-sm italic font-medium">-</p></div>
             </div>
         </div>
     </div>
     <div class="px-8 pb-8">
-        <div class="flex items-center gap-3 border-b border-slate-100 pb-3 mb-6"><span class="material-symbols-outlined text-primary">shopping_basket</span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Resumen de Productos</h3></div>
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-3 mb-6"><span class="material-symbols-outlined text-primary"></span><h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Resumen de Productos</h3></div>
         <div class="overflow-x-auto rounded-xl border border-slate-100">
             <table class="w-full text-left border-collapse">
-                <thead><tr class="bg-slate-50"><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest">Producto</th><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-center">Cantidad</th><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Precio Unitario</th><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Subtotal</th></tr></thead>
+                <thead><tr class="bg-slate-50"><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest"></th><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-center">Cantidad</th><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Precio Unitario</th><th class="px-6 py-4 text-slate-500 text-[11px] font-black uppercase tracking-widest text-right">Subtotal</th><tr></thead>
                 <tbody id="productos-table-body" class="divide-y divide-slate-100"><tr><td colspan="4" class="text-center py-10 text-slate-400">Cargando productos...</td></tr></tbody>
             </table>
         </div>
@@ -82,6 +92,28 @@
     const API_BASE = 'http://3.15.13.161:8000/api';
     const TOKEN = localStorage.token;
     function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+
+    // Configuración de estados con colores (igual que en el calendario)
+    const estadoConfig = {
+        2: { nombre: 'Pendiente', color: 'bg-order-red', textoColor: 'text-red-800', bgLight: 'bg-red-100' },
+        8: { nombre: 'Preparación', color: 'bg-order-orange', textoColor: 'text-orange-800', bgLight: 'bg-orange-100' },
+        7: { nombre: 'En camino', color: 'bg-order-blue', textoColor: 'text-blue-800', bgLight: 'bg-blue-100' },
+        5: { nombre: 'Entregado', color: 'bg-order-green', textoColor: 'text-green-800', bgLight: 'bg-green-100' },
+        6: { nombre: 'Cancelado', color: 'bg-order-purple', textoColor: 'text-purple-800', bgLight: 'bg-purple-100' },
+        3: { nombre: 'En proceso', color: 'bg-order-yellow', textoColor: 'text-yellow-800', bgLight: 'bg-yellow-100' }
+    };
+
+    function getColorPorEstado(idEstado) {
+        return estadoConfig[idEstado]?.bgLight || 'bg-gray-100';
+    }
+
+    function getTextoColorEstado(idEstado) {
+        return estadoConfig[idEstado]?.textoColor || 'text-gray-800';
+    }
+
+    function getNombreEstado(idEstado) {
+        return estadoConfig[idEstado]?.nombre || 'Desconocido';
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const pedidoId = urlParams.get('id');
@@ -105,12 +137,6 @@
         return res.json();
     }
 
-    async function obtenerEstado(id) {
-        // Simular
-        const estados = { 1: 'Pendiente', 2: 'Preparación', 3: 'Enviado', 4: 'Entregado', 5: 'Cancelado' };
-        return { descripcion: estados[id] || 'Desconocido' };
-    }
-
     async function cargarProductos() {
         // Aquí deberías obtener productos asociados desde /api/pedidos_has_producto/
         // Por simplicidad, devolvemos vacío
@@ -122,18 +148,27 @@
             const pedido = await obtenerPedido();
             const cliente = await obtenerCliente(pedido.id_cliente);
             const direccion = await obtenerDireccion(pedido.id_direccion);
-            const estado = await obtenerEstado(pedido.id_estado);
+            const estadoInfo = estadoConfig[pedido.id_estado] || { nombre: 'Desconocido', bgLight: 'bg-gray-100', textoColor: 'text-gray-800' };
             const productos = await cargarProductos();
 
             document.getElementById('titulo-pedido').innerText = `DETALLES DEL PEDIDO #${pedido.id_pedido}`;
-            document.getElementById('estado-badge').innerText = estado.descripcion;
-            document.getElementById('estado-badge').className = `px-4 py-1.5 ${pedido.id_estado === 4 ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} text-sm font-extrabold rounded-full uppercase tracking-wider`;
+            
+            // Aplicar color al badge del estado según configuración
+            const estadoBadge = document.getElementById('estado-badge');
+            estadoBadge.innerText = estadoInfo.nombre;
+            estadoBadge.className = `px-4 py-1.5 ${getColorPorEstado(pedido.id_estado)} ${getTextoColorEstado(pedido.id_estado)} text-sm font-extrabold rounded-full uppercase tracking-wider`;
+            
             document.getElementById('cliente-nombre').innerText = cliente ? `${cliente.nombre} ${cliente.apellido}` : 'No especificado';
             document.getElementById('cliente-contacto').innerText = cliente?.telefono || '-';
-            document.getElementById('direccion-texto').innerText = direccion?.direccion || 'No especificada';
+            document.getElementById('direccion-texto').innerText = direccion?.descripcion || 'No especificada';
             document.getElementById('comentario-pedido').innerText = pedido.comentario || 'Sin comentarios';
             document.getElementById('fecha-entrega').innerText = pedido.fecha_entrega ? new Date(pedido.fecha_entrega).toLocaleString() : '-';
-            document.getElementById('estado-texto').innerHTML = `<span class="size-2 rounded-full ${pedido.id_estado === 4 ? 'bg-green-500' : 'bg-amber-500'}"></span> ${estado.descripcion}`;
+            
+            // Aplicar color al círculo del estado
+            const estadoTexto = document.getElementById('estado-texto');
+            const colorCirculo = estadoConfig[pedido.id_estado]?.color || 'bg-gray-500';
+            estadoTexto.innerHTML = `<span class="size-2 rounded-full ${colorCirculo}"></span> ${estadoInfo.nombre}`;
+            
             document.getElementById('comentario-extra').innerText = pedido.comentario || 'Sin comentarios adicionales';
             document.getElementById('subtotal-val').innerText = `$${(pedido.subtotal || 0).toFixed(2)}`;
             document.getElementById('total-val').innerText = `$${(pedido.total || 0).toFixed(2)}`;
