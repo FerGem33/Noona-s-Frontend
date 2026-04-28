@@ -103,8 +103,8 @@
             </div>
             <div class="mt-6 p-4 bg-brand-primary/5 rounded-2xl border border-brand-primary/10">
                 <div class="flex gap-3 items-start">
-                    <div class="bg-brand-primary text-white p-2 rounded-xl"><span class="material-symbols-outlined"></span></div>
-                    <div><h4 class="font-bold text-brand-primary"></h4><p class="text-xs text-brand-primary/70"></p></div>
+                    <div class="bg-brand-primary text-white p-2 rounded-xl"><span class="material-symbols-outlined">info</span></div>
+                    <div><h4 class="font-bold text-brand-primary">Información</h4><p class="text-xs text-brand-primary/70">Los productos se agregarán al pedido</p></div>
                 </div>
             </div>
         </div>
@@ -161,6 +161,12 @@
     const productosContainer = document.getElementById('productos-container');
     const subtotalSpan = document.getElementById('subtotal');
     const totalSpan = document.getElementById('total');
+
+    // ========== FUNCIÓN PARA OBTENER PARÁMETROS DE URL ==========
+    function getParameterByName(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
 
     // ========== CARGAR DATOS INICIALES ==========
     async function cargarClientes() {
@@ -427,14 +433,42 @@
     document.getElementById('btn-nueva-direccion').addEventListener('click', nuevaDireccion);
     document.getElementById('form-pedido').addEventListener('submit', crearPedido);
 
-    // Inicializar
+    // ========== INICIALIZACIÓN CORREGIDA ==========
     async function init() {
+        console.log('🚀 Inicializando formulario de pedido...');
+        console.log('📍 URL actual:', window.location.href);
+        console.log('🔍 Parámetros:', window.location.search);
+        
         await Promise.all([cargarClientes(), cargarTodasDirecciones(), cargarEstados(), cargarProductosCatalogo()]);
-        // Fecha por defecto (dentro de 3 días)
-        const hoy = new Date();
-        hoy.setDate(hoy.getDate() + 3);
-        document.getElementById('fecha_entrega').value = hoy.toISOString().slice(0,10);
+        
+        // 🔥 IMPORTANTE: Verificar fecha desde URL (viene del calendario)
+        const fechaURL = getParameterByName('fecha');
+        const fechaInput = document.getElementById('fecha_entrega');
+        
+        if (fechaURL && fechaURL.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // Si hay fecha válida en la URL, usarla (viene del calendario)
+            fechaInput.value = fechaURL;
+            console.log('✅ Fecha cargada DESDE EL CALENDARIO:', fechaURL);
+            
+            // Mostrar un pequeño indicador visual
+            const fechaLabel = document.querySelector('label[for="fecha_entrega"]');
+            if (fechaLabel) {
+                fechaLabel.style.color = '#5D1927';
+                fechaLabel.style.fontWeight = 'bold';
+            }
+        } else {
+            // Fecha por defecto: 3 días después de hoy (solo si NO viene del calendario)
+            const hoy = new Date();
+            hoy.setDate(hoy.getDate() + 3);
+            const fechaDefault = hoy.toISOString().slice(0,10);
+            fechaInput.value = fechaDefault;
+            console.log('📅 Usando fecha por defecto (no vino del calendario):', fechaDefault);
+        }
+        
+        console.log('🎯 Fecha final asignada:', fechaInput.value);
     }
+    
+    // Ejecutar inicialización
     init();
 
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
