@@ -293,10 +293,10 @@ loginButton.addEventListener('click', function(e) {
         // 🔁 LÓGICA DE REDIRECCIÓN SEGÚN id_rol:
         // id_rol = 1 → Dueña → menú principal
         // cualquier otro (repartidor, etc.) → calendario_repartidor.html
-        if (data2.id_rol === 1) {
+        if (data2.id_rol === 1 ||data2.id_rol === 2) {
             window.location.href = "/menuprincipal.html";
         } else {
-            window.location.href = "/calendario_repartidor.html";
+            window.location.href = "/calendario2.html";
         }
     })
     .catch(err => {
