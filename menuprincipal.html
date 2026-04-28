@@ -86,7 +86,7 @@
 <p class="text-sm text-slate-500 px-4">Visualiza y gestiona las entregas programadas.</p>
 </button>
 <!-- Generar Cotizaciones -->
-<button class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
+<button  class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
 <div class="size-20 rounded-full bg-primary/5 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
 <span class="material-symbols-outlined text-4xl">shopping_bag</span>
 </div>
@@ -102,7 +102,7 @@
 <p class="text-sm text-slate-500 px-4">Administra productos, clientes y categorías.</p>
 </button>
 <!-- Generar Reportes -->
-<button class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
+<button id="botonReportes" class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-xl border border-primary/5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group text-center aspect-square">
 <div class="size-20 rounded-full bg-primary/5 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
 <span class="material-symbols-outlined text-4xl">bar_chart</span>
 </div>
@@ -125,10 +125,15 @@
         window.location.href = "/calendario.html";
     });
 
-    // ✅ Redirección para CRUD's del Sistema (hacia index.html)
+    //  Redirección para CRUD's del Sistema (hacia index.html)
     const botonCruds = document.getElementById("botonCruds");
     botonCruds.addEventListener('click', function() {
         window.location.href = "index.html";
+    });
+      // Redirección para reportes
+    const botonReportes = document.getElementById("botonReportes");
+    botonReportes.addEventListener('click', function() {
+        window.location.href = "Generar_reportes.html";
     });
 
     // ✅ Cerrar Sesión - Limpiar localStorage y redirigir al login
