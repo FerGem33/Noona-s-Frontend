@@ -18,6 +18,9 @@
                         "order-green": "#86efac",
                         "order-orange": "#fdba74",
                         "order-red": "#fca5a5",
+                        "order-blue": "#93c5fd",
+                        "order-purple": "#c4b5fd",
+                        "order-yellow": "#FFFF00"
                     },
                     fontFamily: {
                         "display": ["Montserrat", "sans-serif"]
@@ -28,6 +31,11 @@
         }
 </script>
 <style>
+    /* Silenciar advertencias de Tailwind CSS en consola */
+    .tailwind-config-warning {
+        display: none !important;
+    }
+    
     .group:hover .opacity-0 {
         opacity: 1 !important;
     }
@@ -74,8 +82,7 @@
                 <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Cargando...</p>
                 <p id="textoRol" class="text-xs text-slate-500">Rol</p>
             </div>
-            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-primary/30" 
-                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCyX9F_Mxb84vf-1qjWaQEKyfgqoMtgf5atLb_NpHd-T7eJqbB9rfDfMv0bzicjmxZ1nKyaGbR9Ia7NI4_RqUDRtSRZCNPoz0KNIPVxb8vkImvcdkEEzddyl-o7qRGM8QolEihxUnrI691go2nszf9j1Pn6xyEGyF2E7splrg8dY6_-mlvO253nqpVkSmV8Qd-DNQ8vUkyTfBJ8Qz2CHmP-50UUGjq5p8tQ7l3KUBKcLjwHPdLugplJtl7yLEuXXvFDcz-aLopvniGn");'></div>
+           
         </div>
     </div>
 </header>
@@ -98,18 +105,30 @@
             </div>
         </div>
         <div class="flex gap-4">
-            <div class="flex items-center gap-4 bg-white dark:bg-slate-800 p-2 px-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+            <div class="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-800 p-2 px-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
                 <div class="flex items-center gap-2">
-                    <span class="size-3 rounded-full bg-order-green"></span>
-                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Entregado</span>
+                    <span class="size-3 rounded-full bg-order-red"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Pendiente </span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="size-3 rounded-full bg-order-orange"></span>
-                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">En Proceso</span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Preparación</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="size-3 rounded-full bg-order-red"></span>
-                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Pendiente</span>
+                    <span class="size-3 rounded-full bg-order-blue"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">En camino </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-green"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Entregado </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-purple"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Cancelado </span>
+                </div>
+                 <div class="flex items-center gap-2">
+                    <span class="size-3 rounded-full bg-order-yellow"></span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">En proceso </span>
                 </div>
             </div>
         </div>
@@ -137,8 +156,42 @@
 
 <script>
 // ============================================
-// NONNA - CALENDARIO CON API REAL
-// Sincronizado con el backend de pedidos
+// SILENCIAR ADVERTENCIAS DE TAILWIND (AL INICIO)
+// ============================================
+(function() {
+    // Guardar funciones originales
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    // Filtrar advertencias de Tailwind
+    console.warn = function(...args) {
+        const message = args[0] || '';
+        if (typeof message === 'string') {
+            // Ignorar advertencias específicas de Tailwind
+            if (message.includes('cdn.tailwindcss.com') || 
+                message.includes('Tailwind CSS') ||
+                message.includes('plugins=forms') ||
+                message.includes('production') ||
+                message.includes('should not be used in production')) {
+                return; // No mostrar estas advertencias
+            }
+        }
+        originalWarn.apply(console, args);
+    };
+    
+    console.error = function(...args) {
+        const message = args[0] || '';
+        if (typeof message === 'string') {
+            if (message.includes('Tailwind') || message.includes('tailwind')) {
+                return; // No mostrar errores de Tailwind
+            }
+        }
+        originalError.apply(console, args);
+    };
+})();
+
+// ============================================
+// NONNA - CALENDARIO CON API REAL (VERSIÓN CORREGIDA)
 // ============================================
 
 // ============================================
@@ -148,7 +201,6 @@
 const API_BASE = 'http://3.15.13.161:8000/api';
 let TOKEN = localStorage.getItem('token') || localStorage.getItem('Token');
 
-// Headers para las peticiones
 function getHeaders() {
     return {
         'accept': 'application/json',
@@ -158,42 +210,38 @@ function getHeaders() {
 }
 
 // ============================================
-// 2. MAPEOS DE ESTADOS Y CLIENTES
+// 2. MAPEOS DE ESTADOS (CORREGIDO)
 // ============================================
 
-// Mapeo de estados de la API a estados internos
-// API: 1=Pendiente, 2=Preparación, 3=Enviado, 4=Entregado, 5=Cancelado
-const estadoMapAPItoLocal = {
-    1: 'pendiente',
-    2: 'proceso',    // Preparación → En Proceso
-    3: 'proceso',    // Enviado → En Proceso
-    4: 'entregado',
-    5: 'pendiente'   // Cancelado → Pendiente (para efectos visuales)
+// Mapeo de estado API a colores y textos
+const estadoConfig = {
+    2: { nombre: 'Pendiente', color: 'bg-order-red', local: 'Pendiente' },
+    8: { nombre: 'Preparación', color: 'bg-order-orange', local: 'En preparacion' },
+    7: { nombre: 'En camino', color: 'bg-order-blue', local: 'En camino' },
+    5: { nombre: 'Entregado', color: 'bg-order-green', local: 'Entregado' },
+    6: { nombre: 'Cancelado', color: 'bg-order-purple', local: 'Cancelado' },
+    3: { nombre: 'En proceso', color: 'bg-order-yellow', local: 'En proceso' },
+
 };
 
+// Mapeo para actualizar estado vía API
 const estadoMapLocalToAPI = {
-    'pendiente': 1,
-    'proceso': 2,    // Usaremos "Preparación" como equivalente a "En Proceso"
-    'entregado': 4
+    'Pendiente': 2,
+    'En preparacion': 8,
+    'En camino': 7,
+    'Entregado': 5,
+    'Cancelado': 6,
+    'En proceso': 3
 };
 
-const estadoTextoAPI = {
-    1: 'Pendiente',
-    2: 'Preparación',
-    3: 'Enviado',
-    4: 'Entregado',
-    5: 'Cancelado'
-};
-
-let clientesMap = {};  // id_cliente -> nombre completo
-let pedidosCache = [];  // Cache de pedidos
+let clientesMap = {};
+let pedidosCache = [];
 let clientesCargados = false;
 
 // ============================================
-// 3. FUNCIONES DE CARGA DE DATOS DESDE API
+// 3. FUNCIONES DE API
 // ============================================
 
-// Verificar token y redirigir si es necesario
 function verificarToken() {
     if (!TOKEN) {
         alert('❌ Sesión no iniciada. Redirigiendo al login...');
@@ -203,7 +251,6 @@ function verificarToken() {
     return true;
 }
 
-// Cargar clientes desde la API
 async function cargarClientes() {
     if (clientesCargados) return;
     
@@ -221,12 +268,9 @@ async function cargarClientes() {
         console.log(`✅ Cargados ${Object.keys(clientesMap).length} clientes`);
     } catch (error) {
         console.error('❌ Error cargando clientes:', error);
-        // Usar datos de ejemplo si falla
-        clientesMap = { 1: 'Cliente Ejemplo 1', 2: 'Cliente Ejemplo 2' };
     }
 }
 
-// Cargar todos los pedidos desde la API
 async function cargarPedidosDesdeAPI() {
     if (!verificarToken()) return [];
     
@@ -237,10 +281,15 @@ async function cargarPedidosDesdeAPI() {
         const pedidos = await response.json();
         pedidosCache = pedidos;
         console.log(`✅ Cargados ${pedidos.length} pedidos desde API`);
+        
+        // Mostrar estados de los pedidos para depuración
+        pedidos.forEach(p => {
+            console.log(`Pedido #${p.id_pedido}: Estado ID=${p.id_estado} - ${estadoConfig[p.id_estado]?.nombre || 'Desconocido'}`);
+        });
+        
         return pedidos;
     } catch (error) {
         console.error('❌ Error cargando pedidos:', error);
-        // Mostrar mensaje amigable
         const contenedor = document.getElementById('calendarioDias');
         if (contenedor) {
             contenedor.innerHTML = `
@@ -256,30 +305,16 @@ async function cargarPedidosDesdeAPI() {
     }
 }
 
-// Obtener nombre del cliente por ID
 function getNombreCliente(idCliente) {
     return clientesMap[idCliente] || `Cliente ${idCliente}`;
 }
 
-// Normalizar fecha de API (ISO) a formato YYYY-MM-DD
 function normalizarFecha(fechaAPI) {
     if (!fechaAPI) return null;
-    // Si ya viene en formato YYYY-MM-DD
     if (fechaAPI.match(/^\d{4}-\d{2}-\d{2}$/)) return fechaAPI;
-    // Si viene en formato ISO
     return fechaAPI.split('T')[0];
 }
 
-// Obtener pedidos por fecha específica
-function obtenerPedidosPorFecha(fecha) {
-    const fechaNormalizada = normalizarFecha(fecha);
-    return pedidosCache.filter(pedido => {
-        const fechaPedido = normalizarFecha(pedido.fecha_entrega);
-        return fechaPedido === fechaNormalizada;
-    });
-}
-
-// Obtener pedidos por mes
 function obtenerPedidosPorMes(mes, año) {
     return pedidosCache.filter(pedido => {
         if (!pedido.fecha_entrega) return false;
@@ -290,73 +325,30 @@ function obtenerPedidosPorMes(mes, año) {
 }
 
 // ============================================
-// 4. FUNCIONES CRUD CON API
+// 4. FUNCIÓN PARA REDIRIGIR A NUEVO PEDIDO
 // ============================================
 
-// Actualizar estado de un pedido
-async function actualizarEstadoPedido(id, nuevoEstadoLocal) {
-    if (!verificarToken()) return false;
+window.crearNuevoPedido = function(fecha) {
+    console.log("🖱️ Click en crear nuevo pedido para fecha:", fecha);
     
-    const nuevoEstadoAPI = estadoMapLocalToAPI[nuevoEstadoLocal];
-    if (!nuevoEstadoAPI) {
-        console.error('Estado inválido:', nuevoEstadoLocal);
-        return false;
+    if (!fecha) {
+        console.error('No se proporcionó fecha');
+        alert('Error: No se pudo obtener la fecha seleccionada');
+        return;
     }
     
-    try {
-        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
-            method: 'PATCH',
-            headers: getHeaders(),
-            body: JSON.stringify({ id_estado: nuevoEstadoAPI })
-        });
-        
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-        
-        // Actualizar cache local
-        const pedidoIndex = pedidosCache.findIndex(p => p.id_pedido === id);
-        if (pedidoIndex !== -1) {
-            pedidosCache[pedidoIndex].id_estado = nuevoEstadoAPI;
-        }
-        
-        console.log(`✅ Pedido ${id} actualizado a estado: ${nuevoEstadoLocal}`);
-        return true;
-    } catch (error) {
-        console.error('❌ Error actualizando pedido:', error);
-        alert('Error al actualizar el estado. Intenta nuevamente.');
-        return false;
-    }
-}
-
-// Eliminar pedido
-async function eliminarPedido(id) {
-    if (!verificarToken()) return false;
-    
-    if (!confirm(`¿Estás seguro de eliminar el pedido #${id}? Esta acción no se puede deshacer.`)) {
-        return false;
+    let fechaFormateada = fecha;
+    if (fechaFormateada.includes('T')) {
+        fechaFormateada = fechaFormateada.split('T')[0];
     }
     
-    try {
-        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
-            method: 'DELETE',
-            headers: getHeaders()
-        });
-        
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-        
-        // Actualizar cache local
-        pedidosCache = pedidosCache.filter(p => p.id_pedido !== id);
-        
-        console.log(`✅ Pedido ${id} eliminado correctamente`);
-        return true;
-    } catch (error) {
-        console.error('❌ Error eliminando pedido:', error);
-        alert('Error al eliminar el pedido. Intenta nuevamente.');
-        return false;
-    }
-}
+    const url = `pedido_nuevo.html?fecha=${fechaFormateada}`;
+    console.log(`📅 Redirigiendo a: ${url}`);
+    window.location.href = url;
+};
 
 // ============================================
-// 5. FUNCIONES DEL CALENDARIO
+// 5. FUNCIONES DEL CALENDARIO (CORREGIDO)
 // ============================================
 
 function obtenerDiasDelMes(mes, año) {
@@ -375,18 +367,13 @@ function esFechaHoy(fechaStr) {
            hoy.getUTCDate() === fechaComparar.getUTCDate();
 }
 
+// FUNCIÓN CORREGIDA - Obtener color según estado
 function getColorPorEstado(idEstado) {
-    const estadoLocal = estadoMapAPItoLocal[idEstado];
-    const colores = {
-        'entregado': 'bg-order-green',
-        'proceso': 'bg-order-orange',
-        'pendiente': 'bg-order-red'
-    };
-    return colores[estadoLocal] || 'bg-gray-300';
+    return estadoConfig[idEstado]?.color || 'bg-gray-300';
 }
 
 function getTextoEstado(idEstado) {
-    return estadoTextoAPI[idEstado] || 'Desconocido';
+    return estadoConfig[idEstado]?.nombre || 'Desconocido';
 }
 
 function generarCalendario(mes, año) {
@@ -396,12 +383,10 @@ function generarCalendario(mes, año) {
     
     const dias = [];
     
-    // Días vacíos del mes anterior
     for (let i = 0; i < primerDia; i++) {
         dias.push({ dia: null, pedidos: [], fecha: null });
     }
     
-    // Días del mes actual
     for (let dia = 1; dia <= diasEnMes; dia++) {
         const mesStr = String(mes + 1).padStart(2, '0');
         const diaStr = String(dia).padStart(2, '0');
@@ -416,7 +401,6 @@ function generarCalendario(mes, año) {
         });
     }
     
-    // Completar hasta 42 celdas
     const celdasFaltantes = 42 - dias.length;
     for (let i = 0; i < celdasFaltantes; i++) {
         dias.push({ dia: null, pedidos: [], fecha: null });
@@ -463,16 +447,17 @@ function renderizarCalendario() {
             celda.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <span class="size-7 flex items-center justify-center rounded-full text-sm font-black ${hoyClass}">${dia.dia}</span>
-                    <a href="pedido_nuevo.html?fecha=${dia.fecha}"
-                       class="opacity-0 group-hover:opacity-100 text-primary hover:bg-primary/10 rounded-full p-1 transition-all inline-block">
+                    <button onclick="window.crearNuevoPedido('${dia.fecha}')"
+                        class="opacity-0 group-hover:opacity-100 text-primary hover:bg-primary/10 rounded-full p-1 transition-all inline-block cursor-pointer"
+                        title="Agregar pedido para el ${dia.dia}/${mesActual+1}/${añoActual}">
                         <span class="material-symbols-outlined text-sm">+</span>
-                    </a>
+                    </button>
                 </div>
                 <div class="flex flex-col gap-1 max-h-24 overflow-y-auto">
                     ${dia.pedidos.map(pedido => `
                         <div class="px-2 py-1 rounded ${getColorPorEstado(pedido.id_estado)} text-[10px] font-bold text-slate-900 truncate cursor-pointer hover:opacity-80 transition-opacity"
-                             onclick="abrirModalPedido(${pedido.id_pedido})"
-                             title="${getNombreCliente(pedido.id_cliente)} - Pedido #${pedido.id_pedido}">
+                             onclick="window.abrirModalPedido(${pedido.id_pedido})"
+                             title="Pedido #${pedido.id_pedido} - ${getTextoEstado(pedido.id_estado)}">
                             #${pedido.id_pedido} - ${getNombreCliente(pedido.id_cliente).substring(0, 20)}
                             <span class="ml-1 text-[8px] opacity-70">${getTextoEstado(pedido.id_estado)}</span>
                         </div>
@@ -487,10 +472,10 @@ function renderizarCalendario() {
 }
 
 // ============================================
-// 7. MODAL PARA GESTIÓN DE PEDIDOS
+// 7. FUNCIONES GLOBALES PARA EL MODAL (CORREGIDO)
 // ============================================
 
-async function abrirModalPedido(idPedido) {
+window.abrirModalPedido = async function(idPedido) {
     const pedido = pedidosCache.find(p => p.id_pedido === idPedido);
     if (!pedido) {
         alert('Pedido no encontrado');
@@ -502,13 +487,16 @@ async function abrirModalPedido(idPedido) {
     const estadoActual = pedido.id_estado;
     const total = pedido.total ? `$${parseFloat(pedido.total).toFixed(2)}` : '$0.00';
     
+    const modalId = `modal_${Date.now()}`;
+    
     const modal = document.createElement('div');
+    modal.id = modalId;
     modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
     modal.innerHTML = `
         <div class="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full mx-4 p-6 shadow-xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">Pedido #${pedido.id_pedido}</h3>
-                <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-slate-600">
+                <button onclick="document.getElementById('${modalId}').remove()" class="text-slate-400 hover:text-slate-600">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -528,22 +516,23 @@ async function abrirModalPedido(idPedido) {
                 </div>
                 <div>
                     <label class="text-xs text-slate-500">Estado</label>
-                    <select id="estadoSelect" class="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
-                        <option value="1" ${estadoActual === 1 ? 'selected' : ''}>Pendiente</option>
-                        <option value="2" ${estadoActual === 2 ? 'selected' : ''}>Preparación</option>
-                        <option value="3" ${estadoActual === 3 ? 'selected' : ''}>Enviado</option>
-                        <option value="4" ${estadoActual === 4 ? 'selected' : ''}>Entregado</option>
-                        <option value="5" ${estadoActual === 5 ? 'selected' : ''}>Cancelado</option>
+                    <select id="estadoSelect_${pedido.id_pedido}" class="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2">
+                        <option value="2" ${estadoActual === 2 ? 'selected' : ''}>Pendiente</option>
+                        <option value="8" ${estadoActual === 8 ? 'selected' : ''}>Preparación</option>
+                        <option value="7" ${estadoActual === 7 ? 'selected' : ''}>En camino</option>
+                        <option value="5" ${estadoActual === 5 ? 'selected' : ''}>Entregado</option>
+                        <option value="6" ${estadoActual === 6 ? 'selected' : ''}>Cancelado</option>
+                        <option value="3" ${estadoActual === 3 ? 'select' : ''}>En proceso</option> 
                     </select>
                 </div>
             </div>
             
             <div class="flex gap-3 mt-6">
-                <button onclick="actualizarEstadoPedidoModal(${pedido.id_pedido})" 
+                <button onclick="window.actualizarEstadoPedidoModal(${pedido.id_pedido}, '${modalId}')" 
                         class="flex-1 bg-primary text-slate-900 px-4 py-2 rounded-lg font-semibold hover:opacity-90">
                     Actualizar Estado
                 </button>
-                <button onclick="eliminarPedidoModal(${pedido.id_pedido})" 
+                <button onclick="window.eliminarPedidoModal(${pedido.id_pedido}, '${modalId}')" 
                         class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600">
                     Eliminar
                 </button>
@@ -556,28 +545,106 @@ async function abrirModalPedido(idPedido) {
     `;
     
     document.body.appendChild(modal);
-}
+};
 
-async function actualizarEstadoPedidoModal(id) {
-    const select = document.querySelector('#estadoSelect');
-    if (select) {
-        const nuevoEstadoAPI = parseInt(select.value);
-        const exito = await actualizarEstadoPedido(id, estadoMapAPItoLocal[nuevoEstadoAPI]);
+window.actualizarEstadoPedidoModal = async function(id, modalId) {
+    const select = document.getElementById(`estadoSelect_${id}`);
+    if (!select) {
+        console.error('No se encontró el select para el pedido', id);
+        alert('Error: No se pudo encontrar el selector de estado');
+        return;
+    }
+    
+    const nuevoEstadoAPI = parseInt(select.value);
+    const nuevoEstadoLocal = estadoConfig[nuevoEstadoAPI]?.local;
+    
+    if (!nuevoEstadoLocal) {
+        alert('Estado inválido');
+        return;
+    }
+    
+    console.log(`🔄 Actualizando pedido ${id}: Estado API=${nuevoEstadoAPI} → ${estadoConfig[nuevoEstadoAPI]?.nombre}`);
+    
+    const exito = await actualizarEstadoPedido(id, nuevoEstadoLocal);
+    
+    if (exito) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.remove();
         
-        if (exito) {
-            document.querySelector('.fixed')?.remove();
-            await recargarDatosYRenderizar();
-            alert(`✅ Pedido #${id} actualizado correctamente`);
+        await recargarDatosYRenderizar();
+    } else {
+        alert(`❌ Error al actualizar el pedido #${id}. Revisa la consola para más detalles.`);
+    }
+};
+
+window.eliminarPedidoModal = async function(id, modalId) {
+    const exito = await eliminarPedido(id);
+    if (exito) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+        await recargarDatosYRenderizar();
+        alert(`✅ Pedido #${id} eliminado correctamente`);
+    }
+};
+
+async function actualizarEstadoPedido(id, nuevoEstadoLocal) {
+    if (!verificarToken()) return false;
+    
+    const nuevoEstadoAPI = estadoMapLocalToAPI[nuevoEstadoLocal];
+    if (!nuevoEstadoAPI) {
+        console.error('Estado inválido:', nuevoEstadoLocal);
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify({ id_estado: nuevoEstadoAPI })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `Error HTTP: ${response.status}`);
         }
+        
+        // Actualizar el pedido en el caché
+        const pedidoIndex = pedidosCache.findIndex(p => p.id_pedido === id);
+        if (pedidoIndex !== -1) {
+            pedidosCache[pedidoIndex].id_estado = nuevoEstadoAPI;
+        }
+        
+        console.log(`✅ Pedido ${id} actualizado a estado: ${nuevoEstadoLocal} (API: ${nuevoEstadoAPI})`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error actualizando pedido:', error);
+        alert('Error al actualizar el estado. Intenta nuevamente.');
+        return false;
     }
 }
 
-async function eliminarPedidoModal(id) {
-    const exito = await eliminarPedido(id);
-    if (exito) {
-        document.querySelector('.fixed')?.remove();
-        await recargarDatosYRenderizar();
-        alert(`✅ Pedido #${id} eliminado correctamente`);
+async function eliminarPedido(id) {
+    if (!verificarToken()) return false;
+    
+    if (!confirm(`¿Estás seguro de eliminar el pedido #${id}?`)) {
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        pedidosCache = pedidosCache.filter(p => p.id_pedido !== id);
+        console.log(`✅ Pedido ${id} eliminado correctamente`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error eliminando pedido:', error);
+        alert('Error al eliminar el pedido. Intenta nuevamente.');
+        return false;
     }
 }
 
@@ -604,13 +671,11 @@ function mesSiguiente() {
 }
 
 async function recargarDatosYRenderizar() {
-    // Mostrar loading
     const contenedor = document.getElementById('calendarioDias');
     if (contenedor) {
         contenedor.innerHTML = '<div class="skeleton" style="grid-column: span 7; height: 140px;"></div>';
     }
     
-    // Recargar datos
     await cargarClientes();
     await cargarPedidosDesdeAPI();
     renderizarCalendario();
@@ -621,7 +686,6 @@ async function recargarDatosYRenderizar() {
 // ============================================
 
 async function inicializar() {
-    // Verificar token
     TOKEN = localStorage.getItem('token') || localStorage.getItem('Token');
     if (!TOKEN) {
         alert('❌ Sesión no iniciada. Por favor, inicia sesión.');
@@ -629,20 +693,15 @@ async function inicializar() {
         return;
     }
     
-    // Cargar datos de usuario
     const usuario = localStorage.getItem("usuario") || localStorage.getItem("username");
     const rol = localStorage.getItem("rol");
     if (usuario) document.getElementById("textoUsuario").innerText = usuario;
     if (rol) document.getElementById("textoRol").innerText = rol;
     
-    // Cargar datos desde API
     await cargarClientes();
     await cargarPedidosDesdeAPI();
-    
-    // Renderizar calendario
     renderizarCalendario();
     
-    // Configurar eventos
     const btnMenuPrincipal = document.getElementById('btnMenuPrincipal');
     if (btnMenuPrincipal) {
         btnMenuPrincipal.addEventListener('click', () => {
@@ -660,8 +719,7 @@ async function inicializar() {
         btnMesSiguiente.addEventListener('click', mesSiguiente);
     }
     
-    console.log('✅ Calendario inicializado con API real');
-    console.log(`📅 Mes actual: ${new Date().toLocaleString('es', { month: 'long' })} ${añoActual}`);
+    console.log('✅ Calendario inicializado correctamente');
 }
 
 function escapeHtml(str) {
@@ -669,7 +727,6 @@ function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
 }
 
-// Iniciar
 document.addEventListener('DOMContentLoaded', inicializar);
 </script>
 
