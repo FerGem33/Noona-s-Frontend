@@ -233,104 +233,81 @@
     });
     
     // ============================================
-    // FUNCIONALIDAD DEL LOGIN
-    // ============================================
-    const loginButton = document.getElementById('loginBtn');
-    
-    loginButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        if (!username || !password) {
-            mostrarMensajeCentral(
-                '⚠️ Campos incompletos',
-                'warning',
-                'Por favor, complete todos los campos para continuar.'
-            );
-            return;
-        }
-        
-        const data = new URLSearchParams();
-        data.append("grant_type", "");
-        data.append("username", username);
-        data.append("password", password);
-        data.append("scope", "");
-        data.append("client_id", "");
-        data.append("client_secret", "");
-        
-        fetch("http://3.15.13.161:8000/api/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "accept": "application/json"
-            },
-            body: data
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`Error HTTP: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(data => {
-            console.log("Respuesta del servidor:", data);
-            
-            if (data.access_token) {
-                localStorage.setItem("token", data.access_token);
+// LOGIN CON REDIRECCIÓN BASADA EN id_rol
+// ============================================
+const loginButton = document.getElementById('loginBtn');
 
-                fetch(`http://3.15.13.161:8000/api/auth/usuario/${username}`,{
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${data.access_token}`
-                    }
-                })
-                .then(res2 => {
-                    if (!res2.ok) {
-                        throw new Error(`Error HTTP: ${res2.status}`);
-                    }
-                    return res2.json(); 
-                })
-                .then(data2 => {
-                    localStorage.setItem("id_usuario", data2.id_usuario);
-                    localStorage.setItem("usuario", data2.nombre);
-                    localStorage.setItem("id_rol", data2.id_rol);
-                    localStorage.setItem("rol", data2.rol);
-                    
-                    const rolUsuario = (data2.rol || "").toLowerCase();
-                    
-                    if (rolUsuario === "repartidor") {
-                        window.location.href = "/calendario2.html";
-                    } else {
-                        window.location.href = "/menuprincipal.html";
-                    }
-                })
-                .catch(err2 => {
-                    console.error("Inicio de sesión exitoso, pero hubo un error al obtener datos del usuario:", err2);
-                    mostrarMensajeCentral(
-                        '⚠️ Error al obtener datos',
-                        'error',
-                        'Hubo un problema al cargar la información del usuario. Por favor, intente nuevamente.'
-                    );
-                })
-            } else {
-                mostrarMensajeCentral(
-                    '❌ Credenciales incorrectas',
-                    'error',
-                    'Por favor, verifique su usuario y contraseña e intente nuevamente.'
-                );
-            }
-        })
-        .catch(err => {
-            console.error("Error en la petición:", err);
-            mostrarMensajeCentral(
-                '⚠️ Error de constraseña o usuario',
-                'error',
-                'Verifique que los datos ingresados sean correctos y vuelva a intentarlo.'
-            );
-        });
+loginButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (!username || !password) {
+        mostrarMensajeCentral('⚠️ Campos incompletos', 'warning', 'Por favor, complete todos los campos para continuar.');
+        return;
+    }
+    
+    const data = new URLSearchParams();
+    data.append("grant_type", "");
+    data.append("username", username);
+    data.append("password", password);
+    data.append("scope", "");
+    data.append("client_id", "");
+    data.append("client_secret", "");
+    
+    fetch("http://3.15.13.161:8000/api/auth/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "accept": "application/json"
+        },
+        body: data
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        if (data.access_token) {
+            localStorage.setItem("token", data.access_token);
+            return fetch(`http://3.15.13.161:8000/api/auth/usuario/${username}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${data.access_token}`
+                }
+            });
+        } else {
+            throw new Error('No access_token');
+        }
+    })
+    .then(res2 => {
+        if (!res2.ok) throw new Error(`Error HTTP: ${res2.status}`);
+        return res2.json();
+    })
+    .then(data2 => {
+        localStorage.setItem("id_usuario", data2.id_usuario);
+        localStorage.setItem("usuario", data2.nombre);
+        localStorage.setItem("id_rol", data2.id_rol);
+        localStorage.setItem("rol", data2.rol);
+        
+        // 🔁 LÓGICA DE REDIRECCIÓN SEGÚN id_rol:
+        // id_rol = 1 → Dueña → menú principal
+        // cualquier otro (repartidor, etc.) → calendario_repartidor.html
+        if (data2.id_rol === 1) {
+            window.location.href = "/menuprincipal.html";
+        } else {
+            window.location.href = "/calendario_repartidor.html";
+        }
+    })
+    .catch(err => {
+        console.error("Error en el login o al obtener usuario:", err);
+        mostrarMensajeCentral(
+            '❌ Credenciales incorrectas',
+            'error',
+            'Usuario o contraseña inválidos. Verifique e intente de nuevo.'
+        );        
     });
+});
 </script>
 </body>
 </html>
