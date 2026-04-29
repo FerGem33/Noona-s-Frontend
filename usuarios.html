@@ -119,12 +119,12 @@
                     <td class="px-6 py-4 text-primary/80 italic">${escapeHtml(usr.rol || `ID: ${usr.id_rol}`)}</td>
                     <td class="px-6 py-4">
                         <div class="flex justify-center gap-3">
-                        <a href="usuario_editar.html?nombre=${encodeURIComponent(usr.nombre)}" class="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors" title="Editar">
-                            <span class="material-symbols-outlined">edit</span>
-                        </a>
-                        <a href="usuario_eliminar.html?nombre=${encodeURIComponent(usr.nombre)}" class="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors" title="Eliminar">
-                            <span class="material-symbols-outlined">delete</span>
-                        </a>
+                            <a href="usuario_editar.html?nombre=${encodeURIComponent(usr.nombre)}" class="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors" title="Editar">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <a href="usuario_eliminar.html?id=${usr.id_usuario}&nombre=${encodeURIComponent(usr.nombre)}" class="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors" title="Eliminar">
+                                <span class="material-symbols-outlined">delete</span>
+                            </a>
                         </div>
                     </td>
                 </tr>
