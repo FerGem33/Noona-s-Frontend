@@ -113,7 +113,7 @@
 <!-- Navigation Header -->
 <header class="flex items-center justify-between mb-12">
 <div class="flex items-center gap-4">
-<button onclick="window.location.href='/'"
+<button onclick="window.location.href='menuprincipal.html'"
         class="flex items-center justify-center bg-burgundy text-white px-5 py-2.5 rounded-full gap-2 transition-opacity hover:opacity-90">
 <span class="material-symbols-outlined text-sm">arrow_back</span>
 <span class="text-xs font-bold tracking-wider uppercase">Menú Principal</span>
@@ -192,7 +192,9 @@
                 <label class="block text-burgundy font-bold mb-2">Días:</label>
                 <input type="number" id="daysInput" 
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50"
-                       placeholder="Ejemplo: 30" min="1" value="30">
+                       placeholder="Ejemplo: 30" min="1" step="1" onkeydown="validarEntero(event)"
+                       oninput="validarSinDecimales(this)"
+                       value="30">
             </div>
             <div class="flex gap-3">
                 <button onclick="generateReport()" id="generateBtn"
@@ -210,6 +212,36 @@
 
 <script>
     let currentReportType = null;
+    
+    // Función para validar que solo se ingresen enteros (teclado)
+    function validarEntero(event) {
+        // Permitir teclas especiales: backspace, tab, enter, escape, delete, flechas
+        const teclasEspeciales = [8, 9, 13, 27, 46, 37, 38, 39, 40];
+        if (teclasEspeciales.includes(event.keyCode)) {
+            return;
+        }
+        // Permitir números del 0 al 9
+        if (event.key < '0' || event.key > '9') {
+            event.preventDefault();
+            showToast('Solo se permiten números enteros', true);
+        }
+    }
+    
+    // Función para validar que no haya decimales en el input
+    function validarSinDecimales(input) {
+        if (input.value.includes('.')) {
+            input.value = input.value.split('.')[0];
+            showToast('No se permiten números decimales', true);
+        }
+        if (input.value.includes(',')) {
+            input.value = input.value.split(',')[0];
+            showToast('No se permiten números decimales', true);
+        }
+        // Convertir a entero si tiene algo
+        if (input.value !== '') {
+            input.value = parseInt(input.value);
+        }
+    }
     
     // Función para mostrar el modal
     function showModal(reportType) {
