@@ -65,10 +65,10 @@
 <body class="font-display text-slate-900 dark:text-slate-100 min-h-screen bg-[#FEBDC6]">
 <div class="layout-container flex h-full grow flex-col">
 
-<!-- Top Navigation Bar (SIN botón de menú principal) -->
+<!-- Top Navigation Bar -->
 <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/20 bg-white dark:bg-background-dark px-6 py-4 lg:px-20">
     <div class="flex items-center gap-6">
-        <!-- Solo el logo, sin botón de navegación -->
+        <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
         <div class="flex items-center gap-3">
             <h2 class="text-slate-900 dark:text-slate-50 text-xl font-black uppercase tracking-tight">NONNA</h2>
         </div>
@@ -79,6 +79,7 @@
                 <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Cargando...</p>
                 <p id="textoRol" class="text-xs text-slate-500">Rol</p>
             </div>
+           
         </div>
     </div>
 </header>
@@ -155,18 +156,21 @@
 // SILENCIAR ADVERTENCIAS DE TAILWIND (AL INICIO)
 // ============================================
 (function() {
+    // Guardar funciones originales
     const originalWarn = console.warn;
     const originalError = console.error;
     
+    // Filtrar advertencias de Tailwind
     console.warn = function(...args) {
         const message = args[0] || '';
         if (typeof message === 'string') {
+            // Ignorar advertencias específicas de Tailwind
             if (message.includes('cdn.tailwindcss.com') || 
                 message.includes('Tailwind CSS') ||
                 message.includes('plugins=forms') ||
                 message.includes('production') ||
                 message.includes('should not be used in production')) {
-                return;
+                return; // No mostrar estas advertencias
             }
         }
         originalWarn.apply(console, args);
@@ -176,7 +180,7 @@
         const message = args[0] || '';
         if (typeof message === 'string') {
             if (message.includes('Tailwind') || message.includes('tailwind')) {
-                return;
+                return; // No mostrar errores de Tailwind
             }
         }
         originalError.apply(console, args);
@@ -184,7 +188,7 @@
 })();
 
 // ============================================
-// NONNA - CALENDARIO REPARTIDOR (VISTA LIMITADA)
+// NONNA - CALENDARIO CON API REAL (VERSIÓN CORREGIDA)
 // ============================================
 
 // ============================================
@@ -203,9 +207,10 @@ function getHeaders() {
 }
 
 // ============================================
-// 2. MAPEOS DE ESTADOS
+// 2. MAPEOS DE ESTADOS (CORREGIDO)
 // ============================================
 
+// Mapeo de estado API a colores y textos
 const estadoConfig = {
     2: { nombre: 'Pendiente', color: 'bg-order-red', local: 'Pendiente' },
     8: { nombre: 'Preparación', color: 'bg-order-orange', local: 'En preparacion' },
@@ -213,8 +218,10 @@ const estadoConfig = {
     5: { nombre: 'Entregado', color: 'bg-order-green', local: 'Entregado' },
     6: { nombre: 'Cancelado', color: 'bg-order-purple', local: 'Cancelado' },
     3: { nombre: 'En proceso', color: 'bg-order-yellow', local: 'En proceso' },
+
 };
 
+// Mapeo para actualizar estado vía API
 const estadoMapLocalToAPI = {
     'Pendiente': 2,
     'En preparacion': 8,
@@ -271,6 +278,12 @@ async function cargarPedidosDesdeAPI() {
         const pedidos = await response.json();
         pedidosCache = pedidos;
         console.log(`✅ Cargados ${pedidos.length} pedidos desde API`);
+        
+        // Mostrar estados de los pedidos para depuración
+        pedidos.forEach(p => {
+            console.log(`Pedido #${p.id_pedido}: Estado ID=${p.id_estado} - ${estadoConfig[p.id_estado]?.nombre || 'Desconocido'}`);
+        });
+        
         return pedidos;
     } catch (error) {
         console.error('❌ Error cargando pedidos:', error);
@@ -309,7 +322,30 @@ function obtenerPedidosPorMes(mes, año) {
 }
 
 // ============================================
-// 4. FUNCIONES DEL CALENDARIO (SIN BOTÓN +)
+// 4. FUNCIÓN PARA REDIRIGIR A NUEVO PEDIDO
+// ============================================
+
+window.crearNuevoPedido = function(fecha) {
+    console.log("🖱️ Click en crear nuevo pedido para fecha:", fecha);
+    
+    if (!fecha) {
+        console.error('No se proporcionó fecha');
+        alert('Error: No se pudo obtener la fecha seleccionada');
+        return;
+    }
+    
+    let fechaFormateada = fecha;
+    if (fechaFormateada.includes('T')) {
+        fechaFormateada = fechaFormateada.split('T')[0];
+    }
+    
+    const url = `pedido_nuevo.html?fecha=${fechaFormateada}`;
+    console.log(`📅 Redirigiendo a: ${url}`);
+    window.location.href = url;
+};
+
+// ============================================
+// 5. FUNCIONES DEL CALENDARIO (CORREGIDO)
 // ============================================
 
 function obtenerDiasDelMes(mes, año) {
@@ -328,6 +364,7 @@ function esFechaHoy(fechaStr) {
            hoy.getUTCDate() === fechaComparar.getUTCDate();
 }
 
+// FUNCIÓN CORREGIDA - Obtener color según estado
 function getColorPorEstado(idEstado) {
     return estadoConfig[idEstado]?.color || 'bg-gray-300';
 }
@@ -370,7 +407,7 @@ function generarCalendario(mes, año) {
 }
 
 // ============================================
-// 5. RENDERIZADO DEL CALENDARIO (SIN BOTÓN +)
+// 6. RENDERIZADO DEL CALENDARIO
 // ============================================
 
 let mesActual = new Date().getMonth();
@@ -404,10 +441,14 @@ function renderizarCalendario() {
         } else {
             const hoyClass = dia.esHoy ? 'bg-primary text-slate-900 shadow-sm' : 'text-slate-400';
             
-            // Se ha eliminado el botón "+"
             celda.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <span class="size-7 flex items-center justify-center rounded-full text-sm font-black ${hoyClass}">${dia.dia}</span>
+                    <button onclick="window.crearNuevoPedido('${dia.fecha}')"
+                        class="opacity-0 group-hover:opacity-100 text-primary hover:bg-primary/10 rounded-full p-1 transition-all inline-block cursor-pointer"
+                        title="Agregar pedido para el ${dia.dia}/${mesActual+1}/${añoActual}">
+                        <span class="material-symbols-outlined text-sm">+</span>
+                    </button>
                 </div>
                 <div class="flex flex-col gap-1 max-h-24 overflow-y-auto">
                     ${dia.pedidos.map(pedido => `
@@ -428,7 +469,7 @@ function renderizarCalendario() {
 }
 
 // ============================================
-// 6. MODAL (SOLO ACTUALIZAR ESTADO, SIN ELIMINAR NI VER DETALLES)
+// 7. FUNCIONES GLOBALES PARA EL MODAL (CORREGIDO)
 // ============================================
 
 window.abrirModalPedido = async function(idPedido) {
@@ -478,7 +519,7 @@ window.abrirModalPedido = async function(idPedido) {
                         <option value="7" ${estadoActual === 7 ? 'selected' : ''}>En camino</option>
                         <option value="5" ${estadoActual === 5 ? 'selected' : ''}>Entregado</option>
                         <option value="6" ${estadoActual === 6 ? 'selected' : ''}>Cancelado</option>
-                        <option value="3" ${estadoActual === 3 ? 'selected' : ''}>En proceso</option> 
+                        <option value="3" ${estadoActual === 3 ? 'select' : ''}>En proceso</option> 
                     </select>
                 </div>
             </div>
@@ -488,7 +529,10 @@ window.abrirModalPedido = async function(idPedido) {
                         class="flex-1 bg-primary text-slate-900 px-4 py-2 rounded-lg font-semibold hover:opacity-90">
                     Actualizar Estado
                 </button>
-                <!-- Botones Eliminar y Ver Detalles han sido eliminados -->
+                <a href="pedido_ver.html?id=${pedido.id_pedido}" 
+                   class="flex-1 text-center px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50">
+                    Ver Detalles
+                </a>
             </div>
         </div>
     `;
@@ -523,6 +567,16 @@ window.actualizarEstadoPedidoModal = async function(id, modalId) {
         await recargarDatosYRenderizar();
     } else {
         alert(`❌ Error al actualizar el pedido #${id}. Revisa la consola para más detalles.`);
+    }
+};
+
+window.eliminarPedidoModal = async function(id, modalId) {
+    const exito = await eliminarPedido(id);
+    if (exito) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+        await recargarDatosYRenderizar();
+        alert(`✅ Pedido #${id} eliminado correctamente`);
     }
 };
 
@@ -562,8 +616,33 @@ async function actualizarEstadoPedido(id, nuevoEstadoLocal) {
     }
 }
 
+async function eliminarPedido(id) {
+    if (!verificarToken()) return false;
+    
+    if (!confirm(`¿Estás seguro de eliminar el pedido #${id}?`)) {
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/pedidos/${id}/`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        pedidosCache = pedidosCache.filter(p => p.id_pedido !== id);
+        console.log(`✅ Pedido ${id} eliminado correctamente`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error eliminando pedido:', error);
+        alert('Error al eliminar el pedido. Intenta nuevamente.');
+        return false;
+    }
+}
+
 // ============================================
-// 7. FUNCIONES DE NAVEGACIÓN ENTRE MESES
+// 8. FUNCIONES DE NAVEGACIÓN
 // ============================================
 
 function mesAnterior() {
@@ -596,7 +675,7 @@ async function recargarDatosYRenderizar() {
 }
 
 // ============================================
-// 8. INICIALIZACIÓN
+// 9. INICIALIZACIÓN
 // ============================================
 
 async function inicializar() {
@@ -616,7 +695,12 @@ async function inicializar() {
     await cargarPedidosDesdeAPI();
     renderizarCalendario();
     
-    // No se agrega evento para "Menú Principal" porque ese botón ya no existe
+    const btnMenuPrincipal = document.getElementById('btnMenuPrincipal');
+    if (btnMenuPrincipal) {
+        btnMenuPrincipal.addEventListener('click', () => {
+            window.location.href = "menuprincipal.html";
+        });
+    }
     
     const btnMesAnterior = document.getElementById('btnMesAnterior');
     if (btnMesAnterior) {
@@ -628,7 +712,7 @@ async function inicializar() {
         btnMesSiguiente.addEventListener('click', mesSiguiente);
     }
     
-    console.log('✅ Calendario de repartidor inicializado correctamente');
+    console.log('✅ Calendario inicializado correctamente');
 }
 
 function escapeHtml(str) {
