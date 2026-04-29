@@ -23,6 +23,12 @@
         },
     }
 </script>
+<style>
+    body { font-family: 'Montserrat', sans-serif; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+</style>
 <title>Editar Receta - Nonna</title>
 </head>
 <body class="bg-[#FEBDC6] font-display min-h-screen flex items-center justify-center p-4">
@@ -83,7 +89,7 @@
                 </div>
                 <div class="col-span-6 md:col-span-3 flex flex-col gap-2">
                     <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Cantidad</label>
-                    <input id="cantidad" type="number" step="0.01" class="w-full rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm" placeholder="Ej. 1.5">
+                    <input id="cantidad" type="number" step="1" class="w-full rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm" placeholder="Ej. 1">
                 </div>
                 <div class="col-span-6 md:col-span-3">
                     <button id="btn-agregar" class="w-full h-[42px] bg-primary text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md shadow-primary/20">
@@ -116,6 +122,31 @@
     </footer>
 </div>
 
+<!-- MODALES DE MENSAJES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span>
+        </div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button class="btn-cerrar-exito mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button class="btn-cerrar-error mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
 <script>
     const API_BASE = 'http://3.15.13.161:8000/api';
     const TOKEN = localStorage.token;
@@ -124,15 +155,38 @@
         return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
     }
 
+    // Función para mostrar modales
+    function mostrarExito(titulo, mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = titulo;
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        const btn = modal.querySelector('.btn-cerrar-exito');
+        btn.onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje, callback) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        const btn = modal.querySelector('.btn-cerrar-error');
+        btn.onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const recetaId = urlParams.get('id');
     if (!recetaId) {
-        alert('No se especificó receta');
-        window.location.href = 'recetas.html';
+        mostrarError('No se especificó receta', () => window.location.href = 'recetas.html');
     }
 
-    let todasMaterias = [];          // lista de materias primas disponibles
-    let ingredientesActuales = [];   // { id_materia, nombre, cantidad }
+    let todasMaterias = [];
+    let ingredientesActuales = [];
 
     // Cargar materias primas 
     async function cargarMaterias() {
@@ -151,35 +205,71 @@
         } catch(e) { console.error(e); }
     }
 
-    // Cargar ingredientes actuales de esta receta
+    // Cargar ingredientes actuales de esta receta (VERSIÓN CORREGIDA)
     async function cargarIngredientes() {
+        const tbody = document.getElementById('tabla-ingredientes');
+        if (!tbody) {
+            console.error('No se encontró el elemento tabla-ingredientes');
+            return;
+        }
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">Cargando ingredientes...</td></tr>';
         try {
             const res = await fetch(`${API_BASE}/receta_materia_prima/`, { headers: getHeaders() });
-            if (!res.ok) throw new Error();
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const todasRelaciones = await res.json();
-            const misIngredientes = todasRelaciones.filter(rel => rel.id_receta == recetaId);
+            console.log('Todas las relaciones:', todasRelaciones);
+            
+            // Filtrar por la receta actual (comparación numérica estricta)
+            const misIngredientes = todasRelaciones.filter(rel => parseInt(rel.id_receta) === parseInt(recetaId));
+            console.log(`Relaciones para receta ${recetaId}:`, misIngredientes);
+            
+            if (misIngredientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">No hay ingredientes registrados para esta receta. Agrega usando el formulario superior.</td></tr>';
+                document.getElementById('total-ingredientes').innerText = '0 Items';
+                return;
+            }
+            
             ingredientesActuales = [];
             for (const rel of misIngredientes) {
-                const mpRes = await fetch(`${API_BASE}/materia_prima/${rel.id_materia}`, { headers: getHeaders() });
-                if (!mpRes.ok) continue;
-                const mp = await mpRes.json();
-                ingredientesActuales.push({
-                    id_materia: rel.id_materia,
-                    nombre: mp.descripcion,
-                    cantidad: rel.cantidad
-                });
+                try {
+                    const mpRes = await fetch(`${API_BASE}/materia_prima/${rel.id_materia}`, { headers: getHeaders() });
+                    let nombre = `Materia Prima ID ${rel.id_materia}`;
+                    if (mpRes.ok) {
+                        const mp = await mpRes.json();
+                        nombre = mp.descripcion || nombre;
+                    } else {
+                        console.warn(`No se pudo cargar materia prima ${rel.id_materia}, status: ${mpRes.status}`);
+                    }
+                    ingredientesActuales.push({
+                        id_materia: rel.id_materia,
+                        nombre: nombre,
+                        cantidad: rel.cantidad
+                    });
+                } catch (err) {
+                    console.warn(`Error al procesar materia prima ${rel.id_materia}:`, err);
+                    ingredientesActuales.push({
+                        id_materia: rel.id_materia,
+                        nombre: `[Error] ID ${rel.id_materia}`,
+                        cantidad: rel.cantidad
+                    });
+                }
             }
             renderizarTablaIngredientes();
-        } catch(e) {
-            console.error(e);
-            document.getElementById('tabla-ingredientes').innerHTML = '<tr><td colspan="3" class="text-center py-4 text-red-500">Error al cargar ingredientes</td></tr>';
+        } catch (error) {
+            console.error('Error cargando ingredientes:', error);
+            mostrarError('No se pudieron cargar los ingredientes. Verifica tu conexión o token.');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-red-500">Error al cargar ingredientes. Recarga la página.</td></tr>';
         }
     }
 
     function renderizarTablaIngredientes() {
         const tbody = document.getElementById('tabla-ingredientes');
+        if (!tbody) {
+            console.error('No se encontró tabla-ingredientes al renderizar');
+            return;
+        }
         if (ingredientesActuales.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">No hay ingredientes registrados</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">No hay ingredientes registrados para esta receta. Agrega usando el formulario superior.</td></tr>';
             document.getElementById('total-ingredientes').innerText = '0 Items';
             return;
         }
@@ -195,40 +285,46 @@
             tbody.insertAdjacentHTML('beforeend', fila);
         });
         document.getElementById('total-ingredientes').innerText = `${ingredientesActuales.length} Items`;
+        
+        // Reasignar eventos eliminar
         document.querySelectorAll('.eliminar-ingrediente').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const idx = parseInt(btn.dataset.idx);
-                const ing = ingredientesActuales[idx];
-                if (confirm('¿Eliminar este ingrediente de la receta?')) {
-                    try {
-                        const resDel = await fetch(`${API_BASE}/receta_materia_prima/${recetaId}/${ing.id_materia}`, { method: 'DELETE', headers: getHeaders() });
-                        if (resDel.ok) {
-                            ingredientesActuales.splice(idx, 1);
-                            renderizarTablaIngredientes();
-                        } else {
-                            alert('Error al eliminar');
-                        }
-                    } catch(e) { alert('Error de conexión'); }
-                }
-            });
+            btn.removeEventListener('click', eliminarHandler);
+            btn.addEventListener('click', eliminarHandler);
         });
+    }
+
+    // Manejador de eliminación de ingrediente
+    async function eliminarHandler(e) {
+        const btn = e.currentTarget;
+        const idx = parseInt(btn.dataset.idx);
+        const ing = ingredientesActuales[idx];
+        if (confirm('¿Eliminar este ingrediente de la receta?')) {
+            try {
+                const resDel = await fetch(`${API_BASE}/receta_materia_prima/${recetaId}/${ing.id_materia}`, { method: 'DELETE', headers: getHeaders() });
+                if (resDel.ok) {
+                    ingredientesActuales.splice(idx, 1);
+                    renderizarTablaIngredientes();
+                    mostrarExito('Ingrediente eliminado', 'El ingrediente se ha removido correctamente.');
+                } else {
+                    mostrarError('Error al eliminar el ingrediente');
+                }
+            } catch(e) { mostrarError('Error de conexión'); }
+        }
     }
 
     // Agregar nuevo ingrediente
     async function agregarIngrediente() {
         const idMateria = parseInt(document.getElementById('select-materia').value);
         const cantidad = parseFloat(document.getElementById('cantidad').value);
-        if (!idMateria) { alert('Seleccione una materia prima'); return; }
-        if (isNaN(cantidad) || cantidad <= 0) { alert('Cantidad válida requerida'); return; }
+        if (!idMateria) { mostrarError('Seleccione una materia prima'); return; }
+        if (isNaN(cantidad) || cantidad <= 0) { mostrarError('Cantidad válida requerida'); return; }
         const materia = todasMaterias.find(m => m.id_materia === idMateria);
         if (!materia) return;
 
-        // Verificar si ya existe en la receta
         const existente = ingredientesActuales.find(i => i.id_materia === idMateria);
         if (existente) {
-            // Podrías actualizar la cantidad, pero mejor lo manejas como actualización
+            const nuevaCantidad = existente.cantidad + cantidad;
             if (confirm('Este ingrediente ya existe. ¿Deseas aumentar la cantidad?')) {
-                const nuevaCantidad = existente.cantidad + cantidad;
                 await actualizarIngrediente(idMateria, nuevaCantidad);
             }
             return;
@@ -247,12 +343,12 @@
                 })
             });
             if (!res.ok) throw new Error();
-            alert('Ingrediente agregado');
             await cargarIngredientes(); // recargar lista
             document.getElementById('select-materia').value = '';
             document.getElementById('cantidad').value = '';
+            mostrarExito('Ingrediente agregado', 'La materia prima se ha añadido correctamente a la receta.');
         } catch(e) {
-            alert('Error al agregar ingrediente');
+            mostrarError('Error al agregar ingrediente');
         }
     }
 
@@ -270,12 +366,12 @@
                 })
             });
             if (!res.ok) throw new Error();
-            alert('Cantidad actualizada');
             await cargarIngredientes();
-        } catch(e) { alert('Error al actualizar'); }
+            mostrarExito('Cantidad actualizada', 'El ingrediente se ha actualizado correctamente.');
+        } catch(e) { mostrarError('Error al actualizar cantidad'); }
     }
 
-    // Cargar datos de la receta y luego ingredientes
+    // Cargar datos de la receta
     async function cargarReceta() {
         try {
             const res = await fetch(`${API_BASE}/receta/recetas/${recetaId}`, { headers: getHeaders() });
@@ -284,14 +380,13 @@
             document.getElementById('id_receta').value = receta.id_receta;
             document.getElementById('descripcion').value = receta.descripcion || '';
         } catch(e) {
-            alert('Error al cargar receta');
-            window.location.href = 'recetas.html';
+            mostrarError('Error al cargar receta', () => window.location.href = 'recetas.html');
         }
     }
 
     async function actualizarReceta() {
         const descripcion = document.getElementById('descripcion').value.trim();
-        if (!descripcion) { alert('La descripción es obligatoria'); return; }
+        if (!descripcion) { mostrarError('La descripción es obligatoria'); return; }
         try {
             const res = await fetch(`${API_BASE}/receta/recetas/${recetaId}`, {
                 method: 'PUT',
@@ -299,10 +394,9 @@
                 body: JSON.stringify({ descripcion })
             });
             if (!res.ok) throw new Error();
-            alert('Receta actualizada');
-            window.location.href = 'recetas.html';
+            mostrarExito('Receta actualizada', 'Los cambios se han guardado correctamente.', () => window.location.href = 'recetas.html');
         } catch(e) {
-            alert('Error al actualizar receta');
+            mostrarError('Error al actualizar receta');
         }
     }
 
@@ -311,6 +405,7 @@
 
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
 
+    // Inicializar
     cargarMaterias();
     cargarReceta();
     cargarIngredientes();

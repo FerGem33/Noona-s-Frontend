@@ -1,135 +1,565 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Cotizaciones - Nonna</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
-                colors: { "primary": "#FEBDC6", "accent": "#5D1927", "background-light": "#f8f5f6", "background-dark": "#230f12" },
-                fontFamily: { "display": ["Montserrat"] },
-                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-            },
-        },
+                colors: {
+                    "surface-container-highest": "#ebe0e0",
+                    "primary-fixed": "#ffd9dd",
+                    "tertiary-fixed-dim": "#a7d1b0",
+                    "surface-container-low": "#fcf1f1",
+                    "outline": "#837375",
+                    "secondary-container": "#fe99a7",
+                    "background": "#fff8f7",
+                    "on-primary-fixed": "#340f17",
+                    "secondary-fixed-dim": "#ffb2bb",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#f6b6bf",
+                    "inverse-on-surface": "#f9eeee",
+                    "on-secondary-container": "#792e3b",
+                    "secondary-fixed": "#ffd9dc",
+                    "on-secondary-fixed-variant": "#782e3b",
+                    "on-surface": "#1f1a1b",
+                    "surface": "#fff8f7",
+                    "tertiary": "#41674c",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#3f0212",
+                    "on-primary-container": "#7a4951",
+                    "on-background": "#1f1a1b",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed-variant": "#673941",
+                    "surface-dim": "#e2d8d8",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#294e36",
+                    "surface-variant": "#ebe0e0",
+                    "on-surface-variant": "#514345",
+                    "tertiary-fixed": "#c2edcb",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#aed8b7",
+                    "surface-container-high": "#f1e6e6",
+                    "surface-container": "#f6ebeb",
+                    "on-tertiary-fixed": "#00210e",
+                    "on-tertiary-container": "#3a5f45",
+                    "surface-tint": "#825058",
+                    "inverse-primary": "#f6b6bf",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "secondary": "#954552",
+                    "inverse-surface": "#352f2f",
+                    "primary": "#825058",
+                    "outline-variant": "#d5c2c3",
+                    "primary-container": "#febdc6",
+                    "surface-bright": "#fff8f7"
+                },
+                borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+                spacing: {
+                    "element-gap": "0.5rem",
+                    "cell-padding-x": "1.5rem",
+                    "input-height": "3.5rem",
+                    "container-padding": "2rem",
+                    "section-gap": "1.5rem",
+                    "cell-padding-y": "1.25rem"
+                },
+                fontFamily: {
+                    "table-header": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "h2": ["Montserrat"],
+                    "label": ["Montserrat"],
+                    "h1": ["Montserrat"],
+                    "input-text": ["Montserrat"]
+                },
+                fontSize: {
+                    "table-header": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0.05em", fontWeight: "700" }],
+                    "body-lg": ["1.125rem", { lineHeight: "1.75rem", fontWeight: "400" }],
+                    "h2": ["1.5rem", { lineHeight: "2rem", fontWeight: "800" }],
+                    "label": ["0.875rem", { lineHeight: "1.25rem", fontWeight: "600" }],
+                    "h1": ["2.25rem", { lineHeight: "2.5rem", letterSpacing: "-0.025em", fontWeight: "900" }],
+                    "input-text": ["1rem", { lineHeight: "1.5rem", fontWeight: "500" }]
+                }
+            }
+        }
     }
 </script>
-<title>Nonna - Gestión de Cotizaciones</title>
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 280px;
+        max-width: 380px;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        padding: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        transform: translateX(400px);
+        transition: transform 0.3s ease-out;
+        border-left: 4px solid;
+    }
+    .toast-notification.show { transform: translateX(0); }
+    .toast-notification.success { border-left-color: #10b981; }
+    .toast-notification.error { border-left-color: #ef4444; }
+    .toast-notification.warning { border-left-color: #f59e0b; }
+    .toast-close { cursor: pointer; color: #9ca3af; }
+    .modal-overlay { background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
+</style>
 </head>
-<body class="font-display bg-primary min-h-screen">
-<div class="layout-container flex h-full grow flex-col">
-    <div class="px-8 pt-4">
-        <a href="index.html" class="inline-flex items-center gap-1 text-accent font-semibold hover:underline">
-            <span class="text-xl">←</span>
-            <span class="text-sm uppercase tracking-wide">CRUD's del Sistema</span>
-        </a>
-    </div>
-    <main class="flex-1 p-8 flex justify-center">
-        <div class="max-w-6xl w-full flex flex-col gap-6">
-            <div class="flex flex-col gap-1">
-                <h1 class="text-accent text-4xl font-black tracking-tight">Gestión de Cotizaciones</h1>
-                <p class="text-accent/70 text-lg">Administra presupuestos y cotizaciones generadas.</p>
+<body class="bg-primary-container min-h-screen font-body-lg flex flex-col">
+    <!-- Header con botón de regreso a CRUDs (como en ejemplos anteriores) -->
+    <header class="bg-white/80 backdrop-blur-sm border-b border-primary/10 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary p-1.5 rounded-lg">
+                    <span class="material-symbols-outlined text-white text-2xl">receipt_long</span>
+                </div>
+                <h1 class="text-primary text-xl font-bold tracking-tight">Nonna <span class="font-light text-primary/70">Cotizaciones</span></h1>
             </div>
-            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-accent/5 border-b border-accent/10">
-                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider">Cliente</th>
-                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider text-right">Total</th>
-                                <th class="px-6 py-4 text-accent text-xs font-bold uppercase tracking-wider text-center">Acciones</th>
-                             </tr>
-                        </thead>
-                        <tbody id="tabla-cotizaciones" class="divide-y divide-accent/5">
-                            <tr><td colspan="4" class="text-center py-10 text-accent/50">Cargando cotizaciones...</td></tr>
-                        </tbody>
-                    </table>
+            <a href="index.html" class="flex items-center gap-2 px-4 py-2 text-primary font-semibold hover:bg-primary/5 rounded-lg transition-colors border border-primary/20">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                <span>CRUD's del Sistema</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-12">
+        <div class="w-full max-w-[1400px] bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col h-full max-h-[860px]">
+            <!-- Card Header -->
+            <div class="px-10 py-8 flex items-center justify-between border-b border-[#FEBDC6]/20">
+                <div>
+                    <h2 class="text-h1 font-h1 text-[#5D1927]">Gestión de Cotizaciones</h2>
+                    <p class="text-on-surface-variant font-body-lg">Administra y realiza el seguimiento de tus cotizaciones</p>
+                </div>
+                <button id="btnNuevo" class="flex items-center gap-2 px-8 h-14 bg-[#5D1927] text-white rounded-xl font-bold shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>Nueva Cotización</span>
+                </button>
+            </div>
+
+            <!-- Buscador -->
+            <div class="px-10 pt-6">
+                <div class="relative max-w-md">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/50">search</span>
+                    <input type="text" id="searchInput" class="w-full pl-10 pr-4 py-2 rounded-xl border border-primary/20 focus:ring-2 focus:ring-primary" placeholder="Buscar por folio o cliente...">
                 </div>
             </div>
-            <div class="flex justify-end">
-                <a href="cotizacion_nuevo.html" class="bg-accent text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-accent/30 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined">add</span> Nueva Cotización
-                </a>
+
+            <!-- Table Container -->
+            <div class="flex-1 overflow-auto px-10 py-6">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-primary-container/10">
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10 first:rounded-tl-xl">ID</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10">Pedido</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10">Producto</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10">Cantidad</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10">Diseño</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10">Envío</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10">Estado</th>
+                            <th class="px-6 py-5 font-table-header text-table-header text-[#5D1927] border-b-2 border-[#5D1927]/10 last:rounded-tr-xl">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaBody" class="divide-y divide-[#5D1927]/5">
+                        <tr><td colspan="8" class="text-center py-10 text-primary/50">Cargando cotizaciones...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
-</div>
 
-<script>
-    let clientesMap = {};
+    <!-- Modal para crear/editar cotización -->
+    <div id="modalForm" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 id="modalTitle" class="text-xl font-bold text-brand-primary mb-4">Nueva Cotización</h3>
+            <form id="cotizacionForm" class="space-y-4">
+                <input type="hidden" id="editId" value="">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Pedido *</label>
+                    <select id="id_pedido" class="w-full p-3 border rounded-xl" required>
+                        <option value="">Cargando pedidos...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Producto *</label>
+                    <select id="id_producto" class="w-full p-3 border rounded-xl" required>
+                        <option value="">Cargando productos...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Estado *</label>
+                    <select id="id_estado" class="w-full p-3 border rounded-xl" required>
+                        <option value="">Cargando estados...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Cantidad *</label>
+                    <input type="number" id="cantidad" class="w-full p-3 border rounded-xl" min="1" value="1" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Precio Diseño</label>
+                    <input type="number" step="0.01" id="precio_disenio" class="w-full p-3 border rounded-xl" value="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Precio Envío</label>
+                    <input type="number" step="0.01" id="precio_envio" class="w-full p-3 border rounded-xl" value="0">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="cancelModalBtn" class="px-4 py-2 border rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-xl">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    async function cargarClientes() {
-        try {
-            const res = await fetch('http://3.15.13.161:8000/api/cliente/', {
-                headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1IiwiZXhwIjoxNzc2MDUwODA0fQ.R2PzKoeGJjVYe3flsQNrrkfZF3RF-Grlk1u-h4OkaF0' }
+    <script>
+        const API_BASE = 'http://3.15.13.161:8000/api';
+        const TOKEN = localStorage.token || localStorage.getItem('token') || localStorage.getItem('access_token');
+        if (!TOKEN) {
+            alert('No hay token de autenticación. Redirigiendo al login.');
+            window.location.href = 'index.html';
+        }
+
+        function getHeaders() {
+            return {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // ----- Toast notifications -----
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container') || (() => {
+                const div = document.createElement('div');
+                div.id = 'toast-container';
+                div.style.cssText = 'position:fixed; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;';
+                document.body.appendChild(div);
+                return div;
+            })();
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            const iconMap = { success: 'check_circle', error: 'error', warning: 'warning', info: 'info' };
+            const icon = iconMap[type] || 'info';
+            const color = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6';
+            toast.innerHTML = `
+                <div class="toast-icon"><span class="material-symbols-outlined" style="color:${color}">${icon}</span></div>
+                <div class="toast-content flex-1">${message}</div>
+                <div class="toast-close"><span class="material-symbols-outlined text-sm">close</span></div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            toast.querySelector('.toast-close').onclick = () => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            };
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        // ----- Data stores -----
+        let cotizaciones = [];
+        let pedidosMap = {};       // id_pedido -> {folio, cliente_nombre}
+        let productosMap = {};     // id_producto -> descripcion
+        let estadosMap = {};       // id_estado -> descripcion
+
+        // Cargar datos relacionados
+        async function loadPedidos() {
+            try {
+                const res = await fetch(`${API_BASE}/pedidos/`, { headers: getHeaders() });
+                if (res.ok) {
+                    const data = await res.json();
+                    data.forEach(p => {
+                        pedidosMap[p.id_pedido] = {
+                            id: p.id_pedido,
+                            cliente: p.cliente_nombre || `Pedido ${p.id_pedido}`,
+                            folio: `#PED-${p.id_pedido}`
+                        };
+                    });
+                }
+            } catch(e) { console.error('Error cargando pedidos', e); }
+        }
+
+        async function loadProductos() {
+            try {
+                const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+                if (res.ok) {
+                    const data = await res.json();
+                    data.forEach(p => productosMap[p.id_producto] = p.descripcion || `Producto ${p.id_producto}`);
+                }
+            } catch(e) { console.error('Error cargando productos', e); }
+        }
+
+        async function loadEstados() {
+            try {
+                const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
+                if (res.ok) {
+                    const data = await res.json();
+                    data.forEach(e => estadosMap[e.id_estado] = e.descripcion);
+                }
+            } catch(e) { console.error('Error cargando estados', e); }
+            // fallback si falla
+            if (Object.keys(estadosMap).length === 0) {
+                estadosMap = {1:'Pendiente',2:'Preparación',3:'Enviado',4:'Entregado',5:'Cancelado',6:'Cotización'};
+            }
+        }
+
+        // CRUD funciones
+        async function fetchCotizaciones() {
+            const res = await fetch(`${API_BASE}/cotizacion/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+            return res.json();
+        }
+
+        async function createCotizacion(data) {
+            const res = await fetch(`${API_BASE}/cotizacion/`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(data)
             });
-            if (res.ok) {
-                const clientes = await res.json();
-                clientesMap = {};
-                clientes.forEach(c => { clientesMap[c.id_cliente] = `${c.nombre} ${c.apellido}`.trim(); });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al crear');
+            }
+            return res.json();
+        }
+
+        async function updateCotizacion(id, data) {
+            const res = await fetch(`${API_BASE}/cotizacion/${id}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al actualizar');
+            }
+            return res.json();
+        }
+
+        async function deleteCotizacion(id) {
+            const res = await fetch(`${API_BASE}/cotizacion/${id}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al eliminar');
+            }
+            return true;
+        }
+
+        // Render tabla
+        function renderTable(filterText = '') {
+            const tbody = document.getElementById('tablaBody');
+            let filtered = [...cotizaciones];
+            if (filterText) {
+                const lower = filterText.toLowerCase();
+                filtered = filtered.filter(c => {
+                    const pedido = pedidosMap[c.id_pedido]?.folio || `#${c.id_pedido}`;
+                    const producto = productosMap[c.id_producto] || `Prod ${c.id_producto}`;
+                    return pedido.toLowerCase().includes(lower) || producto.toLowerCase().includes(lower);
+                });
+            }
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-primary/50">No hay cotizaciones registradas.</td></tr>';
                 return;
             }
-        } catch(e) {}
-        // Fallback: clientes de ejemplo
-        clientesMap = { 1: 'Cliente Ejemplo 1', 2: 'Cliente Ejemplo 2' };
-    }
-
-    function obtenerCotizaciones() {
-        const stored = localStorage.getItem('cotizaciones');
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    function guardarCotizaciones(cotizaciones) {
-        localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
-    }
-
-    function renderizarTabla() {
-        const cotizaciones = obtenerCotizaciones();
-        const tbody = document.getElementById('tabla-cotizaciones');
-        if (!cotizaciones.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-accent/50">No hay cotizaciones. Crea la primera!</td></tr>';
-            return;
+            tbody.innerHTML = '';
+            filtered.forEach(c => {
+                const pedidoObj = pedidosMap[c.id_pedido] || { folio: `#PED-${c.id_pedido}`, cliente: `Pedido ${c.id_pedido}` };
+                const productoNombre = productosMap[c.id_producto] || `Producto ${c.id_producto}`;
+                const estadoNombre = estadosMap[c.id_estado] || `Estado ${c.id_estado}`;
+                let estadoColor = '';
+                if (c.id_estado === 1 || c.id_estado === 6) estadoColor = 'bg-amber-100 text-amber-700';
+                else if (c.id_estado === 4) estadoColor = 'bg-green-100 text-green-700';
+                else if (c.id_estado === 5) estadoColor = 'bg-rose-100 text-rose-700';
+                else estadoColor = 'bg-blue-100 text-blue-700';
+                const row = `
+                    <tr class="group hover:bg-[#5D1927]/5 transition-colors">
+                        <td class="px-6 py-cell-padding-y font-bold text-[#5D1927]">${c.id_pedido}-${c.id_producto}</td>
+                        <td class="px-6 py-cell-padding-y"><span class="font-medium">${pedidoObj.folio}</span><br><span class="text-xs text-on-surface-variant">${pedidoObj.cliente}</span></td>
+                        <td class="px-6 py-cell-padding-y text-on-surface-variant">${escapeHtml(productoNombre)}</td>
+                        <td class="px-6 py-cell-padding-y font-medium">${c.cantidad}</td>
+                        <td class="px-6 py-cell-padding-y">$${parseFloat(c.precio_disenio || 0).toFixed(2)}</td>
+                        <td class="px-6 py-cell-padding-y">$${parseFloat(c.precio_envio || 0).toFixed(2)}</td>
+                        <td class="px-6 py-cell-padding-y"><span class="px-3 py-1 rounded-full text-xs font-bold ${estadoColor}">${estadoNombre}</span></td>
+                        <td class="px-6 py-cell-padding-y">
+                            <div class="flex items-center gap-2">
+                                <button class="btn-editar p-2 text-primary hover:bg-primary/10 rounded-lg" data-id="${c.id_pedido}|${c.id_producto}"><span class="material-symbols-outlined">edit</span></button>
+                                <button class="btn-eliminar p-2 text-error hover:bg-error/10 rounded-lg" data-id="${c.id_pedido}|${c.id_producto}"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            // eventos de editar/eliminar
+            document.querySelectorAll('.btn-editar').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const compositeId = btn.dataset.id.split('|');
+                    const id_pedido = parseInt(compositeId[0]);
+                    const id_producto = parseInt(compositeId[1]);
+                    const item = cotizaciones.find(c => c.id_pedido === id_pedido && c.id_producto === id_producto);
+                    if (item) openModal(item);
+                });
+            });
+            document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const compositeId = btn.dataset.id.split('|');
+                    const id_pedido = parseInt(compositeId[0]);
+                    const id_producto = parseInt(compositeId[1]);
+                    if (confirm('¿Eliminar esta cotización? Esta acción no se puede deshacer.')) {
+                        try {
+                            await deleteCotizacion(id_pedido, id_producto);
+                            showToast('Cotización eliminada correctamente', 'success');
+                            await loadAllData();
+                        } catch (err) {
+                            showToast('Error al eliminar: ' + err.message, 'error');
+                        }
+                    }
+                });
+            });
         }
-        tbody.innerHTML = '';
-        cotizaciones.forEach(cot => {
-            const total = cot.total ? `$${parseFloat(cot.total).toFixed(2)}` : '$0.00';
-            const clienteNombre = clientesMap[cot.id_cliente] || `Cliente ${cot.id_cliente}`;
-            const fila = `
-                <tr class="hover:bg-accent/5 transition-colors">
-                    <td class="px-6 py-4 text-accent font-mono">${cot.id_cotizacion}</td>
-                    <td class="px-6 py-4 text-slate-800 font-semibold">${escapeHtml(clienteNombre)}</td>
-                    <td class="px-6 py-4 text-right text-accent font-bold">${total}</td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="flex justify-center gap-2">
-                            <a href="cotizacion_previa.html?id=${cot.id_cotizacion}" class="p-2 text-accent/60 hover:text-accent hover:bg-accent/10 rounded-lg transition-all" title="Ver detalle">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </a>
-                            <a href="cotizacion_editar.html?id=${cot.id_cotizacion}" class="p-2 text-accent/60 hover:text-accent hover:bg-accent/10 rounded-lg transition-all" title="Editar">
-                                <span class="material-symbols-outlined">edit</span>
-                            </a>
-                            <a href="cotizacion_eliminar.html?id=${cot.id_cotizacion}" class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
-                                <span class="material-symbols-outlined">delete</span>
-                            </a>
-                        </div>
-                    </td>
-                 </tr>
-            `;
-            tbody.insertAdjacentHTML('beforeend', fila);
+
+        // Cargar datos combinados
+        async function loadAllData() {
+            try {
+                await Promise.all([loadPedidos(), loadProductos(), loadEstados()]);
+                cotizaciones = await fetchCotizaciones();
+                renderTable(document.getElementById('searchInput')?.value || '');
+            } catch (err) {
+                showToast('Error al cargar datos: ' + err.message, 'error');
+                document.getElementById('tablaBody').innerHTML = '<tr><td colspan="8" class="text-center py-10 text-red-500">Error al cargar cotizaciones</td></tr>';
+            }
+        }
+
+        // Modal llenado de selects
+        async function fillSelects() {
+            const pedidoSelect = document.getElementById('id_pedido');
+            const productoSelect = document.getElementById('id_producto');
+            const estadoSelect = document.getElementById('id_estado');
+            // pedidos
+            pedidoSelect.innerHTML = '<option value="">Seleccionar pedido</option>';
+            for (const id in pedidosMap) {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = `${pedidosMap[id].folio} - ${pedidosMap[id].cliente}`;
+                pedidoSelect.appendChild(opt);
+            }
+            // productos
+            productoSelect.innerHTML = '<option value="">Seleccionar producto</option>';
+            for (const id in productosMap) {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = productosMap[id];
+                productoSelect.appendChild(opt);
+            }
+            // estados
+            estadoSelect.innerHTML = '<option value="">Seleccionar estado</option>';
+            for (const id in estadosMap) {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = estadosMap[id];
+                estadoSelect.appendChild(opt);
+            }
+        }
+
+        function openModal(item = null) {
+            fillSelects();
+            const modal = document.getElementById('modalForm');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('cotizacionForm');
+            if (item) {
+                title.innerText = 'Editar Cotización';
+                document.getElementById('editId').value = `${item.id_pedido}|${item.id_producto}`;
+                document.getElementById('id_pedido').value = item.id_pedido;
+                document.getElementById('id_producto').value = item.id_producto;
+                document.getElementById('id_estado').value = item.id_estado;
+                document.getElementById('cantidad').value = item.cantidad;
+                document.getElementById('precio_disenio').value = item.precio_disenio || 0;
+                document.getElementById('precio_envio').value = item.precio_envio || 0;
+                // deshabilitar pedido y producto en edición (clave compuesta)
+                document.getElementById('id_pedido').disabled = true;
+                document.getElementById('id_producto').disabled = true;
+            } else {
+                title.innerText = 'Nueva Cotización';
+                document.getElementById('editId').value = '';
+                document.getElementById('cotizacionForm').reset();
+                document.getElementById('id_pedido').disabled = false;
+                document.getElementById('id_producto').disabled = false;
+                document.getElementById('cantidad').value = 1;
+                document.getElementById('precio_disenio').value = 0;
+                document.getElementById('precio_envio').value = 0;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('btnNuevo').addEventListener('click', () => openModal(null));
+        document.getElementById('cancelModalBtn').addEventListener('click', () => {
+            document.getElementById('modalForm').classList.add('hidden');
         });
-    }
 
-    async function cargarPagina() {
-        await cargarClientes();
-        renderizarTabla();
-    }
+        document.getElementById('cotizacionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const data = {
+                id_pedido: parseInt(document.getElementById('id_pedido').value),
+                id_producto: parseInt(document.getElementById('id_producto').value),
+                id_estado: parseInt(document.getElementById('id_estado').value),
+                cantidad: parseInt(document.getElementById('cantidad').value),
+                precio_disenio: parseFloat(document.getElementById('precio_disenio').value) || 0,
+                precio_envio: parseFloat(document.getElementById('precio_envio').value) || 0
+            };
+            if (isNaN(data.id_pedido) || isNaN(data.id_producto) || isNaN(data.id_estado) || data.cantidad < 1) {
+                showToast('Complete los campos obligatorios', 'warning');
+                return;
+            }
+            try {
+                if (editId) {
+                    // edición: la API probablemente necesita la clave compuesta, usamos PUT a /cotizacion/{id_pedido}/{id_producto}?
+                    // La API original parece tener endpoint /cotizacion/ con clave compuesta. Usamos PUT a /cotizacion/?id_pedido=&id_producto=
+                    // mejor: construimos URL con query params
+                    const [oldPedido, oldProducto] = editId.split('|');
+                    const res = await fetch(`${API_BASE}/cotizacion/?id_pedido=${oldPedido}&id_producto=${oldProducto}`, {
+                        method: 'PUT',
+                        headers: getHeaders(),
+                        body: JSON.stringify(data)
+                    });
+                    if (!res.ok) throw new Error((await res.json()).detail);
+                    showToast('Cotización actualizada', 'success');
+                } else {
+                    await createCotizacion(data);
+                    showToast('Cotización creada', 'success');
+                }
+                document.getElementById('modalForm').classList.add('hidden');
+                await loadAllData();
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            }
+        });
 
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
-    cargarPagina();
-</script>
+        // Búsqueda en tiempo real
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderTable(e.target.value);
+        });
+
+        loadAllData();
+
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    </script>
 </body>
 </html>

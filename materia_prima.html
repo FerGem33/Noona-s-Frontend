@@ -65,22 +65,14 @@
             <th class="px-4 py-5 font-bold text-center">U. Medida</th>
             <th class="px-4 py-5 font-bold">Precio</th>
             <th class="px-4 py-5 font-bold text-right">Acciones</th>
-           </tr>
+          </tr>
         </thead>
         <tbody id="tabla-materia-body" class="divide-y divide-slate-50">
           <tr><td colspan="5" class="text-center py-10 text-slate-400">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="p-8 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500 font-medium">
-      <div></div>
-      <div class="flex items-center gap-1">
-        <button class="size-9 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors" disabled>←</button>
-        <button class="size-9 flex items-center justify-center rounded-lg bg-primary text-white font-bold">1</button>
-        <span class="px-2">...</span>
-        <button class="size-9 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors" disabled>→</button>
-      </div>
-    </div>
+    <!-- ELIMINADA LA SECCIÓN DE PAGINACIÓN (flechas, números, etc.) -->
   </main>
   <footer class="text-center py-4 text-primary/60 text-sm font-medium">© 2024 Nonna Bakery - Sistema de Gestión de Panadería Profesional</footer>
 </div>
@@ -129,36 +121,35 @@
   }
 
   function renderizarTabla(materias) {
-  const tbody = document.getElementById('tabla-materia-body');
-  if (!materias.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-400">No hay materias primas. ¡Agrega la primera!</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = '';
-  materias.forEach(mat => {
-    const precio = mat.precio_unitario ? `$${parseFloat(mat.precio_unitario).toFixed(2)}` : '$0.00';
-    const unidadNombre = unidadesMap[mat.id_unidad] || `ID: ${mat.id_unidad}`;
-    const fila = `
-      <tr class="hover:bg-slate-50/50 transition-colors group">
-        <td class="px-4 py-5 text-slate-600 font-medium">${mat.id_materia}</td>
-        <td class="px-4 py-5 text-slate-900 font-semibold">${escapeHtml(mat.descripcion)}</td>
-        <td class="px-4 py-5 text-center text-slate-600">${escapeHtml(unidadNombre)}</td>
-        <td class="px-4 py-5 text-slate-900 font-medium">${precio}</td>
-        <td class="px-4 py-5 text-right">
-          <div class="flex justify-end gap-2">
-            <a href="materia_prima_form.html?id=${mat.id_materia}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Editar">
-              <span class="material-symbols-outlined">edit_note</span>
-            </a>
-            <!-- CAMBIO AQUÍ: botón reemplazado por enlace -->
-            <a href="materia_prima_eliminar.html?id=${mat.id_materia}" class="p-2 text-primary hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-              <span class="material-symbols-outlined">delete_sweep</span>
-            </a>
-          </div>
-        </td>
-      </tr>
-    `;
-    tbody.insertAdjacentHTML('beforeend', fila);
-  });
+    const tbody = document.getElementById('tabla-materia-body');
+    if (!materias.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-400">No hay materias primas. ¡Agrega la primera!</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = '';
+    materias.forEach(mat => {
+      const precio = mat.precio_unitario ? `$${parseFloat(mat.precio_unitario).toFixed(2)}` : '$0.00';
+      const unidadNombre = unidadesMap[mat.id_unidad] || `ID: ${mat.id_unidad}`;
+      const fila = `
+        <tr class="hover:bg-slate-50/50 transition-colors group">
+          <td class="px-4 py-5 text-slate-600 font-medium">${mat.id_materia}</td>
+          <td class="px-4 py-5 text-slate-900 font-semibold">${escapeHtml(mat.descripcion)}</td>
+          <td class="px-4 py-5 text-center text-slate-600">${escapeHtml(unidadNombre)}</td>
+          <td class="px-4 py-5 text-slate-900 font-medium">${precio}</td>
+          <td class="px-4 py-5 text-right">
+            <div class="flex justify-end gap-2">
+              <a href="materia_prima_form.html?id=${mat.id_materia}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Editar">
+                <span class="material-symbols-outlined">edit_note</span>
+              </a>
+              <a href="materia_prima_eliminar.html?id=${mat.id_materia}" class="p-2 text-primary hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
+                <span class="material-symbols-outlined">delete_sweep</span>
+              </a>
+            </div>
+          </td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML('beforeend', fila);
+    });
   }
 
   async function cargarMaterias() {

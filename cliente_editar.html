@@ -24,6 +24,37 @@
         },
     }
 </script>
+<style>
+    /* Toast notifications */
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 280px;
+        max-width: 380px;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        transform: translateX(400px);
+        transition: transform 0.3s ease-out;
+        border-left: 4px solid;
+        pointer-events: auto;
+    }
+    .toast-notification.show { transform: translateX(0); }
+    .toast-notification.success { border-left-color: #10b981; }
+    .toast-notification.error { border-left-color: #ef4444; }
+    .toast-notification.warning { border-left-color: #f59e0b; }
+    .toast-icon { flex-shrink: 0; }
+    .toast-content { flex: 1; font-size: 0.875rem; line-height: 1.4; }
+    .toast-close { cursor: pointer; color: #9ca3af; transition: color 0.2s; }
+    .toast-close:hover { color: #4b5563; }
+</style>
 </head>
 <body class="bg-accent-pink font-display min-h-screen flex items-center justify-center p-4 sm:p-8">
 <div class="w-full max-w-[1200px] bg-white rounded-xl shadow-xl overflow-hidden">
@@ -79,10 +110,10 @@
         <!-- Botones de acción -->
         <div class="flex flex-col sm:flex-row gap-4 pt-8 mt-10 border-t border-slate-100">
             <button id="btn-guardar" class="bg-primary text-white font-bold px-8 py-4 rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 min-w-[200px] shadow-lg shadow-primary/10">
-                Guardar Cambios
+                <span class="material-symbols-outlined"></span> Guardar Cambios
             </button>
             <a href="clientes.html" class="bg-transparent text-primary font-bold px-8 py-4 rounded-lg border-2 border-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 min-w-[200px]">
-                Cancelar
+                <span class="material-symbols-outlined"></span> Cancelar
             </a>
         </div>
     </main>
@@ -96,14 +127,65 @@
         return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
     }
 
+    // ---------- SISTEMA DE NOTIFICACIONES TOAST ----------
+    function showToast(message, type = 'info', duration = 4000) {
+        const toastContainer = document.getElementById('toast-container') || (() => {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.style.position = 'fixed';
+            container.style.top = '20px';
+            container.style.right = '20px';
+            container.style.zIndex = '1000';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.gap = '10px';
+            document.body.appendChild(container);
+            return container;
+        })();
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        
+        let icon = '';
+        if (type === 'success') icon = '';
+        else if (type === 'error') icon = 'error';
+        else if (type === 'warning') icon = 'warning';
+        else icon = 'info';
+        
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <span class="material-symbols-outlined" style="color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'}">${icon}</span>
+            </div>
+            <div class="toast-content">${message}</div>
+            <div class="toast-close">
+                <span class="material-symbols-outlined text-sm"></span>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        });
+        
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, duration);
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const clienteId = urlParams.get('id');
     if (!clienteId) {
-        alert('No se especificó qué cliente editar.');
-        window.location.href = 'clientes.html';
+        showToast('No se especificó qué cliente editar.', 'error');
+        setTimeout(() => { window.location.href = 'clientes.html'; }, 1500);
     }
 
-    // Cargar datos del cliente
+    // ---------- CARGAR DATOS DEL CLIENTE ----------
     async function cargarCliente() {
         try {
             const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { headers: getHeaders() });
@@ -114,18 +196,17 @@
             document.getElementById('apellido').value = cliente.apellido || '';
             document.getElementById('telefono').value = cliente.telefono || '';
         } catch (error) {
-            alert('Error al cargar cliente: ' + error.message);
-            window.location.href = 'clientes.html';
+            showToast('Error al cargar cliente: ' + error.message, 'error');
+            setTimeout(() => { window.location.href = 'clientes.html'; }, 2000);
         }
     }
 
-    // Cargarrr direcciones del cliente 
+    // ---------- CARGAR DIRECCIONES ----------
     async function cargarDirecciones() {
         const container = document.getElementById('lista-direcciones');
         container.innerHTML = '<p class="text-slate-500 text-sm">Cargando direcciones...</p>';
         try {
             const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
-            console.log('Status de direcciones:', res.status);
             if (!res.ok) {
                 let errorMsg = `HTTP ${res.status}`;
                 try {
@@ -149,21 +230,27 @@
                         <p class="font-bold text-slate-900">Dirección</p>
                         <p class="text-sm text-slate-500">${escapeHtml(dir.descripcion)}</p>
                     </div>
-                    <button class="eliminar-direccion text-slate-400 hover:text-red-600 transition-colors" data-id="${dir.id_direccion}">
+                    <button class="eliminar-direccion text-slate-400 hover:text-red-600 transition-colors" data-id="${dir.id_direccion}" title="Eliminar dirección">
                         <span class="material-symbols-outlined">Eliminar</span>
                     </button>
                 `;
                 container.appendChild(div);
             });
-            // Agregar  eliminar
+            // Eventos eliminar dirección con confirmación visual
             document.querySelectorAll('.eliminar-direccion').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    if (confirm('¿Eliminar esta dirección?')) {
-                        try {
-                            const delRes = await fetch(`${API_BASE}/direccion/${btn.dataset.id}`, { method: 'DELETE', headers: getHeaders() });
-                            if (!delRes.ok) throw new Error('Error al eliminar');
-                            cargarDirecciones(); // recargar lista
-                        } catch(e) { alert('Error al eliminar dirección'); }
+                    const confirmDelete = confirm('¿Eliminar esta dirección? Esta acción no se puede deshacer.');
+                    if (!confirmDelete) return;
+                    try {
+                        const delRes = await fetch(`${API_BASE}/direccion/${btn.dataset.id}`, { method: 'DELETE', headers: getHeaders() });
+                        if (!delRes.ok) {
+                            const errData = await delRes.json();
+                            throw new Error(errData.detail || 'Error al eliminar');
+                        }
+                        showToast('Dirección eliminada correctamente', 'success');
+                        cargarDirecciones(); // recargar lista
+                    } catch(e) {
+                        showToast('Error al eliminar dirección: ' + e.message, 'error');
                     }
                 });
             });
@@ -173,7 +260,7 @@
         }
     }
 
-    //  agregar nueva dirección
+    // ---------- MODAL AGREGAR DIRECCIÓN ----------
     function mostrarModalAgregarDireccion() {
         const modalDiv = document.createElement('div');
         modalDiv.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
@@ -191,53 +278,73 @@
         modalDiv.querySelector('#cancelar-modal').onclick = () => modalDiv.remove();
         modalDiv.querySelector('#confirmar-modal').onclick = async () => {
             const descripcion = modalDiv.querySelector('#nueva-descripcion').value.trim();
-            if (!descripcion) { alert('La dirección es obligatoria'); return; }
+            if (!descripcion) {
+                showToast('La dirección es obligatoria', 'warning');
+                return;
+            }
             try {
                 const res = await fetch(`${API_BASE}/direccion/`, {
                     method: 'POST',
                     headers: getHeaders(),
                     body: JSON.stringify({ id_cliente: parseInt(clienteId), descripcion })
                 });
-                if (!res.ok) throw new Error('Error al guardar');
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.detail || 'Error al guardar');
+                }
+                showToast('Dirección agregada correctamente', 'success');
                 modalDiv.remove();
                 cargarDirecciones(); // recargar lista
-            } catch(e) { alert('Error al guardar dirección'); }
+            } catch(e) {
+                showToast('Error al guardar dirección: ' + e.message, 'error');
+            }
         };
     }
 
-    // Actualizar datos del cliente
+    // ---------- ACTUALIZAR CLIENTE ----------
     async function actualizarCliente() {
-        const datos = {
-            nombre: document.getElementById('nombre').value.trim(),
-            apellido: document.getElementById('apellido').value.trim(),
-            telefono: document.getElementById('telefono').value.trim()
-        };
-        if (!datos.nombre || !datos.apellido) {
-            alert('Nombre y apellido son obligatorios');
+        const nombre = document.getElementById('nombre').value.trim();
+        const apellido = document.getElementById('apellido').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        
+        if (!nombre || !apellido) {
+            showToast('Nombre y apellido son obligatorios', 'warning');
             return;
         }
+        
+        const btn = document.getElementById('btn-guardar');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin"></span> Guardando...';
+        btn.disabled = true;
+        
         try {
             const res = await fetch(`${API_BASE}/cliente/${clienteId}`, {
                 method: 'PUT',
                 headers: getHeaders(),
-                body: JSON.stringify(datos)
+                body: JSON.stringify({ nombre, apellido, telefono })
             });
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.detail || 'Error al actualizar');
             }
-            alert('Cliente actualizado correctamente');
-            window.location.href = 'clientes.html';
+            showToast('Cliente actualizado correctamente', 'success');
+            setTimeout(() => {
+                window.location.href = 'clientes.html';
+            }, 1500);
         } catch (error) {
-            alert('Error: ' + error.message);
+            showToast('Error: ' + error.message, 'error');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
         }
     }
 
+    // Event listeners
     document.getElementById('btn-guardar').addEventListener('click', actualizarCliente);
     document.getElementById('btn-agregar-direccion').addEventListener('click', mostrarModalAgregarDireccion);
-
+    
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
-
+    
+    // Inicializar
     cargarCliente();
     cargarDirecciones();
 </script>

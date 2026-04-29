@@ -20,13 +20,41 @@
 <style>
     body { background-color: #FEBDC6; font-family: 'Public Sans', sans-serif; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    /* Estilos para modales */
+    /* Estilos para modales y toasts */
     .modal-overlay { background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 280px;
+        max-width: 380px;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        transform: translateX(400px);
+        transition: transform 0.3s ease-out;
+        border-left: 4px solid;
+        pointer-events: auto;
+    }
+    .toast-notification.show { transform: translateX(0); }
+    .toast-notification.success { border-left-color: #10b981; }
+    .toast-notification.error { border-left-color: #ef4444; }
+    .toast-notification.warning { border-left-color: #f59e0b; }
+    .toast-icon { flex-shrink: 0; }
+    .toast-content { flex: 1; font-size: 0.875rem; line-height: 1.4; }
+    .toast-close { cursor: pointer; color: #9ca3af; transition: color 0.2s; }
+    .toast-close:hover { color: #4b5563; }
 </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-8">
 <main class="w-full max-w-7xl bg-white/40 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 flex flex-col md:flex-row overflow-hidden">
-    <!-- Left Side: Form Content (se adapta al ancho restante) -->
+    <!-- Left Side: Form Content -->
     <div class="flex-1 h-full overflow-y-auto p-6 md:p-10">
         <header class="mb-6">
             <h1 class="text-3xl md:text-4xl font-extrabold text-brand-primary tracking-tight">Registrar Nuevo Pedido</h1>
@@ -92,7 +120,7 @@
         </form>
     </div>
     
-    <!-- Right Side: Summary & Actions (sin imagen) -->
+    <!-- Right Side: Summary & Actions -->
     <div class="w-full md:w-96 bg-zinc-50/80 border-l border-white/50 p-6 md:p-8 flex flex-col justify-between">
         <div>
             <h3 class="text-2xl font-bold text-brand-primary mb-4">Resumen Financiero</h3>
@@ -103,19 +131,19 @@
             </div>
             <div class="mt-6 p-4 bg-brand-primary/5 rounded-2xl border border-brand-primary/10">
                 <div class="flex gap-3 items-start">
-                    <div class="bg-brand-primary text-white p-2 rounded-xl"><span class="material-symbols-outlined">info</span></div>
-                    <div><h4 class="font-bold text-brand-primary">Información</h4><p class="text-xs text-brand-primary/70">Los productos se agregarán al pedido</p></div>
+                    <div class="bg-brand-primary text-white p-2 rounded-xl"><span class="material-symbols-outlined"></span></div>
+                    <div><h4 class="font-bold text-brand-primary"></h4><p class="text-xs text-brand-primary/70"></p></div>
                 </div>
             </div>
         </div>
         <div class="space-y-3 mt-6">
-            <button type="submit" form="form-pedido" class="w-full py-4 bg-brand-primary text-white rounded-xl font-bold text-lg shadow-xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2">✅ Crear Pedido</button>
+            <button type="submit" form="form-pedido" id="btn-submit" class="w-full py-4 bg-brand-primary text-white rounded-xl font-bold text-lg shadow-xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2">✅ Crear Pedido</button>
             <a href="pedidos.html" class="w-full py-4 bg-white text-zinc-500 rounded-xl font-bold text-lg border border-zinc-200 hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2">❌ Cancelar</a>
         </div>
     </div>
 </main>
 
-<!-- Modal para nuevo cliente -->
+<!-- Modales para cliente y dirección -->
 <div id="modal-cliente" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6">
         <h3 class="text-xl font-bold text-brand-primary mb-4">Nuevo Cliente</h3>
@@ -131,7 +159,6 @@
     </div>
 </div>
 
-<!-- Modal para nueva dirección -->
 <div id="modal-direccion" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6">
         <h3 class="text-xl font-bold text-brand-primary mb-4">Nueva Dirección</h3>
@@ -149,6 +176,43 @@
 
     function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
 
+    // ---------- SISTEMA DE NOTIFICACIONES TOAST ----------
+    function showToast(message, type = 'info', duration = 4000) {
+        const toastContainer = document.getElementById('toast-container') || (() => {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.style.cssText = 'position:fixed; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;';
+            document.body.appendChild(container);
+            return container;
+        })();
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        let icon = '';
+        if (type === 'success') icon = '';
+        else if (type === 'error') icon = 'error';
+        else if (type === 'warning') icon = 'warning';
+        else icon = 'info';
+        const iconColor = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : (type === 'warning' ? '#f59e0b' : '#3b82f6'));
+        toast.innerHTML = `
+            <div class="toast-icon"><span class="material-symbols-outlined" style="color:${iconColor}">${icon}</span></div>
+            <div class="toast-content">${message}</div>
+            <div class="toast-close"><span class="material-symbols-outlined text-sm"></span></div>
+        `;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        toast.querySelector('.toast-close').onclick = () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        };
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, duration);
+    }
+
     let clientes = [];
     let todasDirecciones = [];
     let productosCatalogo = [];
@@ -162,7 +226,6 @@
     const subtotalSpan = document.getElementById('subtotal');
     const totalSpan = document.getElementById('total');
 
-    // ========== FUNCIÓN PARA OBTENER PARÁMETROS DE URL ==========
     function getParameterByName(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
@@ -170,15 +233,17 @@
 
     // ========== CARGAR DATOS INICIALES ==========
     async function cargarClientes() {
-        const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
-        if (res.ok) clientes = await res.json();
-        clienteSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
-        clientes.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id_cliente;
-            opt.textContent = `${c.nombre} ${c.apellido}`.trim();
-            clienteSelect.appendChild(opt);
-        });
+        try {
+            const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
+            if (res.ok) clientes = await res.json();
+            clienteSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
+            clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id_cliente;
+                opt.textContent = `${c.nombre} ${c.apellido}`.trim();
+                clienteSelect.appendChild(opt);
+            });
+        } catch(e) { showToast('Error al cargar clientes: ' + e.message, 'error'); }
     }
 
     async function cargarTodasDirecciones() {
@@ -212,7 +277,6 @@
                 estadoSelect.appendChild(opt);
             });
         } catch(e) {
-            // fallback
             const fallback = [{id_estado:1, descripcion:'Pendiente'},{id_estado:2, descripcion:'Preparación'},{id_estado:3, descripcion:'Enviado'},{id_estado:4, descripcion:'Entregado'},{id_estado:5, descripcion:'Cancelado'}];
             estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
             fallback.forEach(e => {
@@ -229,10 +293,10 @@
         if (res.ok) productosCatalogo = await res.json();
     }
 
-    // ========== AGREGAR / ELIMINAR PRODUCTOS ==========
+    // ========== PRODUCTOS DEL PEDIDO ==========
     function actualizarResumen() {
         let subtotal = productosPedido.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
-        let envio = 0; // puedes agregar campo de envío si quieres
+        let envio = 0;
         let total = subtotal + envio;
         subtotalSpan.innerText = `$${subtotal.toFixed(2)}`;
         document.getElementById('envio').innerText = `$${envio.toFixed(2)}`;
@@ -258,9 +322,8 @@
             `;
             productosContainer.appendChild(div);
         });
-        // Asignar eventos a los botones de eliminar
         document.querySelectorAll('.eliminar-producto').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx);
                 productosPedido.splice(idx, 1);
                 renderizarProductos();
@@ -271,7 +334,7 @@
 
     function mostrarModalAgregarProducto() {
         if (productosCatalogo.length === 0) {
-            alert('No hay productos registrados. Primero agregue productos desde el módulo de productos.');
+            showToast('No hay productos registrados. Primero agregue productos desde el módulo de productos.', 'warning');
             return;
         }
         const modalProducto = document.createElement('div');
@@ -297,13 +360,12 @@
         modalProducto.querySelector('#confirmar-producto').addEventListener('click', () => {
             const select = modalProducto.querySelector('#select-producto');
             const id_producto = select.value;
-            if (!id_producto) { alert('Seleccione un producto'); return; }
+            if (!id_producto) { showToast('Seleccione un producto', 'warning'); return; }
             const cantidad = parseInt(modalProducto.querySelector('#cantidad-producto').value);
-            if (isNaN(cantidad) || cantidad < 1) { alert('Cantidad válida requerida'); return; }
+            if (isNaN(cantidad) || cantidad < 1) { showToast('Cantidad válida requerida', 'warning'); return; }
             const selectedOption = select.options[select.selectedIndex];
             const nombre = selectedOption.dataset.nombre;
             const precio = parseFloat(selectedOption.dataset.precio);
-            // Verificar si ya existe el mismo producto en el pedido (opcional: sumar cantidad)
             const existente = productosPedido.find(p => p.id_producto == id_producto);
             if (existente) {
                 existente.cantidad += cantidad;
@@ -315,9 +377,10 @@
         });
     }
 
-    // ========== CREAR PEDIDO ==========
+    // ========== CREAR PEDIDO CON TOASTS ==========
     async function crearPedido(event) {
         event.preventDefault();
+        
         const id_cliente = parseInt(clienteSelect.value);
         const id_direccion = parseInt(direccionSelect.value);
         const id_estado = parseInt(estadoSelect.value);
@@ -326,11 +389,16 @@
         const subtotal = parseFloat(subtotalSpan.innerText.replace('$', ''));
         const total = parseFloat(totalSpan.innerText.replace('$', ''));
 
-        if (!id_cliente) { alert('Seleccione un cliente'); return; }
-        if (!id_direccion) { alert('Seleccione una dirección'); return; }
-        if (!id_estado) { alert('Seleccione un estado'); return; }
-        if (!fecha_entrega) { alert('Seleccione fecha de entrega'); return; }
-        if (productosPedido.length === 0) { alert('Agregue al menos un producto al pedido'); return; }
+        if (!id_cliente) { showToast('Seleccione un cliente', 'warning'); return; }
+        if (!id_direccion) { showToast('Seleccione una dirección', 'warning'); return; }
+        if (!id_estado) { showToast('Seleccione un estado', 'warning'); return; }
+        if (!fecha_entrega) { showToast('Seleccione fecha de entrega', 'warning'); return; }
+        if (productosPedido.length === 0) { showToast('Agregue al menos un producto al pedido', 'warning'); return; }
+
+        const btnSubmit = document.getElementById('btn-submit');
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin"></span> Creando...';
+        btnSubmit.disabled = true;
 
         const datosPedido = {
             id_direccion, id_estado, id_cliente,
@@ -338,13 +406,18 @@
             fecha_pedido: new Date().toISOString(),
             comentario, tipo_entrega: true, subtotal, total
         };
+        
         try {
             const resPedido = await fetch(`${API_BASE}/pedidos/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(datosPedido) });
-            if (!resPedido.ok) throw new Error(JSON.stringify((await resPedido.json()).detail));
+            if (!resPedido.ok) {
+                const errData = await resPedido.json();
+                throw new Error(errData.detail || 'Error al crear pedido');
+            }
             const nuevoPedido = await resPedido.json();
-            // Asociar productos al pedido mediante pedidos_has_producto
+            
+            // Asociar productos
             for (const prod of productosPedido) {
-                await fetch(`${API_BASE}/pedidos_has_producto/`, {
+                const relRes = await fetch(`${API_BASE}/pedidos_has_producto/`, {
                     method: 'POST',
                     headers: getHeaders(),
                     body: JSON.stringify({
@@ -355,15 +428,23 @@
                         precio_envio: 0
                     })
                 });
+                if (!relRes.ok) {
+                    console.warn('Error al asociar producto', prod);
+                }
             }
-            alert(`Pedido #${nuevoPedido.id_pedido} creado correctamente`);
-            window.location.href = 'pedidos.html';
+            
+            showToast(`✅ Pedido #${nuevoPedido.id_pedido} creado correctamente`, 'success');
+            setTimeout(() => {
+                window.location.href = 'pedidos.html';
+            }, 2000);
         } catch (error) {
-            alert('Error al crear pedido: ' + error.message);
+            showToast('Error al crear pedido: ' + error.message, 'error');
+            btnSubmit.innerHTML = originalText;
+            btnSubmit.disabled = false;
         }
     }
 
-    // ========== NUEVO CLIENTE ==========
+    // ========== NUEVO CLIENTE (con toasts) ==========
     async function nuevoCliente() {
         const modal = document.getElementById('modal-cliente');
         modal.classList.remove('hidden');
@@ -371,7 +452,7 @@
             const nombre = document.getElementById('new_nombre').value.trim();
             const apellido = document.getElementById('new_apellido').value.trim();
             const telefono = document.getElementById('new_telefono').value.trim();
-            if (!nombre || !apellido) { alert('Nombre y apellido son obligatorios'); return; }
+            if (!nombre || !apellido) { showToast('Nombre y apellido son obligatorios', 'warning'); return; }
             try {
                 const res = await fetch(`${API_BASE}/cliente/`, {
                     method: 'POST',
@@ -379,26 +460,26 @@
                     body: JSON.stringify({ nombre, apellido, telefono })
                 });
                 if (!res.ok) throw new Error((await res.json()).detail);
-                alert('Cliente creado correctamente');
+                showToast('Cliente creado correctamente', 'success');
                 await cargarClientes();
                 modal.classList.add('hidden');
                 document.getElementById('new_nombre').value = '';
                 document.getElementById('new_apellido').value = '';
                 document.getElementById('new_telefono').value = '';
-            } catch(e) { alert('Error: ' + e.message); }
+            } catch(e) { showToast('Error: ' + e.message, 'error'); }
         };
         document.getElementById('cancelar-modal-cliente').onclick = () => modal.classList.add('hidden');
     }
 
-    // ========== NUEVA DIRECCIÓN ==========
+    // ========== NUEVA DIRECCIÓN (con toasts) ==========
     async function nuevaDireccion() {
         const idCliente = parseInt(clienteSelect.value);
-        if (!idCliente) { alert('Primero seleccione un cliente'); return; }
+        if (!idCliente) { showToast('Primero seleccione un cliente', 'warning'); return; }
         const modal = document.getElementById('modal-direccion');
         modal.classList.remove('hidden');
         document.getElementById('guardar-direccion').onclick = async () => {
             const descripcion = document.getElementById('new_descripcion').value.trim();
-            if (!descripcion) { alert('La dirección es obligatoria'); return; }
+            if (!descripcion) { showToast('La dirección es obligatoria', 'warning'); return; }
             try {
                 const res = await fetch(`${API_BASE}/direccion/`, {
                     method: 'POST',
@@ -406,12 +487,12 @@
                     body: JSON.stringify({ id_cliente: idCliente, descripcion })
                 });
                 if (!res.ok) throw new Error((await res.json()).detail);
-                alert('Dirección agregada correctamente');
+                showToast('Dirección agregada correctamente', 'success');
                 await cargarTodasDirecciones();
                 filtrarDireccionesPorCliente(idCliente);
                 modal.classList.add('hidden');
                 document.getElementById('new_descripcion').value = '';
-            } catch(e) { alert('Error: ' + e.message); }
+            } catch(e) { showToast('Error: ' + e.message, 'error'); }
         };
         document.getElementById('cancelar-modal-direccion').onclick = () => modal.classList.add('hidden');
     }
@@ -433,42 +514,19 @@
     document.getElementById('btn-nueva-direccion').addEventListener('click', nuevaDireccion);
     document.getElementById('form-pedido').addEventListener('submit', crearPedido);
 
-    // ========== INICIALIZACIÓN CORREGIDA ==========
+    // ========== INICIALIZACIÓN ==========
     async function init() {
-        console.log('🚀 Inicializando formulario de pedido...');
-        console.log('📍 URL actual:', window.location.href);
-        console.log('🔍 Parámetros:', window.location.search);
-        
         await Promise.all([cargarClientes(), cargarTodasDirecciones(), cargarEstados(), cargarProductosCatalogo()]);
-        
-        // 🔥 IMPORTANTE: Verificar fecha desde URL (viene del calendario)
         const fechaURL = getParameterByName('fecha');
         const fechaInput = document.getElementById('fecha_entrega');
-        
         if (fechaURL && fechaURL.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            // Si hay fecha válida en la URL, usarla (viene del calendario)
             fechaInput.value = fechaURL;
-            console.log('✅ Fecha cargada DESDE EL CALENDARIO:', fechaURL);
-            
-            // Mostrar un pequeño indicador visual
-            const fechaLabel = document.querySelector('label[for="fecha_entrega"]');
-            if (fechaLabel) {
-                fechaLabel.style.color = '#5D1927';
-                fechaLabel.style.fontWeight = 'bold';
-            }
         } else {
-            // Fecha por defecto: 3 días después de hoy (solo si NO viene del calendario)
             const hoy = new Date();
             hoy.setDate(hoy.getDate() + 3);
-            const fechaDefault = hoy.toISOString().slice(0,10);
-            fechaInput.value = fechaDefault;
-            console.log('📅 Usando fecha por defecto (no vino del calendario):', fechaDefault);
+            fechaInput.value = hoy.toISOString().slice(0,10);
         }
-        
-        console.log('🎯 Fecha final asignada:', fechaInput.value);
     }
-    
-    // Ejecutar inicialización
     init();
 
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }

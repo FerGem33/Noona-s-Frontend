@@ -33,6 +33,10 @@
         background-repeat: no-repeat;
         background-size: 1.5em 1.5em;
     }
+    /* Estilos del modal emergente */
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
 </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4">
@@ -91,11 +95,11 @@
                 </div>
                 <div>
                     <label class="text-primary text-sm font-semibold flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">payments</span> Precio Unitario
+                        <span class="material-symbols-outlined text-sm"></span> Precio Unitario
                     </label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                        <input id="precio_unitario" class="w-full pl-8 pr-4 py-2 rounded-lg border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="0.00" step="0.01" type="number" required>
+                        <input id="precio_unitario" class="w-full pl-8 pr-4 py-2 rounded-lg border border-primary/20 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="0" step="1" type="number" required>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -115,6 +119,30 @@
     </div>
 </div>
 
+<!-- MODAL DE ÉXITO (flotante) -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center transform transition-all">
+        <h3 class="text-xl font-bold text-slate-900" id="modal-titulo">Producto creado</h3>
+        <p class="text-slate-500 mt-2" id="modal-mensaje">El producto se ha guardado correctamente.</p>
+        <button id="btn-cerrar-modal" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">
+            Continuar
+        </button>
+    </div>
+</div>
+
+<!-- MODAL DE ERROR -->
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p class="text-slate-500 mt-2" id="error-mensaje"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">
+            Cerrar
+        </button>
+    </div>
+</div>
+
 <script>
     const API_BASE = 'http://3.15.13.161:8000/api';
     const TOKEN = localStorage.token;
@@ -124,6 +152,26 @@
             'accept': 'application/json',
             'Authorization': `Bearer ${TOKEN}`
         };
+    }
+
+    // Función para mostrar modal de éxito
+    function mostrarExito(titulo, mensaje, urlRedireccion) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('modal-titulo').innerText = titulo;
+        document.getElementById('modal-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        const btn = document.getElementById('btn-cerrar-modal');
+        btn.onclick = () => {
+            modal.classList.add('hidden');
+            if (urlRedireccion) window.location.href = urlRedireccion;
+        };
+    }
+
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
     }
 
     // Vista previa de la imagen seleccionada
@@ -227,30 +275,26 @@
         const descripcion = document.getElementById('descripcion').value.trim();
         const id_categoria = parseInt(document.getElementById('id_categoria').value);
         const id_receta = parseInt(document.getElementById('id_receta').value);
-        const precio_unitario = parseFloat(document.getElementById('precio_unitario').value);
+        const precio_unitario = parseInt(document.getElementById('precio_unitario').value, 10);
         const activo = document.getElementById('activo').checked;
 
-        if (!descripcion) { alert('La descripción es obligatoria'); return; }
-        if (!id_categoria) { alert('Seleccione una categoría'); return; }
-        if (!id_receta) { alert('Seleccione una receta'); return; }
-        if (isNaN(precio_unitario) || precio_unitario <= 0) { alert('Precio válido requerido'); return; }
+        if (!descripcion) { mostrarError('La descripción es obligatoria'); return; }
+        if (!id_categoria) { mostrarError('Seleccione una categoría'); return; }
+        if (!id_receta) { mostrarError('Seleccione una receta'); return; }
+        if (isNaN(precio_unitario) || precio_unitario <= 0) { mostrarError('Precio válido requerido'); return; }
 
         const datosProducto = { id_categoria, id_receta, descripcion, precio_unitario, imagen: "", activo };
 
         try {
-            // Paso 1: Crear el producto
             const nuevoProducto = await crearProducto(datosProducto);
-            // Paso 2: Si hay imagen seleccionada, subirla
             if (inputImagen.files.length > 0) {
                 await subirImagenProducto(nuevoProducto.id_producto, inputImagen.files[0]);
-                alert('Producto e imagen creados correctamente');
+                mostrarExito('¡Producto creado!', 'Producto e imagen guardados correctamente.', 'productos.html');
             } else {
-                alert('Producto creado correctamente (sin imagen)');
+                mostrarExito('¡Producto creado!', 'El producto se ha guardado correctamente.', 'productos.html');
             }
-            // Paso 3: Redirigir al listado
-            window.location.href = 'productos.html';
         } catch (error) {
-            alert('Error: ' + error.message);
+            mostrarError('Error al crear el producto: ' + error.message);
         }
     });
 
