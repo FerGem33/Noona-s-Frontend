@@ -444,6 +444,11 @@ function renderizarCalendario() {
             celda.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <span class="size-7 flex items-center justify-center rounded-full text-sm font-black ${hoyClass}">${dia.dia}</span>
+                    <button onclick="window.crearNuevoPedido('${dia.fecha}')"
+                        class="opacity-0 group-hover:opacity-100 text-primary hover:bg-primary/10 rounded-full p-1 transition-all inline-block cursor-pointer"
+                        title="Agregar pedido para el ${dia.dia}/${mesActual+1}/${añoActual}">
+                        <span class="material-symbols-outlined text-sm">+</span>
+                    </button>
                 </div>
                 <div class="flex flex-col gap-1 max-h-24 overflow-y-auto">
                     ${dia.pedidos.map(pedido => `
