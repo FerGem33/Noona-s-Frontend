@@ -28,6 +28,9 @@
 </script>
 <style>
     body { font-family: 'Inter', sans-serif; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
 </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
@@ -80,9 +83,60 @@
     </div>
 </div>
 
+<!-- MODAL DE CONFIRMACIÓN (reemplaza confirm nativo) -->
+<div id="modal-confirmacion" class="fixed inset-0 flex items-center justify-center z-[70] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-icons-outlined text-amber-600 text-5xl">warning</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Confirmar eliminación</h3>
+        <p id="confirmacion-mensaje" class="text-slate-500 dark:text-slate-300 mt-2 mb-6">¿Estás absolutamente seguro? Esta acción es irreversible.</p>
+        <div class="flex gap-3">
+            <button id="btn-confirmar-cancelar" class="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Cancelar</button>
+            <button id="btn-confirmar-aceptar" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ÉXITO -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-icons-outlined text-green-600 dark:text-green-400 text-5xl">check_circle</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">¡Proveedor eliminado!</h3>
+        <p class="text-slate-500 dark:text-slate-300 mt-2">El proveedor se ha eliminado correctamente.</p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ERROR -->
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4">
+            <span class="material-icons-outlined text-red-600 dark:text-red-400 text-5xl">error</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 dark:text-slate-300 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
 <script>
     const API_BASE = 'http://3.15.13.161:8000/api';
     const TOKEN = localStorage.token;
+
+    if (!TOKEN) {
+        const errorModal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = 'No hay sesión activa. Redirigiendo al login...';
+        errorModal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => {
+            window.location.href = 'index.html';
+        };
+    }
 
     function getHeaders() {
         return {
@@ -95,11 +149,48 @@
     const urlParams = new URLSearchParams(window.location.search);
     const proveedorId = urlParams.get('id');
     if (!proveedorId) {
-        alert('No se especificó qué proveedor eliminar.');
-        window.location.href = 'proveedores.html';
+        mostrarError('No se especificó qué proveedor eliminar.', true);
     }
 
-    // Cargar nombre del proveedor para mostrarlo
+    // ==================== MODALES ====================
+    function mostrarExito(callback) {
+        const modal = document.getElementById('modal-exito');
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+
+    function mostrarError(mensaje, redirigir = false) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => {
+            modal.classList.add('hidden');
+            if (redirigir) window.location.href = 'proveedores.html';
+        };
+    }
+
+    function mostrarConfirmacion(onConfirm) {
+        const modal = document.getElementById('modal-confirmacion');
+        modal.classList.remove('hidden');
+        const aceptarBtn = document.getElementById('btn-confirmar-aceptar');
+        const cancelarBtn = document.getElementById('btn-confirmar-cancelar');
+        const cerrar = () => {
+            modal.classList.add('hidden');
+            aceptarBtn.removeEventListener('click', aceptarHandler);
+            cancelarBtn.removeEventListener('click', cerrar);
+        };
+        const aceptarHandler = () => {
+            cerrar();
+            if (onConfirm) onConfirm();
+        };
+        aceptarBtn.addEventListener('click', aceptarHandler);
+        cancelarBtn.addEventListener('click', cerrar);
+    }
+
+    // ==================== CARGAR NOMBRE ====================
     async function cargarNombre() {
         try {
             const res = await fetch(`${API_BASE}/proveedor/${proveedorId}`, { headers: getHeaders() });
@@ -109,11 +200,17 @@
         } catch (error) {
             console.error(error);
             document.getElementById('nombre-proveedor').innerText = 'Error al cargar datos';
+            mostrarError('No se pudo cargar la información del proveedor.', true);
         }
     }
 
-    // Eliminar proveedor
+    // ==================== ELIMINAR PROVEEDOR ====================
     async function eliminarProveedor() {
+        const btn = document.getElementById('btn-eliminar');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-icons-outlined animate-spin text-lg">progress_activity</span> Eliminando...';
+        btn.disabled = true;
+
         try {
             const res = await fetch(`${API_BASE}/proveedor/${proveedorId}`, {
                 method: 'DELETE',
@@ -123,17 +220,25 @@
                 const err = await res.json();
                 throw new Error(err.detail || 'Error al eliminar');
             }
-            alert('Proveedor eliminado correctamente');
-            window.location.href = 'proveedores.html';
+            mostrarExito(() => {
+                window.location.href = 'proveedores.html';
+            });
         } catch (error) {
-            alert('Error al eliminar: ' + error.message);
+            let errorMsg = error.message;
+            if (errorMsg.includes('foreign key') || errorMsg.includes('referenced')) {
+                errorMsg = 'No se puede eliminar este proveedor porque tiene productos o pedidos asociados.';
+            }
+            mostrarError('Error al eliminar: ' + errorMsg);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     }
 
+    // ==================== EVENTO DEL BOTÓN ====================
     document.getElementById('btn-eliminar').addEventListener('click', () => {
-        if (confirm('¿Estás absolutamente seguro? Esta acción es irreversible.')) {
+        mostrarConfirmacion(() => {
             eliminarProveedor();
-        }
+        });
     });
 
     cargarNombre();
