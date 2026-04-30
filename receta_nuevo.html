@@ -25,8 +25,21 @@
 </script>
 <style>
     body { font-family: "Montserrat", sans-serif; }
-    .modal-mensaje {
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    /* Mejora para la unidad de medida: texto truncado si es largo */
+    .unidad-badge {
+        display: inline-block;
+        min-width: 85px;
+        max-width: 110px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+    }
+    @media (max-width: 768px) {
+        .flex-responsive {
+            flex-wrap: wrap;
+        }
     }
 </style>
 </head>
@@ -70,36 +83,40 @@
                     </div>
                     <span id="total-ingredientes" class="text-xs font-medium text-slate-400">Total: 0</span>
                 </div>
-                <!-- Formulario para agregar ingrediente -->
-                <div class="grid grid-cols-12 gap-4 p-4 bg-slate-50 rounded-xl mb-6 items-end">
-                    <div class="col-span-6 flex flex-col gap-2">
+                <!-- Formulario para agregar ingrediente - VERSIÓN MEJORADA -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-slate-50 rounded-xl mb-6 items-end">
+                    <div class="md:col-span-5 flex flex-col gap-2">
                         <label class="text-xs font-bold text-slate-600 uppercase tracking-tight ml-1">Materia Prima</label>
                         <select id="select-materia" class="w-full appearance-none rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all">
                             <option value="">Cargando materias primas...</option>
                         </select>
                     </div>
-                    <div class="col-span-3 flex flex-col gap-2">
-                        <label class="text-xs font-bold text-slate-600 uppercase tracking-tight ml-1">Cantidad</label>
-                        <input id="cantidad" type="number" step="1" class="w-full rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. 1">
+                    <div class="md:col-span-5 flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-600 uppercase tracking-tight ml-1">Cantidad y Unidad</label>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <input id="cantidad" type="number" step="0.01" class="flex-1 rounded-lg border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="0.00">
+                            <span id="unidad-medida" class="unidad-badge px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-medium">---</span>
+                        </div>
                     </div>
-                    <div class="col-span-3">
+                    <div class="md:col-span-2">
                         <button id="btn-agregar" class="w-full h-[42px] bg-primary text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-md shadow-primary/20">
                             <span class="material-symbols-outlined text-lg">add</span> Añadir
                         </button>
                     </div>
                 </div>
-                <!-- Tabla de ingredientes agregados temporalmente -->
-                <div class="overflow-hidden border border-slate-100 rounded-xl">
-                    <table class="w-full text-left border-collapse">
+                <!-- Tabla de ingredientes agregados -->
+                <div class="overflow-x-auto border border-slate-100 rounded-xl">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
                                 <th class="px-6 py-4">Materia Prima</th>
                                 <th class="px-6 py-4">Cantidad</th>
+                                <th class="px-6 py-4 text-right">Unidad</th>
                                 <th class="px-6 py-4 text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-ingredientes" class="divide-y divide-slate-50">
-                            <tr class="text-center text-slate-400"><td colspan="3">No hay ingredientes agregados</td></tr>
+                            <tr class="text-center text-slate-400"><td colspan="4">No hay ingredientes agregados</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -114,48 +131,32 @@
     </footer>
 </div>
 
-<!-- MODAL DE ERROR (validaciones) -->
+<!-- MODALES (sin cambios) -->
 <div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
     <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
-        <div class="mx-auto mb-4">
-            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
-        </div>
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
         <h3 class="text-xl font-bold text-slate-900">Error de validación</h3>
         <p class="text-slate-500 mt-2" id="error-mensaje"></p>
-        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">
-            Aceptar
-        </button>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
     </div>
 </div>
-
-<!-- MODAL DE ÉXITO -->
 <div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
     <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
-        <div class="mx-auto mb-4">
-            <span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span>
-        </div>
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
         <h3 class="text-xl font-bold text-slate-900">¡Receta creada!</h3>
         <p class="text-slate-500 mt-2">La receta se ha guardado correctamente.</p>
-        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">
-            Continuar
-        </button>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
     </div>
 </div>
-
-<!-- MODAL DE ERROR DE API -->
 <div id="modal-api-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
     <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
-        <div class="mx-auto mb-4">
-            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
-        </div>
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
         <h3 class="text-xl font-bold text-slate-900">Error del servidor</h3>
         <p class="text-slate-500 mt-2" id="api-error-mensaje"></p>
-        <button id="btn-cerrar-api-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">
-            Cerrar
-        </button>
+        <button id="btn-cerrar-api-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Cerrar</button>
     </div>
 </div>
 
@@ -168,34 +169,41 @@
     }
 
     let materiasPrimas = [];
+    let unidadesMap = {};
     let ingredientesTemp = [];
+    let todasRecetas = [];
 
-    // Función para mostrar error de validación
     function mostrarErrorValidacion(mensaje) {
         const modal = document.getElementById('modal-error');
         document.getElementById('error-mensaje').innerText = mensaje;
         modal.classList.remove('hidden');
         document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
     }
-
-    // Función para mostrar error de API
     function mostrarErrorAPI(mensaje) {
         const modal = document.getElementById('modal-api-error');
         document.getElementById('api-error-mensaje').innerText = mensaje;
         modal.classList.remove('hidden');
         document.getElementById('btn-cerrar-api-error').onclick = () => modal.classList.add('hidden');
     }
-
-    // Función para mostrar éxito y redirigir
     function mostrarExito() {
         const modal = document.getElementById('modal-exito');
         modal.classList.remove('hidden');
-        document.getElementById('btn-cerrar-exito').onclick = () => {
-            window.location.href = 'recetas.html';
-        };
+        document.getElementById('btn-cerrar-exito').onclick = () => window.location.href = 'recetas.html';
     }
 
-    // Cargar materias primas para el select
+    async function cargarUnidades() {
+        try {
+            const res = await fetch(`${API_BASE}/unidad_medida/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error();
+            const unidades = await res.json();
+            unidadesMap = {};
+            unidades.forEach(u => {
+                const texto = u.descripcion ? `${u.descripcion} (${u.abreviatura})` : u.abreviatura || `Unidad ${u.id_unidad}`;
+                unidadesMap[u.id_unidad] = texto;
+            });
+        } catch(e) { console.error('Error cargando unidades', e); }
+    }
+
     async function cargarMateriasPrimas() {
         try {
             const res = await fetch(`${API_BASE}/materia_prima/`, { headers: getHeaders() });
@@ -206,16 +214,38 @@
             materiasPrimas.forEach(mp => {
                 const option = document.createElement('option');
                 option.value = mp.id_materia;
-                option.textContent = mp.descripcion;
+                const unidadTexto = unidadesMap[mp.id_unidad] || '';
+                option.textContent = mp.descripcion + (unidadTexto ? ` (${unidadTexto})` : '');
+                option.setAttribute('data-unidad', unidadTexto);
                 select.appendChild(option);
             });
+            select.addEventListener('change', actualizarUnidadMedida);
         } catch (error) {
             console.error(error);
             document.getElementById('select-materia').innerHTML = '<option value="">Error al cargar</option>';
         }
     }
 
-    // Agregar ingrediente a la lista temporal
+    function actualizarUnidadMedida() {
+        const select = document.getElementById('select-materia');
+        const selectedOption = select.options[select.selectedIndex];
+        const unidad = selectedOption ? selectedOption.getAttribute('data-unidad') : '';
+        const spanUnidad = document.getElementById('unidad-medida');
+        spanUnidad.textContent = unidad || '---';
+    }
+
+    async function cargarRecetasExistentes() {
+        try {
+            const res = await fetch(`${API_BASE}/receta/recetas/`, { headers: getHeaders() });
+            if (res.ok) todasRecetas = await res.json();
+        } catch(e) { console.error(e); }
+    }
+
+    function descripcionDuplicada(descripcion) {
+        const normalizada = descripcion.trim().toLowerCase();
+        return todasRecetas.some(receta => receta.descripcion.toLowerCase() === normalizada);
+    }
+
     function agregarIngrediente() {
         const idMateria = parseInt(document.getElementById('select-materia').value);
         const cantidad = parseFloat(document.getElementById('cantidad').value);
@@ -223,6 +253,7 @@
         if (isNaN(cantidad) || cantidad <= 0) { mostrarErrorValidacion('Cantidad válida requerida'); return; }
         const materia = materiasPrimas.find(m => m.id_materia === idMateria);
         if (!materia) return;
+        const unidadTexto = unidadesMap[materia.id_unidad] || '';
         const existente = ingredientesTemp.find(i => i.id_materia === idMateria);
         if (existente) {
             existente.cantidad += cantidad;
@@ -230,12 +261,14 @@
             ingredientesTemp.push({
                 id_materia: idMateria,
                 nombre: materia.descripcion,
-                cantidad: cantidad
+                cantidad: cantidad,
+                unidad: unidadTexto
             });
         }
         renderizarTablaIngredientes();
         document.getElementById('select-materia').value = '';
         document.getElementById('cantidad').value = '';
+        actualizarUnidadMedida();
     }
 
     function eliminarIngrediente(index) {
@@ -246,7 +279,7 @@
     function renderizarTablaIngredientes() {
         const tbody = document.getElementById('tabla-ingredientes');
         if (ingredientesTemp.length === 0) {
-            tbody.innerHTML = '<tr class="text-center text-slate-400"><td colspan="3">No hay ingredientes agregados</td></tr>';
+            tbody.innerHTML = '<tr class="text-center text-slate-400"><td colspan="4">No hay ingredientes agregados</td></tr>';
             document.getElementById('total-ingredientes').innerText = 'Total: 0';
             return;
         }
@@ -256,6 +289,7 @@
                 <tr class="hover:bg-slate-50/50 transition-colors">
                     <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="size-8 rounded bg-primary/5 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-sm">package</span></div><span class="font-semibold text-slate-700">${escapeHtml(ing.nombre)}</span></div></td>
                     <td class="px-6 py-4 text-slate-600 font-medium">${ing.cantidad}</td>
+                    <td class="px-6 py-4 text-right text-slate-500 text-sm">${ing.unidad}</td>
                     <td class="px-6 py-4 text-right"><button class="eliminar-ingrediente text-slate-300 hover:text-red-600 transition-colors" data-index="${idx}"><span class="material-symbols-outlined">delete</span></button></td>
                 </tr>
             `;
@@ -263,27 +297,23 @@
         });
         document.getElementById('total-ingredientes').innerText = `Total: ${ingredientesTemp.length}`;
         document.querySelectorAll('.eliminar-ingrediente').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.index);
                 eliminarIngrediente(idx);
             });
         });
     }
 
-    // Crear receta y luego asociar ingredientes
     async function crearRecetaYIngredientes() {
         const descripcion = document.getElementById('descripcion').value.trim();
-        if (!descripcion) {
-            mostrarErrorValidacion('La descripción de la receta es obligatoria');
-            return;
-        }
-        if (ingredientesTemp.length === 0) {
-            mostrarErrorValidacion('Debe agregar al menos un ingrediente');
+        if (!descripcion) { mostrarErrorValidacion('La descripción de la receta es obligatoria'); return; }
+        if (ingredientesTemp.length === 0) { mostrarErrorValidacion('Debe agregar al menos un ingrediente'); return; }
+        if (descripcionDuplicada(descripcion)) {
+            mostrarErrorValidacion('Ya existe una receta con esa descripción. Por favor, elija un nombre diferente.');
             return;
         }
 
         try {
-            // 1. Crear receta
             const resReceta = await fetch(`${API_BASE}/receta/recetas/`, {
                 method: 'POST',
                 headers: getHeaders(),
@@ -296,7 +326,6 @@
             const nuevaReceta = await resReceta.json();
             const idReceta = nuevaReceta.id_receta;
 
-            // 2. Agregar cada ingrediente a receta_materia_prima
             for (const ing of ingredientesTemp) {
                 await fetch(`${API_BASE}/receta_materia_prima/`, {
                     method: 'POST',
@@ -318,7 +347,14 @@
 
     document.getElementById('btn-agregar').addEventListener('click', agregarIngrediente);
     document.getElementById('btn-guardar').addEventListener('click', crearRecetaYIngredientes);
-    cargarMateriasPrimas();
+
+    async function init() {
+        await cargarUnidades();
+        await cargarMateriasPrimas();
+        await cargarRecetasExistentes();
+        actualizarUnidadMedida();
+    }
+    init();
 
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
 </script>

@@ -75,7 +75,25 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const recetaId = urlParams.get('id');
-    if (!recetaId) { alert('No se especificó receta'); window.location.href = 'recetas.html'; }
+    if (!recetaId) {
+        alert('No se especificó receta');
+        window.location.href = 'recetas.html';
+    }
+
+    let unidadesMap = {};
+
+    async function cargarUnidades() {
+        try {
+            const res = await fetch(`${API_BASE}/unidad_medida/`, { headers: getHeaders() });
+            if (res.ok) {
+                const unidades = await res.json();
+                unidades.forEach(u => {
+                    const texto = u.descripcion ? `${u.descripcion} (${u.abreviatura})` : u.abreviatura || `Unidad ${u.id_unidad}`;
+                    unidadesMap[u.id_unidad] = texto;
+                });
+            }
+        } catch(e) { console.error('Error cargando unidades', e); }
+    }
 
     async function cargarReceta() {
         try {
@@ -83,37 +101,58 @@
             if (!res.ok) throw new Error();
             const receta = await res.json();
             document.getElementById('descripcion').innerText = receta.descripcion || 'Sin descripción';
-        } catch(e) { document.getElementById('descripcion').innerText = 'Error al cargar receta'; }
+        } catch(e) {
+            document.getElementById('descripcion').innerText = 'Error al cargar receta';
+        }
     }
 
     async function cargarIngredientes() {
         try {
+            await cargarUnidades();
+
             const res = await fetch(`${API_BASE}/receta_materia_prima/`, { headers: getHeaders() });
             if (!res.ok) throw new Error();
             const todas = await res.json();
             const misIngredientes = todas.filter(rel => rel.id_receta == recetaId);
             const container = document.getElementById('lista-ingredientes');
+
             if (misIngredientes.length === 0) {
                 container.innerHTML = '<p class="text-slate-400 text-sm">No hay ingredientes registrados.</p>';
                 return;
             }
+
             container.innerHTML = '';
             for (const rel of misIngredientes) {
                 const mpRes = await fetch(`${API_BASE}/materia_prima/${rel.id_materia}`, { headers: getHeaders() });
                 if (!mpRes.ok) continue;
                 const mp = await mpRes.json();
+                const unidadTexto = unidadesMap[mp.id_unidad] || 'unidad';
+
                 const div = document.createElement('div');
-                div.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-xl';
-                div.innerHTML = `<div><span class="font-bold">${escapeHtml(mp.descripcion)}</span><span class="text-sm text-slate-500 ml-2">Cantidad: ${rel.cantidad}</span></div>`;
+                div.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-xl flex-wrap gap-2';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-800">${escapeHtml(mp.descripcion)}</span>
+                    </div>
+                    <div class="text-sm font-medium text-primary">
+                        Cantidad: ${rel.cantidad} ${escapeHtml(unidadTexto)}
+                    </div>
+                `;
                 container.appendChild(div);
             }
-        } catch(e) { document.getElementById('lista-ingredientes').innerHTML = '<p class="text-red-500">Error al cargar ingredientes</p>'; }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('lista-ingredientes').innerHTML = '<p class="text-red-500">Error al cargar ingredientes</p>';
+        }
     }
 
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
 
     cargarReceta();
     cargarIngredientes();
 </script>
 </body>
-</html>
+</html>  
