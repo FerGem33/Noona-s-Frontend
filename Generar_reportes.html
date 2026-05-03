@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
-<html lang="es"><head>
+<html lang="es">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -8,29 +9,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#FEBDC6",
-                        "burgundy": "#4A0E0E",
-                        "background-light": "#FEBDC6",
-                        "background-dark": "#230f12",
-                    },
-                    fontFamily: {
-                        "display": ["Montserrat", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#FEBDC6",
+                    "burgundy": "#4A0E0E",
+                    "background-light": "#FEBDC6",
+                    "background-dark": "#230f12",
+                },
+                fontFamily: {
+                    "display": ["Montserrat", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
                 },
             },
-        }
-    </script>
+        },
+    }
+</script>
 <title>Nonna - Generar Reportes</title>
 <style>
     /* Modal animations */
@@ -46,15 +47,15 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .modal-overlay.active {
         display: flex;
     }
-    
+
     .modal-content {
         animation: modalFadeIn 0.3s ease-out;
     }
-    
+
     @keyframes modalFadeIn {
         from {
             opacity: 0;
@@ -65,7 +66,7 @@
             transform: scale(1);
         }
     }
-    
+
     /* Loading spinner */
     .loading-spinner {
         display: inline-block;
@@ -76,11 +77,11 @@
         border-top-color: transparent;
         animation: spin 0.6s linear infinite;
     }
-    
+
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
-    
+
     /* Toast notification */
     .toast {
         position: fixed;
@@ -93,7 +94,7 @@
         z-index: 1100;
         animation: slideIn 0.3s ease-out;
     }
-    
+
     @keyframes slideIn {
         from {
             transform: translateX(100%);
@@ -104,80 +105,88 @@
             opacity: 1;
         }
     }
-    </style>
+</style>
 </head>
+
 <body class="bg-background-light font-display text-slate-900 min-h-screen">
 <div class="layout-container flex h-full grow flex-col">
-<!-- Main Wrapper with Max Width -->
-<div class="mx-auto w-full max-w-[1200px] px-6 py-8">
-<!-- Navigation Header -->
-<header class="flex items-center justify-between mb-12">
-<div class="flex items-center gap-4">
-<button onclick="window.location.href='menuprincipal.html'"
-        class="flex items-center justify-center bg-burgundy text-white px-5 py-2.5 rounded-full gap-2 transition-opacity hover:opacity-90">
-<span class="material-symbols-outlined text-sm">arrow_back</span>
-<span class="text-xs font-bold tracking-wider uppercase">Menú Principal</span>
-</button>
-</div>
-<div class="flex items-center gap-3">
-<div class="text-burgundy font-black text-3xl tracking-tighter">Nonna</div>
-<div class="w-8 h-8 bg-burgundy rounded-full flex items-center justify-center">
-<svg class="w-5 h-5 text-primary" fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
-</svg>
-</div>
-</div>
-</header>
-<!-- Page Title -->
-<div class="mb-10">
-<h1 class="text-burgundy text-6xl font-black tracking-tight mb-8">REPORTES</h1>
-<div class="bg-burgundy w-full py-6 rounded-xl shadow-lg flex justify-center items-center">
-<h2 class="text-white text-3xl font-bold tracking-wide">GENERAR REPORTES PDF</h2>
-</div>
-</div>
-<!-- Report Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-<!-- Ventas -->
-<button onclick="showModal('ventas')" 
-        class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
-<div class="bg-[#5d1927]/10 p-6 rounded-full">
-<span class="material-symbols-outlined text-[#5d1927] text-7xl">currency_exchange</span>
-</div>
-<span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Ventas</span>
-</button>
-<!-- Inventario -->
-<button onclick="showModal('inventario')" 
-        class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
-<div class="bg-[#5d1927]/10 p-6 rounded-full">
-<span class="material-symbols-outlined text-[#5d1927] text-7xl">assignment</span>
-</div>
-<span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Inventario</span>
-</button>
-<!-- Compras -->
-<button onclick="showModal('compras')" 
-        class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
-<div class="bg-[#5d1927]/10 p-6 rounded-full">
-<span class="material-symbols-outlined text-[#5d1927] text-7xl">shopping_bag</span>
-</div>
-<span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Compras</span>
-</button>
-<!-- Pedidos -->
-<button onclick="showModal('pedidos')" 
-        class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
-<div class="bg-[#5d1927]/10 p-6 rounded-full">
-<span class="material-symbols-outlined text-[#5d1927] text-7xl">edit_note</span>
-</div>
-<span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Pedidos</span>
-</button>
-</div>
-<!-- Footer Decorative Element -->
-<div class="flex justify-center mt-20 opacity-20">
-<div class="h-1 w-24 bg-burgundy rounded-full"></div>
-</div>
-</div>
+    <!-- Main Wrapper with Max Width -->
+    <div class="mx-auto w-full max-w-[1200px] px-6 py-8">
+        <!-- Navigation Header -->
+        <header class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='menuprincipal.html'"
+                        class="flex items-center justify-center bg-burgundy text-white px-5 py-2.5 rounded-full gap-2 transition-opacity hover:opacity-90">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    <span class="text-xs font-bold tracking-wider uppercase">Menú Principal</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="text-burgundy font-black text-3xl tracking-tighter">Nonna</div>
+                <div class="w-8 h-8 bg-burgundy rounded-full flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary" fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Title -->
+        <div class="mb-10">
+            <h1 class="text-burgundy text-6xl font-black tracking-tight mb-8">REPORTES</h1>
+            <div class="bg-burgundy w-full py-6 rounded-xl shadow-lg flex justify-center items-center">
+                <h2 class="text-white text-3xl font-bold tracking-wide">GENERAR REPORTES PDF</h2>
+            </div>
+        </div>
+
+        <!-- Report Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Ventas -->
+            <button onclick="showModal('ventas')"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">currency_exchange</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Ventas</span>
+            </button>
+
+            <!-- Inventario -->
+            <button onclick="generateInventarioReport()"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">assignment</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Inventario</span>
+            </button>
+
+            <!-- Compras -->
+            <button onclick="showModal('compras')"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">shopping_bag</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Compras</span>
+            </button>
+
+            <!-- Pedidos -->
+            <button onclick="showModal('pedidos')"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">edit_note</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Pedidos</span>
+            </button>
+        </div>
+
+        <!-- Footer Decorative Element -->
+        <div class="flex justify-center mt-20 opacity-20">
+            <div class="h-1 w-24 bg-burgundy rounded-full"></div>
+        </div>
+    </div>
 </div>
 
-<!-- Modal para seleccionar días -->
+<!-- Modal para seleccionar rango de fechas -->
 <div id="reportModal" class="modal-overlay">
     <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
         <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
@@ -186,16 +195,22 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
+
         <div class="p-6">
-            <p class="text-gray-700 mb-4">Selecciona el número de días para el reporte:</p>
-            <div class="mb-6">
-                <label class="block text-burgundy font-bold mb-2">Días:</label>
-                <input type="number" id="daysInput" 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50"
-                       placeholder="Ejemplo: 30" min="1" step="1" onkeydown="validarEntero(event)"
-                       oninput="validarSinDecimales(this)"
-                       value="30">
+            <p class="text-gray-700 mb-4">Selecciona el rango de fechas para el reporte:</p>
+
+            <div class="mb-4">
+                <label class="block text-burgundy font-bold mb-2">Fecha de inicio:</label>
+                <input type="date" id="startDateInput"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50">
             </div>
+
+            <div class="mb-6">
+                <label class="block text-burgundy font-bold mb-2">Fecha de fin:</label>
+                <input type="date" id="endDateInput"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50">
+            </div>
+
             <div class="flex gap-3">
                 <button onclick="generateReport()" id="generateBtn"
                         class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
@@ -212,169 +227,176 @@
 
 <script>
     let currentReportType = null;
-    
-    // Función para validar que solo se ingresen enteros (teclado)
-    function validarEntero(event) {
-        // Permitir teclas especiales: backspace, tab, enter, escape, delete, flechas
-        const teclasEspeciales = [8, 9, 13, 27, 46, 37, 38, 39, 40];
-        if (teclasEspeciales.includes(event.keyCode)) {
-            return;
-        }
-        // Permitir números del 0 al 9
-        if (event.key < '0' || event.key > '9') {
-            event.preventDefault();
-            showToast('Solo se permiten números enteros', true);
+
+    const API_BASE_URL = 'http://3.15.13.161:8000/api/reportes';
+
+    function getTodayString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function getDefaultStartDateString() {
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function getReportTitle(reportType) {
+        switch (reportType) {
+            case 'ventas':
+                return 'Reporte de Ventas';
+            case 'compras':
+                return 'Reporte de Compras';
+            case 'pedidos':
+                return 'Reporte de Pedidos';
+            default:
+                return 'Generar Reporte';
         }
     }
-    
-    // Función para validar que no haya decimales en el input
-    function validarSinDecimales(input) {
-        if (input.value.includes('.')) {
-            input.value = input.value.split('.')[0];
-            showToast('No se permiten números decimales', true);
-        }
-        if (input.value.includes(',')) {
-            input.value = input.value.split(',')[0];
-            showToast('No se permiten números decimales', true);
-        }
-        // Convertir a entero si tiene algo
-        if (input.value !== '') {
-            input.value = parseInt(input.value);
-        }
-    }
-    
-    // Función para mostrar el modal
+
     function showModal(reportType) {
         currentReportType = reportType;
+
         const modal = document.getElementById('reportModal');
         const modalTitle = document.getElementById('modalTitle');
-        
-        // Cambiar el título según el tipo de reporte
-        let title = '';
-        switch(reportType) {
-            case 'ventas':
-                title = 'Reporte de Ventas';
-                break;
-            case 'inventario':
-                title = 'Reporte de Inventario';
-                break;
-            case 'compras':
-                title = 'Reporte de Compras';
-                break;
-            case 'pedidos':
-                title = 'Reporte de Pedidos';
-                break;
-            default:
-                title = 'Generar Reporte';
-        }
-        
-        modalTitle.textContent = title;
+        const startDateInput = document.getElementById('startDateInput');
+        const endDateInput = document.getElementById('endDateInput');
+
+        modalTitle.textContent = getReportTitle(reportType);
+
+        const today = getTodayString();
+
+        startDateInput.max = today;
+        endDateInput.max = today;
+
+        startDateInput.value = getDefaultStartDateString();
+        endDateInput.value = today;
+
         modal.classList.add('active');
-        
-        // Limpiar el input
-        document.getElementById('daysInput').value = '30';
     }
-    
-    // Función para cerrar el modal
+
     function closeModal() {
         const modal = document.getElementById('reportModal');
+
         modal.classList.remove('active');
         currentReportType = null;
     }
-    
-    // Función para mostrar notificaciones
+
     function showToast(message, isError = false) {
         const toast = document.createElement('div');
+
         toast.className = 'toast';
         toast.style.backgroundColor = isError ? '#dc2626' : '#4A0E0E';
         toast.innerHTML = message;
+
         document.body.appendChild(toast);
-        
+
         setTimeout(() => {
             toast.remove();
         }, 3000);
     }
-    
-    // Función para generar el reporte
+
+    function validateDateRange(fechaInicio, fechaFin) {
+        const today = getTodayString();
+
+        if (!fechaInicio || !fechaFin) {
+            showToast('Por favor, selecciona ambas fechas', true);
+            return false;
+        }
+
+        if (fechaInicio > today || fechaFin > today) {
+            showToast('Las fechas no pueden ser futuras', true);
+            return false;
+        }
+
+        if (fechaInicio > fechaFin) {
+            showToast('La fecha de inicio debe ser anterior o igual a la fecha de fin', true);
+            return false;
+        }
+
+        return true;
+    }
+
+    function generateInventarioReport() {
+        const url = `${API_BASE_URL}/inventario`;
+
+        window.open(url, '_blank');
+        showToast('Abriendo reporte de inventario...');
+    }
+
     async function generateReport() {
-        const daysInput = document.getElementById('daysInput');
-        const days = parseInt(daysInput.value);
+        const startDateInput = document.getElementById('startDateInput');
+        const endDateInput = document.getElementById('endDateInput');
         const generateBtn = document.getElementById('generateBtn');
-        
-        // Validar el número de días
-        if (isNaN(days) || days < 1) {
-            showToast('Por favor, ingresa un número válido de días (mínimo 1)', true);
-            return;
-        }
-        
-        if (days > 365) {
-            showToast('El número de días no puede ser mayor a 365', true);
-            return;
-        }
-        
+
+        const fechaInicio = startDateInput.value;
+        const fechaFin = endDateInput.value;
+
         if (!currentReportType) {
             showToast('Error: Tipo de reporte no especificado', true);
             return;
         }
-        
-        // Deshabilitar botón y mostrar loading
+
+        if (!validateDateRange(fechaInicio, fechaFin)) {
+            return;
+        }
+
         const originalText = generateBtn.innerHTML;
         generateBtn.innerHTML = '<span class="loading-spinner"></span> Generando...';
         generateBtn.disabled = true;
-        
+
         try {
             let url = '';
-            
-            // Construir la URL según el tipo de reporte
-            switch(currentReportType) {
+
+            switch (currentReportType) {
                 case 'ventas':
-                    url = `http://3.15.13.161:8000/api/reportes/ventas/${days}`;
-                    break;
-                case 'inventario':
-                    url = `http://3.15.13.161:8000/api/reportes/inventario`;
+                    url = `${API_BASE_URL}/ventas?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     break;
                 case 'compras':
-                    url = `http://3.15.13.161:8000/api/reportes/compras/${days}`;
+                    url = `${API_BASE_URL}/compras?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     break;
                 case 'pedidos':
-                    url = `http://3.15.13.161:8000/api/reportes/pedidos/${days}`;
+                    url = `${API_BASE_URL}/pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     break;
                 default:
                     throw new Error('Tipo de reporte no válido');
             }
-            
-            // Para inventario, no se necesitan días
-            if (currentReportType === 'inventario') {
-                // Abrir el enlace directamente
-                window.open(url, '_blank');
-                showToast(`Abriendo reporte de ${currentReportType}...`);
-                closeModal();
-            } else {
-                // Para los demás, abrir con los días
-                window.open(url, '_blank');
-                showToast(`Abriendo reporte de ${currentReportType} (${days} días)...`);
-                closeModal();
-            }
-            
+
+            window.open(url, '_blank');
+            showToast(`Abriendo reporte de ${currentReportType}...`);
+            closeModal();
+
         } catch (error) {
             console.error('Error:', error);
             showToast('Error al generar el reporte. Por favor, intenta nuevamente.', true);
         } finally {
-            // Restaurar botón
             generateBtn.innerHTML = originalText;
             generateBtn.disabled = false;
         }
     }
-    
-    // Cerrar modal haciendo clic fuera de él
+
     document.getElementById('reportModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeModal();
         }
     });
-    
-    // Permitir generar reporte con Enter en el input
-    document.getElementById('daysInput').addEventListener('keypress', function(e) {
+
+    document.getElementById('startDateInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generateReport();
+        }
+    });
+
+    document.getElementById('endDateInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             generateReport();
         }
