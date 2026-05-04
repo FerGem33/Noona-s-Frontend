@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Cotización - Nonna</title>
+    <title>Eliminar Compra - Nonna</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -12,8 +12,14 @@
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: { "primary": "#5d1927", "brand-pink": "#FEBDC6" },
+                    colors: {
+                        "primary": "#5d1927",
+                        "brand-pink": "#FEBDC6",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1f1316",
+                    },
                     fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                 },
             },
         }
@@ -29,22 +35,22 @@
             <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                 <span class="material-symbols-outlined text-red-600 text-4xl">warning</span>
             </div>
-            <h2 class="text-2xl font-bold text-primary">Eliminar Cotización</h2>
-            <p class="text-slate-600 mt-2">¿Estás seguro de eliminar esta cotización? Esta acción no se puede deshacer.</p>
+            <h2 class="text-2xl font-bold text-primary">Eliminar Compra</h2>
+            <p class="text-slate-600 mt-2">¿Estás seguro de eliminar esta compra? Esta acción no se puede deshacer.</p>
             <div class="bg-slate-50 p-3 rounded-xl my-4 text-left">
-                <p class="text-sm font-bold text-slate-700">ID Pedido: <span id="id_pedido">---</span></p>
-                <p class="text-sm font-bold text-slate-700">ID Producto: <span id="id_producto">---</span></p>
-                <p class="text-sm font-bold text-slate-700">Producto: <span id="producto-nombre">---</span></p>
-                <p class="text-sm font-bold text-slate-700">Cantidad: <span id="cantidad">---</span></p>
+                <p class="text-sm font-bold text-slate-700">ID Compra: <span id="compra-id">---</span></p>
+                <p class="text-sm font-bold text-slate-700">Proveedor: <span id="proveedor-nombre">Cargando...</span></p>
+                <p class="text-sm font-bold text-slate-700">Fecha: <span id="compra-fecha">---</span></p>
+                <p class="text-sm font-bold text-slate-700">Total: <span id="compra-total">---</span></p>
             </div>
             <div class="flex gap-3">
                 <button id="btn-eliminar" class="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition">Sí, eliminar</button>
-                <a href="cotizaciones.html" class="flex-1 border-2 border-primary text-primary font-bold py-3 rounded-xl hover:bg-primary/5 text-center">Cancelar</a>
+                <a href="compras.html" class="flex-1 border-2 border-primary text-primary font-bold py-3 rounded-xl hover:bg-primary/5 text-center">Cancelar</a>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmación adicional -->
+    <!-- Modales y script similar al anterior, sin cambios importantes -->
     <div id="modal-confirmacion" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
         <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
@@ -62,8 +68,8 @@
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
         <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
             <span class="material-symbols-outlined text-green-600 text-5xl mb-2">check_circle</span>
-            <h3 class="text-xl font-bold text-slate-900">¡Cotización eliminada!</h3>
-            <p class="text-slate-500 mt-2">La cotización se eliminó correctamente.</p>
+            <h3 class="text-xl font-bold text-slate-900">¡Compra eliminada!</h3>
+            <p class="text-slate-500 mt-2">La compra se ha eliminado correctamente.</p>
             <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Continuar</button>
         </div>
     </div>
@@ -82,55 +88,53 @@
         const API_BASE = 'http://3.15.13.161:8000/api';
         const TOKEN = localStorage.token;
         if (!TOKEN) {
-            alert('No hay sesión activa.');
+            alert('No hay sesión activa');
             window.location.href = 'index.html';
         }
 
         function getHeaders() {
-            return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+            return {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            };
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const id_pedido = urlParams.get('id_pedido');
-        const id_producto = urlParams.get('id_producto');
-        if (!id_pedido || !id_producto) {
-            alert('No se especificó la cotización a eliminar');
-            window.location.href = 'cotizaciones.html';
+        const compraId = urlParams.get('id');
+        if (!compraId) {
+            mostrarError('No se especificó la compra a eliminar', true);
         }
 
-        let productosMap = {};
+        let proveedoresMap = {};
 
-        async function cargarProductos() {
+        async function cargarCompra() {
             try {
-                const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
-                if (res.ok) {
-                    const productos = await res.json();
-                    productos.forEach(p => productosMap[p.id_producto] = p.descripcion || `Producto ${p.id_producto}`);
+                const res = await fetch(`${API_BASE}/compra/${compraId}`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                const compra = await res.json();
+                document.getElementById('compra-id').innerText = compra.id_compra;
+                document.getElementById('compra-fecha').innerText = new Date(compra.fecha).toLocaleString();
+                document.getElementById('compra-total').innerText = `$${compra.total.toFixed(2)}`;
+                if (proveedoresMap[compra.id_proveedor]) {
+                    document.getElementById('proveedor-nombre').innerText = proveedoresMap[compra.id_proveedor];
+                } else {
+                    const provRes = await fetch(`${API_BASE}/proveedor/${compra.id_proveedor}`, { headers: getHeaders() });
+                    if (provRes.ok) {
+                        const prov = await provRes.json();
+                        proveedoresMap[compra.id_proveedor] = prov.descripcion || `Proveedor ${compra.id_proveedor}`;
+                        document.getElementById('proveedor-nombre').innerText = proveedoresMap[compra.id_proveedor];
+                    } else {
+                        document.getElementById('proveedor-nombre').innerText = `ID ${compra.id_proveedor}`;
+                    }
                 }
-            } catch(e) { console.error(e); }
-        }
-
-        async function cargarCotizacion() {
-            try {
-                const res = await fetch(`${API_BASE}/cotizacion/${id_pedido}/${id_producto}`, { headers: getHeaders() });
-                if (!res.ok) throw new Error(`Error ${res.status}`);
-                const data = await res.json();
-                document.getElementById('id_pedido').innerText = data.id_pedido;
-                document.getElementById('id_producto').innerText = data.id_producto;
-                document.getElementById('cantidad').innerText = data.cantidad;
-                const nombreProducto = productosMap[data.id_producto] || `ID ${data.id_producto}`;
-                document.getElementById('producto-nombre').innerText = nombreProducto;
             } catch (error) {
-                mostrarError('Error al cargar la cotización: ' + error.message);
-                setTimeout(() => window.location.href = 'cotizaciones.html', 2000);
+                mostrarError('Error al cargar los datos de la compra', true);
             }
         }
 
-        async function eliminarCotizacion() {
-            const res = await fetch(`${API_BASE}/cotizacion/${id_pedido}/${id_producto}`, {
-                method: 'DELETE',
-                headers: getHeaders()
-            });
+        async function eliminarCompra() {
+            const res = await fetch(`${API_BASE}/compra/${compraId}`, { method: 'DELETE', headers: getHeaders() });
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.detail || 'Error al eliminar');
@@ -146,11 +150,14 @@
                 if (callback) callback();
             };
         }
-        function mostrarError(mensaje) {
+        function mostrarError(mensaje, redirigir = false) {
             const modal = document.getElementById('modal-error');
             document.getElementById('error-mensaje').innerText = mensaje;
             modal.classList.remove('hidden');
-            document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+            document.getElementById('btn-cerrar-error').onclick = () => {
+                modal.classList.add('hidden');
+                if (redirigir) window.location.href = 'compras.html';
+            };
         }
         function mostrarConfirmacion(onConfirm) {
             const modal = document.getElementById('modal-confirmacion');
@@ -168,21 +175,23 @@
         document.getElementById('btn-eliminar').addEventListener('click', () => {
             mostrarConfirmacion(async () => {
                 const btn = document.getElementById('btn-eliminar');
-                const original = btn.innerText;
+                const originalText = btn.innerText;
                 btn.innerText = 'Eliminando...';
                 btn.disabled = true;
                 try {
-                    await eliminarCotizacion();
-                    mostrarExito(() => window.location.href = 'cotizaciones.html');
+                    await eliminarCompra();
+                    mostrarExito(() => {
+                        window.location.href = 'compras.html';
+                    });
                 } catch (error) {
                     mostrarError('Error al eliminar: ' + error.message);
-                    btn.innerText = original;
+                    btn.innerText = originalText;
                     btn.disabled = false;
                 }
             });
         });
 
-        cargarProductos().then(() => cargarCotizacion());
+        cargarCompra();
     </script>
 </body>
 </html>

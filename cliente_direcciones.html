@@ -130,7 +130,7 @@
         }, duration);
     }
 
-    // ---------- MODAL DE CONFIRMACIÓN (reemplaza confirm nativo) ----------
+    // ---------- MODAL DE CONFIRMACIÓN ----------
     function showConfirmModal(message, onConfirm) {
         const modalDiv = document.createElement('div');
         modalDiv.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[1050] backdrop-blur-sm';
@@ -184,7 +184,7 @@
         }
     }
 
-    // ---------- CARGAR DIRECCIONES ----------
+    // ---------- CARGAR DIRECCIONES (VERSIÓN CORREGIDA) ----------
     async function cargarDirecciones() {
         const container = document.getElementById('lista-direcciones');
         container.innerHTML = '<p class="text-slate-500">Cargando direcciones...</p>';
@@ -192,18 +192,28 @@
             const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const todas = await res.json();
-            const misDirecciones = todas.filter(d => d.id_cliente == clienteId);
+            console.log('Todas las direcciones:', todas); // Para depuración
+            
+            // Convertir clienteId a número
+            const idClienteNum = parseInt(clienteId);
+            const misDirecciones = todas.filter(d => d.id_cliente === idClienteNum);
+            console.log('Direcciones del cliente:', misDirecciones);
+            
             if (misDirecciones.length === 0) {
                 container.innerHTML = '<p class="text-slate-500">No hay direcciones registradas para este cliente.</p>';
                 return;
             }
             container.innerHTML = '';
             misDirecciones.forEach(dir => {
+                // Mostrar descripción o un mensaje si está vacía
+                const descripcion = dir.descripcion && dir.descripcion.trim() !== '' 
+                    ? dir.descripcion 
+                    : '<span class="text-red-500">[Dirección sin descripción]</span>';
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-primary/10';
                 div.innerHTML = `
                     <div>
-                        <p class="font-semibold text-slate-800 dark:text-white">${escapeHtml(dir.descripcion)}</p>
+                        <p class="font-semibold text-slate-800 dark:text-white">${descripcion}</p>
                         <p class="text-xs text-slate-500">ID: ${dir.id_direccion}</p>
                     </div>
                     <button class="eliminar-direccion text-red-500 hover:bg-red-50 p-2 rounded-full" data-id="${dir.id_direccion}">
@@ -212,7 +222,7 @@
                 `;
                 container.appendChild(div);
             });
-            // Asignar eventos de eliminación con modal personalizado
+            // Asignar eventos de eliminación
             document.querySelectorAll('.eliminar-direccion').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const idDir = btn.dataset.id;
@@ -224,7 +234,7 @@
                                 throw new Error(errData.detail || 'Error al eliminar');
                             }
                             showToast('Dirección eliminada correctamente', 'success');
-                            cargarDirecciones();
+                            cargarDirecciones(); // recargar lista
                         } catch(e) {
                             showToast('Error al eliminar dirección: ' + e.message, 'error');
                         }
@@ -232,13 +242,13 @@
                 });
             });
         } catch(e) {
-            console.error(e);
+            console.error('Error en cargarDirecciones:', e);
             container.innerHTML = `<p class="text-red-500">Error al cargar direcciones: ${e.message}</p>`;
             showToast('Error al cargar direcciones', 'error');
         }
     }
 
-    // ---------- MODAL AGREGAR DIRECCIÓN (igual que antes, pero con toasts mejorados) ----------
+    // ---------- MODAL AGREGAR DIRECCIÓN ----------
     function mostrarModalAgregar() {
         const modalDiv = document.createElement('div');
         modalDiv.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
@@ -276,7 +286,7 @@
                 }
                 showToast('Dirección agregada correctamente', 'success');
                 modalDiv.remove();
-                cargarDirecciones();
+                cargarDirecciones(); // recargar lista
             } catch(e) {
                 showToast('Error al guardar dirección: ' + e.message, 'error');
                 confirmBtn.innerText = originalText;
@@ -285,7 +295,10 @@
         };
     }
 
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
 
     // EVENTOS
     document.getElementById('btn-agregar').addEventListener('click', mostrarModalAgregar);

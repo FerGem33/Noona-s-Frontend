@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cotizaciones - Nonna</title>
+    <title>Gestión de Compras - Nonna</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -44,7 +44,7 @@
             </a>
             <div class="flex items-center gap-3 text-primary">
                 <div class="bg-primary p-2 rounded-lg text-white">
-                    <span class="material-symbols-outlined">receipt_long</span>
+                    <span class="material-symbols-outlined">shopping_cart</span>
                 </div>
                 <span class="text-2xl font-bold">Nonna</span>
             </div>
@@ -53,30 +53,27 @@
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-6 border-b border-primary/10 flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-primary">Cotizaciones</h1>
-                    <p class="text-slate-500">Gestión de ítems cotizados por pedido</p>
+                    <h1 class="text-3xl font-extrabold text-primary">Gestión de Compras</h1>
+                    <p class="text-slate-500">Registro de compras a proveedores y actualización automática de inventario</p>
                 </div>
-                <a href="cotizacion_nuevo.html" class="bg-primary text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90">
+                <a href="compra_nuevo.html" class="bg-primary text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90">
                     <span class="material-symbols-outlined">add_circle</span>
-                    Nueva Cotización
+                    Nueva Compra
                 </a>
             </div>
             <div class="p-6 overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-primary/80 text-sm font-bold border-b border-primary/10">
-                            <th class="pb-3">ID Pedido</th>
-                            <th class="pb-3">ID Producto</th>
-                            <th class="pb-3">Producto</th>
-                            <th class="pb-3">Cantidad</th>
-                            <th class="pb-3">Diseño</th>
-                            <th class="pb-3">Envío</th>
-                            <th class="pb-3">Estado</th>
+                            <th class="pb-3">ID</th>
+                            <th class="pb-3">Proveedor</th>
+                            <th class="pb-3">Fecha</th>
+                            <th class="pb-3">Total</th>
                             <th class="pb-3 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-cotizaciones" class="divide-y divide-primary/5">
-                        <tr><td colspan="8" class="text-center py-8 text-slate-400">Cargando...</tr></tr>
+                    <tbody id="tabla-compras" class="divide-y divide-primary/5">
+                        <tr><td colspan="5" class="text-center py-8 text-slate-400">Cargando compras...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -95,7 +92,6 @@
             return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
         }
 
-        // Toast simple
         function showToast(msg, type = 'info') {
             const container = document.getElementById('toast-container') || (() => {
                 const div = document.createElement('div');
@@ -123,84 +119,51 @@
             }, 4000);
         }
 
-        let productosMap = {};      // id_producto -> nombre
-        let pedidosMap = {};        // id_pedido -> {folio, cliente}
-        let estadosMap = {};        // id_estado -> nombre
+        let proveedoresMap = {};
 
-        async function cargarProductos() {
+        async function cargarProveedores() {
             try {
-                const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+                const res = await fetch(`${API_BASE}/proveedor/`, { headers: getHeaders() });
                 if (res.ok) {
-                    const productos = await res.json();
-                    productos.forEach(p => productosMap[p.id_producto] = p.descripcion || `Producto ${p.id_producto}`);
+                    const proveedores = await res.json();
+                    proveedoresMap = {};
+                    proveedores.forEach(p => proveedoresMap[p.id_proveedor] = p.descripcion || `Proveedor ${p.id_proveedor}`);
                 }
             } catch(e) { console.error(e); }
         }
 
-        async function cargarPedidos() {
-            try {
-                const res = await fetch(`${API_BASE}/pedidos/`, { headers: getHeaders() });
-                if (res.ok) {
-                    const pedidos = await res.json();
-                    pedidos.forEach(p => pedidosMap[p.id_pedido] = { folio: `#PED-${p.id_pedido}`, cliente: p.cliente_nombre || 'Cliente' });
-                }
-            } catch(e) { console.error(e); }
-        }
-
-        async function cargarEstados() {
-            try {
-                const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
-                if (res.ok) {
-                    const estados = await res.json();
-                    estados.forEach(e => estadosMap[e.id_estado] = e.descripcion);
-                }
-            } catch(e) { console.error(e); }
-            if (Object.keys(estadosMap).length === 0) {
-                estadosMap = {1:'Pendiente',2:'Preparación',3:'Enviado',4:'Entregado',5:'Cancelado',6:'Cotización'};
-            }
-        }
-
-        async function listarCotizaciones() {
-            const res = await fetch(`${API_BASE}/cotizacion/`, { headers: getHeaders() });
+        async function listarCompras() {
+            const res = await fetch(`${API_BASE}/compra/`, { headers: getHeaders() });
             if (!res.ok) throw new Error(`Error ${res.status}`);
             return res.json();
         }
 
         async function cargarYRenderizar() {
-            const tbody = document.getElementById('tabla-cotizaciones');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400">Cargando...</td></tr>';
+            const tbody = document.getElementById('tabla-compras');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">Cargando...</td></tr>';
             try {
-                await Promise.all([cargarProductos(), cargarPedidos(), cargarEstados()]);
-                const cotizaciones = await listarCotizaciones();
-                if (cotizaciones.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400">No hay cotizaciones registradas. Crea la primera.</td></tr>';
+                await cargarProveedores();
+                const compras = await listarCompras();
+                if (compras.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">No hay compras registradas. Crea la primera.</td></tr>';
                     return;
                 }
                 tbody.innerHTML = '';
-                cotizaciones.forEach(c => {
-                    const producto = productosMap[c.id_producto] || `Producto ${c.id_producto}`;
-                    const pedido = pedidosMap[c.id_pedido] || { folio: `#PED-${c.id_pedido}`, cliente: `Pedido ${c.id_pedido}` };
-                    const estado = estadosMap[c.id_estado] || 'Desconocido';
-                    let estadoColor = '';
-                    if (c.id_estado === 1 || c.id_estado === 6) estadoColor = 'bg-amber-100 text-amber-700';
-                    else if (c.id_estado === 4) estadoColor = 'bg-green-100 text-green-700';
-                    else if (c.id_estado === 5) estadoColor = 'bg-rose-100 text-rose-700';
-                    else estadoColor = 'bg-blue-100 text-blue-700';
+                compras.forEach(comp => {
+                    const proveedor = proveedoresMap[comp.id_proveedor] || `ID ${comp.id_proveedor}`;
+                    const fecha = new Date(comp.fecha).toLocaleDateString('es-ES');
                     const fila = `
                         <tr class="hover:bg-primary/5">
-                            <td class="py-3">${c.id_pedido}${c.id_pedido ? ` (${pedido.folio})` : ''}</td>
-                            <td class="py-3">${c.id_producto}</td>
-                            <td class="py-3">${escapeHtml(producto)}</td>
-                            <td class="py-3">${c.cantidad}</td>
-                            <td class="py-3">$${parseFloat(c.precio_disenio || 0).toFixed(2)}</td>
-                            <td class="py-3">$${parseFloat(c.precio_envio || 0).toFixed(2)}</td>
-                            <td class="py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${estadoColor}">${estado}</span></td>
+                            <td class="py-3">${comp.id_compra}</td>
+                            <td class="py-3">${escapeHtml(proveedor)}</td>
+                            <td class="py-3">${fecha}</td>
+                            <td class="py-3 font-bold">$${comp.total.toFixed(2)}</td>
                             <td class="py-3 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <a href="cotizacion_editar.html?id_pedido=${c.id_pedido}&id_producto=${c.id_producto}" class="text-primary hover:bg-primary/10 p-1 rounded" title="Editar">
+                                    <a href="compra_editar.html?id=${comp.id_compra}" class="text-primary hover:bg-primary/10 p-1 rounded" title="Editar">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    <a href="cotizacion_eliminar.html?id_pedido=${c.id_pedido}&id_producto=${c.id_producto}" class="text-red-600 hover:bg-red-50 p-1 rounded" title="Eliminar">
+                                    <a href="compra_eliminar.html?id=${comp.id_compra}" class="text-red-600 hover:bg-red-50 p-1 rounded" title="Eliminar">
                                         <span class="material-symbols-outlined">delete</span>
                                     </a>
                                 </div>
@@ -211,8 +174,8 @@
                 });
             } catch (error) {
                 console.error(error);
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500">Error al cargar: ${error.message}</td></tr>`;
-                showToast('Error al cargar cotizaciones', 'error');
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Error al cargar: ${error.message}</td></tr>`;
+                showToast('Error al cargar compras', 'error');
             }
         }
 

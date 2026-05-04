@@ -94,7 +94,8 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="space-y-2">
               <label class="block text-primary font-semibold text-sm uppercase tracking-wider">Stock Actual</label>
-              <input id="stock_actual" type="number" step="1" class="w-full px-4 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" value="0" required>
+              <input id="stock_actual" type="number" step="1" class="w-full px-4 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-slate-100 text-slate-500 cursor-not-allowed" value="0" readonly disabled>
+              <p class="text-xs text-primary/60 mt-1">El stock se actualiza automáticamente con compras y ventas.</p>
             </div>
             <div class="space-y-2">
               <label class="block text-primary font-semibold text-sm uppercase tracking-wider">Mínimo</label>
@@ -115,7 +116,7 @@
           <!-- Botones -->
           <div class="flex items-center justify-end gap-4 pt-6 border-t border-primary/10">
             <a href="materia_prima.html" class="px-8 py-3 rounded-lg text-primary font-bold hover:bg-primary/5 transition-all">Cancelar</a>
-            <button type="submit" class="px-10 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center gap-2 active:scale-95">
+            <button type="submit" id="btn-submit" class="px-10 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center gap-2 active:scale-95">
               <span class="material-symbols-outlined text-xl">save</span>
               Guardar Materia Prima
             </button>
@@ -229,7 +230,6 @@
       try {
         const materia = await obtenerMateria(materiaId);
         document.getElementById('descripcion').value = materia.descripcion || '';
-        // Asignamos el precio real al campo oculto para preservarlo en la actualización
         document.getElementById('precio_unitario').value = materia.precio_unitario || 0;
         document.getElementById('stock_actual').value = materia.stock_actual || 0;
         document.getElementById('minimo').value = materia.minimo || 0;
@@ -242,8 +242,28 @@
       }
     }
 
+    // Validación de mínimo y máximo
+    function validarMinMax() {
+      const minimo = parseFloat(document.getElementById('minimo').value);
+      const maximo = parseFloat(document.getElementById('maximo').value);
+      if (!isNaN(minimo) && !isNaN(maximo) && minimo > maximo) {
+        mostrarError('El valor mínimo no puede ser mayor que el máximo.');
+        return false;
+      }
+      if (minimo < 0) {
+        mostrarError('El valor mínimo no puede ser negativo.');
+        return false;
+      }
+      if (maximo < 0) {
+        mostrarError('El valor máximo no puede ser negativo.');
+        return false;
+      }
+      return true;
+    }
+
     document.getElementById('form-materia').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
       const idUnidad = parseInt(document.getElementById('id_unidad').value);
       if (isNaN(idUnidad) || idUnidad < 1) {
         mostrarError('Seleccione una unidad de medida válida');
@@ -257,10 +277,18 @@
       const activo = document.getElementById('activo').checked;
 
       if (!descripcion) { mostrarError('La descripción es obligatoria'); return; }
-      // No validamos precio_unitario porque es oculto y tiene valor por defecto (0 o el existente)
       if (stock_actual < 0) { mostrarError('El stock no puede ser negativo'); return; }
+      
+      // Validar reglas de mínimo y máximo
+      if (!validarMinMax()) return;
 
       const datos = { id_unidad: idUnidad, descripcion, precio_unitario, minimo, maximo, stock_actual, imagen: "", activo };
+      
+      const btn = document.getElementById('btn-submit');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xl">progress_activity</span> Guardando...';
+      btn.disabled = true;
+
       try {
         if (materiaId) {
           await actualizarMateria(materiaId, datos);
@@ -271,8 +299,25 @@
         }
       } catch (error) {
         mostrarError('Error al guardar: ' + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
       }
     });
+
+    // Agregar validación en tiempo real (opcional)
+    const minimoInput = document.getElementById('minimo');
+    const maximoInput = document.getElementById('maximo');
+    function validarEnTiempoReal() {
+      const min = parseFloat(minimoInput.value);
+      const max = parseFloat(maximoInput.value);
+      if (!isNaN(min) && !isNaN(max) && min > max) {
+        maximoInput.setCustomValidity('El máximo debe ser mayor o igual al mínimo');
+      } else {
+        maximoInput.setCustomValidity('');
+      }
+    }
+    minimoInput.addEventListener('input', validarEnTiempoReal);
+    maximoInput.addEventListener('input', validarEnTiempoReal);
 
     document.addEventListener('DOMContentLoaded', async () => {
       await cargarUnidadesSelect();

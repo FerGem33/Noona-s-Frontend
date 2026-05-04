@@ -1,182 +1,223 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script>
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                colors: { "primary": "#FEBDC6", "accent": "#5D1927", "background-light": "#f8f5f6", "background-dark": "#230f12" },
-                fontFamily: { "display": ["Montserrat"] },
-                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cotización - Nonna</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#5d1927", "brand-pink": "#FEBDC6", "background-light": "#f8f6f6", "background-dark": "#1f1316" },
+                    fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
             },
-        },
-    }
-</script>
-<title>Nonna - Editar Cotización</title>
+        }
+    </script>
+    <style>
+        body { background-color: #FEBDC6; font-family: 'Montserrat', sans-serif; }
+        .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    </style>
 </head>
-<body class="font-display bg-primary min-h-screen">
-<div class="layout-container flex h-full grow flex-col">
-    <div class="px-8 pt-4"><a href="cotizaciones.html" class="inline-flex items-center gap-1 text-accent font-semibold hover:underline">← Volver</a></div>
-    <main class="flex-1 p-8 flex justify-center">
-        <div class="max-w-6xl w-full flex flex-col gap-6">
-            <div class="flex flex-col gap-1"><h1 class="text-accent text-4xl font-black tracking-tight">Editar Cotización</h1><p class="text-accent/70 text-lg">Modifique los productos y cantidades.</p></div>
-            <div class="bg-white rounded-xl shadow-xl overflow-hidden p-8 flex flex-col gap-8">
-                <!-- Cliente (readonly) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label class="text-accent font-semibold text-sm">Cliente</label><input id="cliente_nombre" class="w-full h-14 px-4 rounded-lg border-2 border-primary/30 bg-slate-50" readonly></div>
-                </div>
-                <!-- Product selector (similar a nueva) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                    <div class="md:col-span-2"><label class="text-accent font-semibold text-sm">Agregar Producto</label>
-                        <select id="select-producto" class="w-full h-14 pl-4 pr-10 rounded-lg border-2 border-primary/30 focus:border-accent">...</select>
-                    </div>
-                    <div><label>Cantidad</label><div class="flex gap-3"><input id="cantidad" type="number" value="1" class="w-full h-14 px-4 rounded-lg border"><button id="btn-agregar" class="h-14 px-6 bg-accent text-white rounded-lg">Añadir</button></div></div>
-                </div>
-                <!-- Tabla de productos (se llena con los existentes) -->
-                <div class="border-2 border-primary/10 rounded-xl overflow-hidden">
-                    <table class="w-full text-left"><thead><tr class="bg-primary/10"><th>Producto</th><th class="text-center">Cantidad</th><th class="text-right">Precio</th><th class="text-right">Subtotal</th><th class="text-center">Acción</th></tr></thead>
-                    <tbody id="tabla-productos"></tbody>
-                    <tfoot><tr class="bg-primary/5"><td colspan="3" class="text-right font-bold">TOTAL</td><td id="total-td" class="text-right font-black text-accent text-2xl">$0.00</td><td></td></tr></tfoot>
-                    </table>
-                </div>
-                <div class="flex justify-end"><button id="btn-actualizar" class="px-10 py-3 bg-accent text-white font-bold rounded-lg shadow-lg">Actualizar Cotización</button></div>
+<body class="min-h-screen p-4 flex items-center justify-center">
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-6 border-b border-primary/10 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-primary">Editar Cotización</h1>
+                <p class="text-slate-500 text-sm">Modifica los datos de la cotización</p>
             </div>
+            <a href="cotizaciones.html" class="text-primary hover:bg-primary/10 p-2 rounded-full transition">
+                <span class="material-symbols-outlined">close</span>
+            </a>
         </div>
-    </main>
-</div>
+        <div class="p-6">
+            <form id="form-cotizacion" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">ID Pedido (no editable)</label>
+                    <input id="id_pedido" type="text" class="w-full p-3 bg-slate-100 border border-primary/20 rounded-xl text-slate-500" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">ID Producto (no editable)</label>
+                    <input id="id_producto" type="text" class="w-full p-3 bg-slate-100 border border-primary/20 rounded-xl text-slate-500" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Estado *</label>
+                    <select id="id_estado" class="w-full p-3 border border-primary/20 rounded-xl focus:ring-primary" required></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Cantidad</label>
+                    <input type="number" id="cantidad" class="w-full p-3 border border-primary/20 rounded-xl" min="1" step="1" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Precio Diseño</label>
+                    <input type="number" step="0.01" id="precio_disenio" class="w-full p-3 border border-primary/20 rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-primary mb-1">Precio Envío</label>
+                    <input type="number" step="0.01" id="precio_envio" class="w-full p-3 border border-primary/20 rounded-xl">
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" id="btn-submit" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        Actualizar Cotización
+                    </button>
+                    <a href="cotizaciones.html" class="flex-1 border-2 border-primary text-primary font-bold py-3 rounded-xl hover:bg-primary/5 text-center">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<script>
-    const API_BASE = 'http://3.15.13.161:8000/api';
-    const TOKEN = localStorage.token;
-    function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+    <!-- MODALES igual que en nuevo -->
+    <div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-green-600 text-5xl mb-2">check_circle</span>
+            <h3 class="text-xl font-bold text-slate-900">¡Cotización actualizada!</h3>
+            <p class="text-slate-500 mt-2">Los cambios se guardaron correctamente.</p>
+            <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Continuar</button>
+        </div>
+    </div>
+    <div id="modal-error" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-red-600 text-5xl mb-2">error</span>
+            <h3 class="text-xl font-bold text-slate-900">Error</h3>
+            <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+            <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Aceptar</button>
+        </div>
+    </div>
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const cotizacionId = urlParams.get('id');
-    if (!cotizacionId) { alert('No se especificó cotización'); window.location.href = 'cotizaciones.html'; }
-
-    let productosCatalogo = [];
-    let productosSeleccionados = [];
-
-    async function cargarDatos() {
-        // Obtener cotización y sus productos
-        const resCot = await fetch(`${API_BASE}/cotizacion/${cotizacionId}`, { headers: getHeaders() });
-        if (!resCot.ok) { alert('Error cargando cotización'); return; }
-        const cot = await resCot.json();
-        // Cargar cliente
-        const resCli = await fetch(`${API_BASE}/cliente/${cot.id_cliente}`, { headers: getHeaders() });
-        if (resCli.ok) {
-            const cli = await resCli.json();
-            document.getElementById('cliente_nombre').value = `${cli.nombre} ${cli.apellido}`;
+    <script>
+        const API_BASE = 'http://3.15.13.161:8000/api';
+        const TOKEN = localStorage.token;
+        if (!TOKEN) {
+            alert('No hay sesión activa.');
+            window.location.href = 'index.html';
         }
-        // Cargar productos asociados 
-        const resProd = await fetch(`${API_BASE}/cotizacion_producto/?id_cotizacion=${cotizacionId}`, { headers: getHeaders() });
-        if (resProd.ok) {
-            const rels = await resProd.json();
-            for (const rel of rels) {
-                const prodRes = await fetch(`${API_BASE}/producto/${rel.id_producto}`, { headers: getHeaders() });
-                if (prodRes.ok) {
-                    const prod = await prodRes.json();
-                    productosSeleccionados.push({
-                        id_producto: prod.id_producto,
-                        nombre: prod.descripcion,
-                        precio: parseFloat(prod.precio_unitario),
-                        cantidad: rel.cantidad
-                    });
-                }
+
+        function getHeaders() {
+            return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const id_pedido = urlParams.get('id_pedido');
+        const id_producto = urlParams.get('id_producto');
+        if (!id_pedido || !id_producto) {
+            alert('No se especificó la cotización a editar');
+            window.location.href = 'cotizaciones.html';
+        }
+
+        let estados = [];
+
+        function mostrarExito(callback) {
+            const modal = document.getElementById('modal-exito');
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-exito').onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) callback();
+            };
+        }
+        function mostrarError(mensaje) {
+            const modal = document.getElementById('modal-error');
+            document.getElementById('error-mensaje').innerText = mensaje;
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+        }
+
+        async function cargarEstados() {
+            try {
+                const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
+                if (!res.ok) throw new Error();
+                estados = await res.json();
+                const select = document.getElementById('id_estado');
+                select.innerHTML = '';
+                estados.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id_estado;
+                    opt.textContent = e.descripcion;
+                    select.appendChild(opt);
+                });
+            } catch(e) {
+                const defaultEstados = [{id_estado:1,descripcion:'Pendiente'},{id_estado:2,descripcion:'Preparación'},{id_estado:3,descripcion:'Enviado'},{id_estado:4,descripcion:'Entregado'},{id_estado:5,descripcion:'Cancelado'},{id_estado:6,descripcion:'Cotización'}];
+                const select = document.getElementById('id_estado');
+                select.innerHTML = '';
+                defaultEstados.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id_estado;
+                    opt.textContent = e.descripcion;
+                    select.appendChild(opt);
+                });
             }
         }
-        actualizarTabla();
-        await cargarProductosCatalogo();
-    }
 
-    async function cargarProductosCatalogo() {
-        const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
-        if (res.ok) {
-            productosCatalogo = await res.json();
-            const select = document.getElementById('select-producto');
-            select.innerHTML = '<option value="">Seleccione...</option>';
-            productosCatalogo.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id_producto;
-                opt.textContent = `${p.descripcion} - $${p.precio_unitario}`;
-                opt.dataset.precio = p.precio_unitario;
-                opt.dataset.nombre = p.descripcion;
-                select.appendChild(opt);
-            });
-        }
-    }
-
-    function actualizarTabla() {
-        const tbody = document.getElementById('tabla-productos');
-        let total = 0;
-        if (productosSeleccionados.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay productos</td></tr>'; document.getElementById('total-td').innerText = '$0.00'; return; }
-        tbody.innerHTML = '';
-        productosSeleccionados.forEach((p, idx) => {
-            const subtotal = p.precio * p.cantidad;
-            total += subtotal;
-            const fila = `<tr><td class="px-6 py-5">${escapeHtml(p.nombre)}</td><td class="text-center"><input type="number" class="cantidad-input w-20 text-center border rounded" data-idx="${idx}" value="${p.cantidad}"></td><td class="text-right">$${p.precio.toFixed(2)}</td><td class="text-right">$${subtotal.toFixed(2)}</td><td class="text-center"><button class="btn-eliminar" data-idx="${idx}"><span class="material-symbols-outlined">delete</span></button></td></tr>`;
-            tbody.insertAdjacentHTML('beforeend', fila);
-        });
-        document.getElementById('total-td').innerText = `$${total.toFixed(2)}`;
-        document.querySelectorAll('.cantidad-input').forEach(inp => {
-            inp.addEventListener('change', (e) => {
-                const idx = parseInt(inp.dataset.idx);
-                productosSeleccionados[idx].cantidad = parseInt(inp.value) || 1;
-                actualizarTabla();
-            });
-        });
-        document.querySelectorAll('.btn-eliminar').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const idx = parseInt(btn.dataset.idx);
-                productosSeleccionados.splice(idx, 1);
-                actualizarTabla();
-            });
-        });
-    }
-
-    document.getElementById('btn-agregar').addEventListener('click', () => {
-        const select = document.getElementById('select-producto');
-        const id = parseInt(select.value);
-        if (!id) return;
-        const cantidad = parseInt(document.getElementById('cantidad').value);
-        const opt = select.options[select.selectedIndex];
-        const precio = parseFloat(opt.dataset.precio);
-        const nombre = opt.dataset.nombre;
-        const existente = productosSeleccionados.find(p => p.id_producto === id);
-        if (existente) existente.cantidad += cantidad;
-        else productosSeleccionados.push({ id_producto: id, nombre, precio, cantidad });
-        actualizarTabla();
-        select.value = '';
-        document.getElementById('cantidad').value = '1';
-    });
-
-    document.getElementById('btn-actualizar').addEventListener('click', async () => {
-        const total = productosSeleccionados.reduce((a,b)=> a + (b.precio*b.cantidad), 0);
-        // Actualizar cabecera
-        await fetch(`${API_BASE}/cotizacion/${cotizacionId}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify({ total }) });
-        // Eliminar relaciones antiguas y volver a crear
-        const oldRels = await fetch(`${API_BASE}/cotizacion_producto/?id_cotizacion=${cotizacionId}`, { headers: getHeaders() });
-        if (oldRels.ok) {
-            const olds = await oldRels.json();
-            for (const old of olds) {
-                await fetch(`${API_BASE}/cotizacion_producto/${old.id_cotizacion}/${old.id_producto}`, { method: 'DELETE', headers: getHeaders() });
+        async function cargarCotizacion() {
+            try {
+                const res = await fetch(`${API_BASE}/cotizacion/${id_pedido}/${id_producto}`, { headers: getHeaders() });
+                if (!res.ok) throw new Error(`Error ${res.status}`);
+                const data = await res.json();
+                document.getElementById('id_pedido').value = data.id_pedido;
+                document.getElementById('id_producto').value = data.id_producto;
+                document.getElementById('id_estado').value = data.id_estado;
+                document.getElementById('cantidad').value = data.cantidad;
+                document.getElementById('precio_disenio').value = data.precio_disenio || 0;
+                document.getElementById('precio_envio').value = data.precio_envio || 0;
+            } catch (error) {
+                mostrarError('Error al cargar la cotización: ' + error.message);
+                setTimeout(() => window.location.href = 'cotizaciones.html', 2000);
             }
         }
-        for (const p of productosSeleccionados) {
-            await fetch(`${API_BASE}/cotizacion_producto/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ id_cotizacion: parseInt(cotizacionId), id_producto: p.id_producto, cantidad: p.cantidad, precio_unitario: p.precio }) });
-        }
-        alert('Cotización actualizada');
-        window.location.href = 'cotizaciones.html';
-    });
 
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
-    cargarDatos();
-</script>
+        async function actualizarCotizacion(datos) {
+            const res = await fetch(`${API_BASE}/cotizacion/${id_pedido}/${id_producto}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify(datos)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || 'Error al actualizar');
+            }
+            return res.json();
+        }
+
+        document.getElementById('form-cotizacion').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id_estado = parseInt(document.getElementById('id_estado').value);
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+            const precio_disenio = parseFloat(document.getElementById('precio_disenio').value) || 0;
+            const precio_envio = parseFloat(document.getElementById('precio_envio').value) || 0;
+
+            if (!id_estado) {
+                mostrarError('Seleccione un estado');
+                return;
+            }
+            if (isNaN(cantidad) || cantidad < 1) {
+                mostrarError('Cantidad válida requerida');
+                return;
+            }
+
+            const payload = { id_pedido: parseInt(id_pedido), id_producto: parseInt(id_producto), id_estado, cantidad, precio_disenio, precio_envio };
+            const btn = document.getElementById('btn-submit');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Actualizando...';
+            btn.disabled = true;
+
+            try {
+                await actualizarCotizacion(payload);
+                mostrarExito(() => window.location.href = 'cotizaciones.html');
+            } catch (error) {
+                mostrarError('Error al actualizar: ' + error.message);
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        });
+
+        Promise.all([cargarEstados(), cargarCotizacion()]);
+    </script>
 </body>
 </html>
