@@ -42,6 +42,29 @@
     .modal-mensaje {
         transition: opacity 0.3s ease, visibility 0.3s ease;
     }
+    /* Estilos para el campo de teléfono cuando tiene error */
+    .input-error {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+    }
+    .error-message {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        margin-left: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    /* Ocultar spinner en input number para Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark min-h-screen font-sans flex flex-col items-center justify-center p-4">
@@ -83,7 +106,11 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
                             <span class="material-symbols-rounded">call</span>
                         </div>
-                        <input id="contacto" class="block w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-gray-800 dark:text-pink-50 [appearance:textfield]" placeholder="Sólo números" type="text">
+                        <input id="contacto" class="block w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-gray-800 dark:text-pink-50" placeholder="Ej: 5512345678" maxlength="10" type="text">
+                    </div>
+                    <div id="contacto-error" class="error-message hidden">
+                        <span class="material-symbols-rounded text-sm">error</span>
+                        <span>El teléfono solo debe contener números y máximo 10 dígitos</span>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4 pt-6">
@@ -191,6 +218,99 @@
         document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
     }
 
+    // ==================== FUNCIONES DE VALIDACIÓN DEL TELÉFONO ====================
+    function validarTelefono(telefono) {
+        // Expresión regular que solo permite números (0-9)
+        const soloNumerosRegex = /^[0-9]+$/;
+        
+        if (!telefono) {
+            return { valido: true, mensaje: '' }; // Teléfono es opcional
+        }
+        
+        if (!soloNumerosRegex.test(telefono)) {
+            return { valido: false, mensaje: 'El teléfono solo debe contener números' };
+        }
+        
+        if (telefono.length !== 10) {
+            return { valido: false, mensaje: 'El teléfono debe tener exactamente 10 dígitos' };
+        }
+        
+        return { valido: true, mensaje: '' };
+    }
+    
+    function mostrarErrorTelefono(mostrar, mensaje = '') {
+        const telefonoInput = document.getElementById('contacto');
+        const errorDiv = document.getElementById('contacto-error');
+        
+        if (mostrar) {
+            telefonoInput.classList.add('input-error');
+            errorDiv.classList.remove('hidden');
+            const errorSpan = errorDiv.querySelector('span:last-child');
+            if (errorSpan) {
+                errorSpan.textContent = mensaje || 'El teléfono solo debe contener números y máximo 10 dígitos';
+            }
+        } else {
+            telefonoInput.classList.remove('input-error');
+            errorDiv.classList.add('hidden');
+        }
+    }
+    
+    // ==================== EVENTOS DE VALIDACIÓN DEL TELÉFONO ====================
+    const contactoInput = document.getElementById('contacto');
+    
+    contactoInput.addEventListener('input', function(e) {
+        // Obtener el valor actual
+        let valor = this.value;
+        
+        // Eliminar cualquier caracter que no sea número
+        let soloNumeros = valor.replace(/[^0-9]/g, '');
+        
+        // Limitar a máximo 10 dígitos
+        if (soloNumeros.length > 10) {
+            soloNumeros = soloNumeros.slice(0, 10);
+        }
+        
+        // Si el valor cambió, actualizarlo
+        if (valor !== soloNumeros) {
+            this.value = soloNumeros;
+        }
+        
+        // Validar y mostrar/ocultar error
+        const validacion = validarTelefono(soloNumeros);
+        if (!validacion.valido && soloNumeros.length > 0) {
+            mostrarErrorTelefono(true, validacion.mensaje);
+        } else {
+            mostrarErrorTelefono(false);
+        }
+    });
+    
+    contactoInput.addEventListener('blur', function() {
+        const validacion = validarTelefono(this.value);
+        if (!validacion.valido && this.value.length > 0) {
+            mostrarErrorTelefono(true, validacion.mensaje);
+        } else {
+            mostrarErrorTelefono(false);
+        }
+    });
+    
+    contactoInput.addEventListener('keypress', function(e) {
+        // Prevenir cualquier tecla que no sea número
+        const charCode = e.which ? e.which : e.keyCode;
+        const char = String.fromCharCode(charCode);
+        
+        // Permitir: números, backspace, delete, tab, enter, escape, flechas
+        if (charCode === 8 || charCode === 46 || charCode === 9 || charCode === 13 || 
+            charCode === 27 || (charCode >= 37 && charCode <= 40)) {
+            return;
+        }
+        
+        // Verificar si el caracter es un número
+        if (!/[0-9]/.test(char)) {
+            e.preventDefault();
+            mostrarWarning('Solo se permiten números en el teléfono');
+        }
+    });
+
     // ==================== API  ====================
     async function crearProveedor(datos) {
         const res = await fetch(`${API_BASE}/proveedor/`, {
@@ -254,6 +374,14 @@
         
         if (!descripcion) {
             mostrarWarning('La descripción (nombre) del proveedor es obligatoria');
+            return;
+        }
+        
+        // Validar teléfono antes de enviar
+        const validacionTelefono = validarTelefono(contacto);
+        if (!validacionTelefono.valido) {
+            mostrarErrorTelefono(true, validacionTelefono.mensaje);
+            mostrarWarning(validacionTelefono.mensaje);
             return;
         }
         
