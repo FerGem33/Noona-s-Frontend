@@ -32,6 +32,24 @@
         .toast-notification.show { transform: translateX(0); }
         .toast-notification.success { border-left-color: #10b981; }
         .toast-notification.error { border-left-color: #ef4444; }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #5d1927;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="min-h-screen p-4">
@@ -56,27 +74,38 @@
                     <h1 class="text-3xl font-extrabold text-primary">Cotizaciones</h1>
                     <p class="text-slate-500">Gestión de ítems cotizados por pedido</p>
                 </div>
-                <a href="cotizacion_nuevo.html" class="bg-primary text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90">
+                <a href="cotizacion_nuevo.html" class="bg-primary text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90 transition-all">
                     <span class="material-symbols-outlined">add_circle</span>
                     Nueva Cotización
                 </a>
             </div>
             <div class="p-6 overflow-x-auto">
+                <div class="mb-4 flex justify-between items-center">
+                    <div class="flex gap-2">
+                        <button id="btn-refresh" class="px-4 py-2 bg-primary/10 text-primary rounded-lg font-semibold hover:bg-primary/20 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined">refresh</span>
+                            Actualizar
+                        </button>
+                    </div>
+                    <div id="info-cantidad" class="text-sm text-slate-500"></div>
+                </div>
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-primary/80 text-sm font-bold border-b border-primary/10">
+                            <th class="pb-3">ID Cotización</th>
                             <th class="pb-3">ID Pedido</th>
                             <th class="pb-3">ID Producto</th>
                             <th class="pb-3">Producto</th>
                             <th class="pb-3">Cantidad</th>
+                            <th class="pb-3">Precio Unitario</th>
                             <th class="pb-3">Diseño</th>
                             <th class="pb-3">Envío</th>
-                            <th class="pb-3">Estado</th>
+                            <th class="pb-3">Subtotal</th>
                             <th class="pb-3 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-cotizaciones" class="divide-y divide-primary/5">
-                        <tr><td colspan="8" class="text-center py-8 text-slate-400">Cargando...</tr></tr>
+                        <tr><td colspan="10" class="text-center py-8"><div class="loading-spinner"></div><p class="text-slate-400 mt-2">Cargando cotizaciones...</p></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -123,102 +152,209 @@
             }, 4000);
         }
 
-        let productosMap = {};      // id_producto -> nombre
-        let pedidosMap = {};        // id_pedido -> {folio, cliente}
-        let estadosMap = {};        // id_estado -> nombre
+        let productosMap = {};
+        let preciosProductosMap = {};
+        let isLoading = false; // Controlar carga simultánea
 
         async function cargarProductos() {
             try {
                 const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
                 if (res.ok) {
                     const productos = await res.json();
-                    productos.forEach(p => productosMap[p.id_producto] = p.descripcion || `Producto ${p.id_producto}`);
+                    productos.forEach(p => {
+                        productosMap[p.id_producto] = p.descripcion || `Producto ${p.id_producto}`;
+                        preciosProductosMap[p.id_producto] = parseFloat(p.precio_unitario) || 0;
+                    });
+                    console.log('Productos cargados:', Object.keys(productosMap).length);
+                } else {
+                    console.error('Error cargando productos:', res.status);
                 }
-            } catch(e) { console.error(e); }
-        }
-
-        async function cargarPedidos() {
-            try {
-                const res = await fetch(`${API_BASE}/pedidos/`, { headers: getHeaders() });
-                if (res.ok) {
-                    const pedidos = await res.json();
-                    pedidos.forEach(p => pedidosMap[p.id_pedido] = { folio: `#PED-${p.id_pedido}`, cliente: p.cliente_nombre || 'Cliente' });
-                }
-            } catch(e) { console.error(e); }
-        }
-
-        async function cargarEstados() {
-            try {
-                const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
-                if (res.ok) {
-                    const estados = await res.json();
-                    estados.forEach(e => estadosMap[e.id_estado] = e.descripcion);
-                }
-            } catch(e) { console.error(e); }
-            if (Object.keys(estadosMap).length === 0) {
-                estadosMap = {1:'Pendiente',2:'Preparación',3:'Enviado',4:'Entregado',5:'Cancelado',6:'Cotización'};
-            }
+            } catch(e) { console.error('Error en cargarProductos:', e); }
         }
 
         async function listarCotizaciones() {
+            console.log('Obteniendo cotizaciones desde:', `${API_BASE}/cotizacion/`);
             const res = await fetch(`${API_BASE}/cotizacion/`, { headers: getHeaders() });
-            if (!res.ok) throw new Error(`Error ${res.status}`);
-            return res.json();
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('Error respuesta API:', res.status, errorText);
+                throw new Error(`Error ${res.status}: ${errorText}`);
+            }
+            const data = await res.json();
+            console.log('Cotizaciones recibidas:', data);
+            return data;
+        }
+
+        function calcularSubtotal(cotizacion) {
+            const precioUnitario = preciosProductosMap[cotizacion.id_producto] || 0;
+            const cantidad = parseFloat(cotizacion.cantidad) || 0;
+            const diseño = parseFloat(cotizacion.precio_disenio) || 0;
+            const envio = parseFloat(cotizacion.precio_envio) || 0;
+            const subtotal = (cantidad * precioUnitario) + diseño + envio;
+            return subtotal;
         }
 
         async function cargarYRenderizar() {
+            // Evitar múltiples cargas simultáneas
+            if (isLoading) {
+                console.log('Ya hay una carga en proceso, omitiendo...');
+                return;
+            }
+            
+            isLoading = true;
             const tbody = document.getElementById('tabla-cotizaciones');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400">Cargando...</td></tr>';
+            const infoCantidad = document.getElementById('info-cantidad');
+            const refreshBtn = document.getElementById('btn-refresh');
+            
+            // Deshabilitar botón de refresh durante la carga
+            if (refreshBtn) {
+                refreshBtn.classList.add('btn-disabled');
+                refreshBtn.disabled = true;
+            }
+            
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8"><div class="loading-spinner"></div><p class="text-slate-400 mt-2">Cargando cotizaciones...</p></td></td>';
+            
             try {
-                await Promise.all([cargarProductos(), cargarPedidos(), cargarEstados()]);
+                await cargarProductos();
                 const cotizaciones = await listarCotizaciones();
-                if (cotizaciones.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400">No hay cotizaciones registradas. Crea la primera.</td></tr>';
+                
+                if (!cotizaciones || cotizaciones.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400">📋 No hay cotizaciones registradas. Crea la primera usando el botón "Nueva Cotización".</td></tr>';
+                    infoCantidad.textContent = '0 cotizaciones';
                     return;
                 }
+                
+                infoCantidad.textContent = `${cotizaciones.length} cotizaciones encontradas`;
                 tbody.innerHTML = '';
-                cotizaciones.forEach(c => {
+                
+                cotizaciones.forEach((c) => {
                     const producto = productosMap[c.id_producto] || `Producto ${c.id_producto}`;
-                    const pedido = pedidosMap[c.id_pedido] || { folio: `#PED-${c.id_pedido}`, cliente: `Pedido ${c.id_pedido}` };
-                    const estado = estadosMap[c.id_estado] || 'Desconocido';
-                    let estadoColor = '';
-                    if (c.id_estado === 1 || c.id_estado === 6) estadoColor = 'bg-amber-100 text-amber-700';
-                    else if (c.id_estado === 4) estadoColor = 'bg-green-100 text-green-700';
-                    else if (c.id_estado === 5) estadoColor = 'bg-rose-100 text-rose-700';
-                    else estadoColor = 'bg-blue-100 text-blue-700';
+                    const precioUnitario = preciosProductosMap[c.id_producto] || 0;
+                    const subtotal = calcularSubtotal(c);
+                    
                     const fila = `
-                        <tr class="hover:bg-primary/5">
-                            <td class="py-3">${c.id_pedido}${c.id_pedido ? ` (${pedido.folio})` : ''}</td>
-                            <td class="py-3">${c.id_producto}</td>
-                            <td class="py-3">${escapeHtml(producto)}</td>
-                            <td class="py-3">${c.cantidad}</td>
-                            <td class="py-3">$${parseFloat(c.precio_disenio || 0).toFixed(2)}</td>
-                            <td class="py-3">$${parseFloat(c.precio_envio || 0).toFixed(2)}</td>
-                            <td class="py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${estadoColor}">${estado}</span></td>
+                        <tr class="hover:bg-primary/5 transition-colors" data-cotizacion-id="${c.id_cotizacion}">
+                            <td class="py-3 font-mono text-sm">${c.id_cotizacion || 'N/A'}</td>
+                            <td class="py-3">${c.id_pedido}</td>
+                            <td class="py-3 font-mono text-sm">${c.id_producto}</td>
+                            <td class="py-3 font-medium">${escapeHtml(producto)}</td>
+                            <td class="py-3 text-center">${c.cantidad}</td>
+                            <td class="py-3 text-right">$${precioUnitario.toFixed(2)}</td>
+                            <td class="py-3 text-right">$${parseFloat(c.precio_disenio || 0).toFixed(2)}</td>
+                            <td class="py-3 text-right">$${parseFloat(c.precio_envio || 0).toFixed(2)}</td>
+                            <td class="py-3 text-right font-bold text-primary text-lg">$${subtotal.toFixed(2)}</td>
                             <td class="py-3 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <a href="cotizacion_editar.html?id_pedido=${c.id_pedido}&id_producto=${c.id_producto}" class="text-primary hover:bg-primary/10 p-1 rounded" title="Editar">
+                                    <button onclick="editarCotizacion(${c.id_cotizacion}, ${c.id_pedido}, ${c.id_producto})" class="text-primary hover:bg-primary/10 p-1 rounded transition-colors" title="Editar">
                                         <span class="material-symbols-outlined">edit</span>
-                                    </a>
-                                    <a href="cotizacion_eliminar.html?id_pedido=${c.id_pedido}&id_producto=${c.id_producto}" class="text-red-600 hover:bg-red-50 p-1 rounded" title="Eliminar">
+                                    </button>
+                                    <button onclick="eliminarCotizacion(${c.id_cotizacion})" class="btn-eliminar text-red-600 hover:bg-red-50 p-1 rounded transition-colors" title="Eliminar" data-id="${c.id_cotizacion}">
                                         <span class="material-symbols-outlined">delete</span>
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     `;
                     tbody.insertAdjacentHTML('beforeend', fila);
                 });
+                
+                showToast(`Se cargaron ${cotizaciones.length} cotizaciones correctamente`, 'success');
             } catch (error) {
-                console.error(error);
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500">Error al cargar: ${error.message}</td></tr>`;
-                showToast('Error al cargar cotizaciones', 'error');
+                console.error('Error en cargarYRenderizar:', error);
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-500">❌ Error al cargar: ${error.message}<br><br><button onclick="cargarYRenderizar()" class="mt-2 px-4 py-2 bg-primary text-white rounded-lg">Reintentar</button></td></tr>`;
+                showToast('Error al cargar cotizaciones: ' + error.message, 'error');
+            } finally {
+                isLoading = false;
+                if (refreshBtn) {
+                    refreshBtn.classList.remove('btn-disabled');
+                    refreshBtn.disabled = false;
+                }
             }
         }
 
-        function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')) : ''; }
-
+        function escapeHtml(str) { 
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+        }
+        
+        // Funciones globales para acciones
+        window.editarCotizacion = function(idCotizacion, idPedido, idProducto) {
+            window.location.href = `cotizacion_editar.html?id_cotizacion=${idCotizacion}&id_pedido=${idPedido}&id_producto=${idProducto}`;
+        };
+        
+        window.eliminarCotizacion = async function(idCotizacion) {
+            if (!idCotizacion) {
+                showToast('ID de cotización inválido', 'error');
+                return;
+            }
+            
+            if (confirm(`¿Estás seguro de eliminar esta cotización?`)) {
+                // Deshabilitar temporalmente el botón de eliminar
+                const btns = document.querySelectorAll(`.btn-eliminar[data-id="${idCotizacion}"]`);
+                btns.forEach(btn => {
+                    btn.classList.add('btn-disabled');
+                    btn.disabled = true;
+                });
+                
+                try {
+                    console.log(`Intentando eliminar cotización ID: ${idCotizacion}`);
+                    const res = await fetch(`${API_BASE}/cotizacion/${idCotizacion}`, {
+                        method: 'DELETE',
+                        headers: getHeaders()
+                    });
+                    
+                    console.log('Respuesta DELETE:', res.status, res.statusText);
+                    
+                    if (res.ok) {
+                        showToast('Cotización eliminada correctamente', 'success');
+                        // Recargar la tabla después de eliminar
+                        setTimeout(() => {
+                            cargarYRenderizar();
+                        }, 500);
+                    } else {
+                        const errorText = await res.text();
+                        console.error('Error respuesta:', errorText);
+                        throw new Error(`Error ${res.status}: ${errorText || 'No se pudo eliminar'}`);
+                    }
+                } catch (error) {
+                    console.error('Error en eliminación:', error);
+                    showToast('Error al eliminar: ' + error.message, 'error');
+                    // Reactivar botones en caso de error
+                    btns.forEach(btn => {
+                        btn.classList.remove('btn-disabled');
+                        btn.disabled = false;
+                    });
+                }
+            }
+        };
+        
+        // Refresh button
+        document.getElementById('btn-refresh')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!isLoading) {
+                cargarYRenderizar();
+            }
+        });
+        
+        // Cargar datos al iniciar (una sola vez)
         cargarYRenderizar();
+        
+        // ELIMINADO: El setInterval que causaba recargas automáticas
+        // Si quieres mantener actualizaciones automáticas, descomenta esto pero con mayor intervalo
+        /*
+        let refreshInterval = setInterval(() => {
+            if (document.visibilityState === 'visible' && !isLoading) {
+                cargarYRenderizar();
+            }
+        }, 60000); // Ahora cada 60 segundos en lugar de 30
+        */
+        
+        // Limpiar intervalo al salir de la página (opcional)
+        window.addEventListener('beforeunload', () => {
+            if (window.refreshInterval) {
+                clearInterval(window.refreshInterval);
+            }
+        });
     </script>
 </body>
 </html>
