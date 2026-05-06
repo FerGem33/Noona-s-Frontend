@@ -96,84 +96,120 @@
     }
 
     let todosPedidos = [];
-    let clientesMap = {};     
-    let estadosMap = {};       
 
-    async function cargarClientes() {
-        try {
-            const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
-            if (!res.ok) throw new Error();
-            const clientes = await res.json();
-            clientesMap = {};
-            clientes.forEach(c => { clientesMap[c.id_cliente] = `${c.nombre} ${c.apellido}`.trim() || `Cliente ${c.id_cliente}`; });
-        } catch(e) { console.error('Error cargando clientes', e); }
+async function listarPedidos() {
+  const res = await fetch(`${API_BASE}/pedidos/`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function renderizarPedidos(pedidos) {
+  const tbody = document.getElementById('tabla-pedidos-body');
+
+  if (!pedidos.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-primary/50">No hay pedidos. ¡Crea el primero!</td></tr>`;
+    document.getElementById('total-registros').innerText = 'Mostrando 0 pedidos';
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  pedidos.forEach(ped => {
+    const id = ped.id_pedido;
+    const clienteNombre = ped.cliente || `Cliente ${ped.id_cliente}`;
+    const fechaEntrega = ped.fecha_entrega
+      ? new Date(ped.fecha_entrega).toLocaleDateString('es-MX')
+      : 'Sin fecha';
+
+    const estadoTexto = ped.estado || `Estado #${ped.id_estado}`;
+    const total = ped.total ? `$${parseFloat(ped.total).toFixed(2)}` : '$0.00';
+
+    const estadoColor = ped.efectuada
+      ? 'bg-green-100 text-green-700'
+      : 'bg-amber-100 text-amber-700';
+
+    const fila = `
+      <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-zinc-100">#${id}</td>
+
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center">
+            <div class="h-8 w-8 rounded-full bg-pink-100 dark:bg-zinc-800 flex items-center justify-center text-primary dark:text-pink-200 mr-3 text-xs font-bold">
+              ${escapeHtml(clienteNombre.charAt(0))}
+            </div>
+            <span class="text-sm text-gray-700 dark:text-zinc-300">${escapeHtml(clienteNombre)}</span>
+          </div>
+        </td>
+
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">${escapeHtml(fechaEntrega)}</td>
+
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-3 py-1 text-xs font-semibold rounded-full ${estadoColor}">
+            ${escapeHtml(estadoTexto)}
+          </span>
+        </td>
+
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-zinc-100 text-right">${total}</td>
+
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+          <div class="flex justify-center gap-2">
+            <a href="pedido_ver.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Ver Detalles">
+              <span class="material-icons-round text-xl">visibility</span>
+            </a>
+            <a href="pedido_editar.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Editar">
+              <span class="material-icons-round text-xl">edit</span>
+            </a>
+            <a href="pedido_eliminar.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Eliminar">
+              <span class="material-icons-round text-xl text-red-600 dark:text-red-400">delete</span>
+            </a>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    tbody.insertAdjacentHTML('beforeend', fila);
+  });
+
+  document.getElementById('total-registros').innerText = `Mostrando ${pedidos.length} pedidos`;
+}
+
+async function cargarPedidos() {
+  const tbody = document.getElementById('tabla-pedidos-body');
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10">Cargando...</td></tr>`;
+
+  try {
+    todosPedidos = await listarPedidos();
+    renderizarPedidos(todosPedidos);
+  } catch (error) {
+    let mensaje = error.message.includes('401')
+      ? 'Token inválido.'
+      : error.message.includes('Failed to fetch')
+        ? 'Error de CORS o conexión.'
+        : error.message;
+
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">Error: ${mensaje}</td></tr>`;
+  }
+}
+
+const buscador = document.getElementById('buscador');
+
+if (buscador) {
+  buscador.addEventListener('input', (e) => {
+    const texto = e.target.value.toLowerCase();
+
+    if (!texto.trim()) {
+      return renderizarPedidos(todosPedidos);
     }
 
-    async function cargarEstados() {
-        estadosMap = { 1: 'Pendiente', 2: 'Preparación', 3: 'Enviado', 4: 'Entregado', 5: 'Cancelado' };
-    }
+    const filtrados = todosPedidos.filter(p =>
+      p.id_pedido.toString().includes(texto) ||
+      (p.cliente || '').toLowerCase().includes(texto) ||
+      (p.estado || '').toLowerCase().includes(texto)
+    );
 
-    async function listarPedidos() {
-        const res = await fetch(`${API_BASE}/pedidos/`, { headers: getHeaders() });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-    }
-
-    function renderizarPedidos(pedidos) {
-        const tbody = document.getElementById('tabla-pedidos-body');
-        if (!pedidos.length) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-primary/50">No hay pedidos. ¡Crea el primero!</td></tr>`;
-            document.getElementById('total-registros').innerText = 'Mostrando 0 pedidos';
-            return;
-        }
-        tbody.innerHTML = '';
-        pedidos.forEach(ped => {
-            const id = ped.id_pedido;
-            const clienteNombre = clientesMap[ped.id_cliente] || `Cliente ${ped.id_cliente}`;
-            const fechaEntrega = ped.fecha_entrega ? new Date(ped.fecha_entrega).toLocaleDateString() : 'Sin fecha';
-            const estadoTexto = estadosMap[ped.id_estado] || 'Desconocido';
-            const total = ped.total ? `$${parseFloat(ped.total).toFixed(2)}` : '$0.00';
-            const estadoColor = ped.id_estado === 1 ? 'bg-amber-100 text-amber-700' : (ped.id_estado === 4 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700');
-            const fila = `
-                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-zinc-100">#${id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap"><div class="flex items-center"><div class="h-8 w-8 rounded-full bg-pink-100 dark:bg-zinc-800 flex items-center justify-center text-primary dark:text-pink-200 mr-3 text-xs font-bold">${clienteNombre.charAt(0)}</div><span class="text-sm text-gray-700 dark:text-zinc-300">${escapeHtml(clienteNombre)}</span></div></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">${escapeHtml(fechaEntrega)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 text-xs font-semibold rounded-full ${estadoColor}">${escapeHtml(estadoTexto)}</span></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-zinc-100 text-right">${total}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center"><div class="flex justify-center gap-2">
-                        <a href="pedido_ver.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Ver Detalles"><span class="material-icons-round text-xl">visibility</span></a>
-                        <a href="pedido_editar.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Editar"><span class="material-icons-round text-xl">edit</span></a>
-                        <a href="pedido_eliminar.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Eliminar"><span class="material-icons-round text-xl text-red-600 dark:text-red-400">delete</span></a>
-                    </div></td>
-                </tr>`;
-            tbody.insertAdjacentHTML('beforeend', fila);
-        });
-        document.getElementById('total-registros').innerText = `Mostrando ${pedidos.length} pedidos`;
-    }
-
-    async function cargarPedidos() {
-        const tbody = document.getElementById('tabla-pedidos-body');
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10">Cargando...</td></tr>`;
-        try {
-            await Promise.all([cargarClientes(), cargarEstados()]);
-            todosPedidos = await listarPedidos();
-            renderizarPedidos(todosPedidos);
-        } catch (error) {
-            let mensaje = error.message.includes('401') ? 'Token inválido. Actualiza TOKEN.' : (error.message.includes('Failed to fetch') ? 'Error de CORS o conexión.' : error.message);
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">Error: ${mensaje}</td></tr>`;
-        }
-    }
-
-    const buscador = document.getElementById('buscador');
-    if (buscador) {
-        buscador.addEventListener('input', (e) => {
-            const texto = e.target.value.toLowerCase();
-            if (!texto.trim()) return renderizarPedidos(todosPedidos);
-            const filtrados = todosPedidos.filter(p => p.id_pedido.toString().includes(texto) || (clientesMap[p.id_cliente] || '').toLowerCase().includes(texto));
-            renderizarPedidos(filtrados);
-        });
-    }
+    renderizarPedidos(filtrados);
+  });
+}
 
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
     cargarPedidos();
