@@ -264,19 +264,29 @@
       const nombreCliente = pedido.cliente || `Cliente #${pedido.id_cliente}`;
       const direccionCompleta = pedido.direccion || `Dirección #${pedido.id_direccion}`;
       
-      // Construir lista de productos (si existe el array)
-      let productosHtml = '';
-      if (Array.isArray(pedido.productos) && pedido.productos.length > 0) {
-        const items = pedido.productos.map(p => `<li>${escapeHtml(p)}</li>`).join('');
-        productosHtml = `
-          <div class="productos-lista">
-            <h3>🧁 Productos del pedido</h3>
-            <ul>
-              ${items}
-            </ul>
-          </div>
-        `;
-      }
+// Construir lista de productos
+let productosHtml = '';
+
+if (Array.isArray(pedido.productos) && pedido.productos.length > 0) {
+  const items = pedido.productos.map(p => `
+    <li>
+      <div>
+        <strong>${escapeHtml(p.producto)}</strong><br>
+        Cantidad: ${escapeHtml(p.cantidad)} ·
+        Precio diseño: ${formatearMoneda(p.precio_disenio)}
+      </div>
+    </li>
+  `).join('');
+
+  productosHtml = `
+    <div class="productos-lista">
+      <h3>🧁 Productos del pedido</h3>
+      <ul>
+        ${items}
+      </ul>
+    </div>
+  `;
+}
       
       const html = `
         <div class="pedido-header">
