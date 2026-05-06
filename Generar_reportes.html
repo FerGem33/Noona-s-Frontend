@@ -236,7 +236,16 @@
                 </div>
                 <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Compra</span>
             </button>
-        </div>
+
+            <!-- Pedido (por ID) -->
+            <button onclick="showPedidoModal()"
+                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
+                <div class="bg-[#5d1927]/10 p-6 rounded-full">
+                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">description</span>
+                </div>
+                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Pedido</span>
+            </button>   
+        </div>        
 
         <!-- Footer Decorative Element -->
         <div class="flex justify-center mt-20 opacity-20">
@@ -311,6 +320,41 @@
                     Generar Reporte
                 </button>
                 <button onclick="closeCompraModal()"
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ingresar ID de Pedido -->
+<div id="pedidoModal" class="modal-compra-overlay">
+    <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
+        <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
+            <h3 class="text-white text-2xl font-bold">Reporte de Pedido</h3>
+            <button onclick="closePedidoModal()" class="text-white hover:opacity-80">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <p class="text-gray-700 mb-4">Ingresa el ID del pedido para generar el reporte:</p>
+
+            <div class="mb-2">
+                <label class="block text-burgundy font-bold mb-2">ID de Pedido:</label>
+                <input type="text" id="pedidoIdInput" placeholder="Ej: 1, 2, 3..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50"
+                       autocomplete="off">
+                <div id="pedidoIdErrorMessage" class="error-message"></div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="generatePedidoReport()" id="generatePedidoBtn"
+                        class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                    Generar Reporte
+                </button>
+                <button onclick="closePedidoModal()"
                         class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
                     Cancelar
                 </button>
@@ -416,6 +460,150 @@
         setTimeout(() => {
             toast.remove();
         }, 3000);
+    }
+
+    function showPedidoModal() {
+        const modal = document.getElementById('pedidoModal');
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+
+        pedidoIdInput.value = '';
+        pedidoIdInput.classList.remove('input-error');
+        errorMessage.classList.remove('active');
+        errorMessage.textContent = '';
+
+        modal.classList.add('active');
+        pedidoIdInput.focus();
+    }
+
+    function closePedidoModal() {
+        const modal = document.getElementById('pedidoModal');
+        modal.classList.remove('active');
+    }
+
+    function validatePedidoIdFormat(pedidoId) {
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+
+        if (!pedidoId || pedidoId.trim() === '') {
+            errorMessage.textContent = 'Por favor, ingresa el ID del pedido';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            return false;
+        }
+
+        if (!/^\d+$/.test(pedidoId)) {
+            errorMessage.textContent = 'El ID debe contener solo números';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            return false;
+        }
+
+        const idNumber = parseInt(pedidoId, 10);
+
+        if (idNumber <= 0) {
+            errorMessage.textContent = 'El ID debe ser un número positivo mayor que cero';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            return false;
+        }
+
+        errorMessage.classList.remove('active');
+        pedidoIdInput.classList.remove('input-error');
+        errorMessage.textContent = '';
+
+        return true;
+    }
+
+    async function checkPedidoExists(pedidoId) {
+        try {
+            const url = `${API_BASE_URL}/pedido/${pedidoId}`;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+                return { exists: true, error: null };
+            }
+
+            if (response.status === 404) {
+                return { exists: false, error: 'El ID de pedido no existe en la base de datos' };
+            }
+
+            return { exists: false, error: `Error del servidor (Código: ${response.status})` };
+
+        } catch (error) {
+            console.error('Error verificando pedido:', error);
+
+            if (error.name === 'AbortError') {
+                return { exists: false, error: 'La solicitud ha excedido el tiempo de espera' };
+            }
+
+            return { exists: false, error: 'Error de conexión. No se pudo verificar el ID' };
+        }
+    }
+
+    async function generatePedidoReport() {
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const generateBtn = document.getElementById('generatePedidoBtn');
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+
+        let pedidoId = pedidoIdInput.value.trim();
+
+        errorMessage.classList.remove('active');
+        pedidoIdInput.classList.remove('input-error');
+
+        if (!validatePedidoIdFormat(pedidoId)) {
+            return;
+        }
+
+        const idNumber = parseInt(pedidoId, 10);
+
+        const originalText = generateBtn.innerHTML;
+        generateBtn.innerHTML = '<span class="loading-spinner"></span> Verificando ID...';
+        generateBtn.disabled = true;
+
+        try {
+            const checkResult = await checkPedidoExists(idNumber);
+
+            if (!checkResult.exists) {
+                errorMessage.textContent = checkResult.error;
+                errorMessage.classList.add('active');
+                pedidoIdInput.classList.add('input-error');
+                showToast(checkResult.error, true);
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+                return;
+            }
+
+            const url = `${API_BASE_URL}/pedido/${idNumber}`;
+            const newWindow = window.open(url, '_blank');
+
+            if (newWindow) {
+                showToast(`Abriendo reporte de pedido #${idNumber}...`);
+                closePedidoModal();
+            } else {
+                showToast('Por favor, permite ventanas emergentes para ver el reporte', true);
+            }
+
+        } catch (error) {
+            console.error('Error al generar el reporte:', error);
+
+            errorMessage.textContent = 'Error al verificar el ID. Intenta nuevamente.';
+            errorMessage.classList.add('active');
+            pedidoIdInput.classList.add('input-error');
+            showToast('Error al verificar el ID de pedido', true);
+        } finally {
+            generateBtn.innerHTML = originalText;
+            generateBtn.disabled = false;
+        }
     }
 
     function validateDateRange(fechaInicio, fechaFin) {
@@ -693,6 +881,33 @@
             generateCompraReport();
         }
     });
+
+    document.getElementById('pedidoModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePedidoModal();
+    }
+});
+
+document.getElementById('pedidoIdInput').addEventListener('input', function(e) {
+    const value = e.target.value;
+    const errorMessage = document.getElementById('pedidoIdErrorMessage');
+    const pedidoIdInput = document.getElementById('pedidoIdInput');
+
+    if (value && !/^\d*$/.test(value)) {
+        e.target.value = value.replace(/[^\d]/g, '');
+    }
+
+    if (errorMessage.classList.contains('active')) {
+        errorMessage.classList.remove('active');
+        pedidoIdInput.classList.remove('input-error');
+    }
+});
+
+document.getElementById('pedidoIdInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        generatePedidoReport();
+    }
+});
 </script>
 
 </body>
