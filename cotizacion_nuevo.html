@@ -70,6 +70,17 @@
             </div>
         </div>
 
+        <!-- Precio de envío global -->
+        <div class="mb-6 flex justify-end">
+            <div class="w-72">
+                <label class="text-accent font-semibold text-sm flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-sm">local_shipping</span>
+                    PRECIO DE ENVÍO (GLOBAL)
+                </label>
+                <input type="number" id="precio-envio-global" step="0.01" class="w-full h-14 px-4 rounded-lg border-2 border-primary/30 focus:border-accent focus:ring-0 bg-white text-slate-700 font-medium" value="0">
+            </div>
+        </div>
+
         <!-- Tabla de productos -->
         <div class="border-2 border-primary/10 rounded-xl overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[900px]">
@@ -79,19 +90,28 @@
                         <th class="px-4 py-4 text-accent font-bold text-sm uppercase text-center">Cantidad</th>
                         <th class="px-4 py-4 text-accent font-bold text-sm uppercase text-right">Precio Unitario</th>
                         <th class="px-4 py-4 text-accent font-bold text-sm uppercase text-right">Diseño</th>
-                        <th class="px-4 py-4 text-accent font-bold text-sm uppercase text-right">Envío</th>
                         <th class="px-4 py-4 text-accent font-bold text-sm uppercase text-right">Subtotal</th>
                         <th class="px-4 py-4 text-accent font-bold text-sm uppercase text-center">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-productos" class="divide-y divide-primary/10">
-                    <tr><td colspan="7" class="text-center py-8 text-slate-400">No hay productos agregados</td></tr>
+                    <tr><td colspan="6" class="text-center py-8 text-slate-400">No hay productos agregados</td></tr>
                 </tbody>
                 <tfoot>
                     <tr class="bg-primary/5 border-t-2 border-primary/20">
-                        <td class="px-6 py-6 text-right font-bold text-accent text-lg" colspan="5">TOTAL ESTIMADO</td>
-                        <td class="px-6 py-6 text-right font-black text-accent text-2xl" id="total-general">$0.00</td>
-                        <td></td>
+                        <td class="px-6 py-6 text-right font-bold text-accent text-lg" colspan="4">SUBTOTAL PRODUCTOS</td>
+                        <td class="px-6 py-6 text-right font-black text-accent text-2xl" id="subtotal-productos">$0.00</td>
+                        <td class="px-6 py-6"></td>
+                    </tr>
+                    <tr class="bg-primary/5">
+                        <td class="px-6 py-3 text-right font-bold text-accent text-lg" colspan="4">+ ENVÍO</td>
+                        <td class="px-6 py-3 text-right font-black text-accent text-2xl" id="total-envio">$0.00</td>
+                        <td class="px-6 py-3"></td>
+                    </tr>
+                    <tr class="bg-primary/10">
+                        <td class="px-6 py-6 text-right font-bold text-accent text-xl" colspan="4">TOTAL COTIZACIÓN</td>
+                        <td class="px-6 py-6 text-right font-black text-accent text-3xl" id="total-general">$0.00</td>
+                        <td class="px-6 py-6"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -144,12 +164,16 @@
     }
 
     let catalogoProductos = [];
-    let productosSeleccionados = []; // cada objeto: { id, nombre, cantidad, precio_unitario, diseño, envio }
+    // cada objeto: { id_producto, nombre, cantidad, precio_unitario, precio_disenio }
+    let productosSeleccionados = [];
 
     const selectProducto = document.getElementById('select-producto');
     const cantidadInput = document.getElementById('cantidad-producto');
+    const precioEnvioGlobal = document.getElementById('precio-envio-global');
     const tbody = document.getElementById('tabla-productos');
-    const totalSpan = document.getElementById('total-general');
+    const subtotalProductosSpan = document.getElementById('subtotal-productos');
+    const totalEnvioSpan = document.getElementById('total-envio');
+    const totalGeneralSpan = document.getElementById('total-general');
 
     function mostrarExito(callback) {
         const modal = document.getElementById('modal-exito');
@@ -197,17 +221,17 @@
         }
         const producto = catalogoProductos.find(p => p.id_producto === id_producto);
         if (!producto) return;
-        const existente = productosSeleccionados.find(p => p.id === id_producto);
+        
+        const existente = productosSeleccionados.find(p => p.id_producto === id_producto);
         if (existente) {
             existente.cantidad += cantidad;
         } else {
             productosSeleccionados.push({
-                id: producto.id_producto,
+                id_producto: producto.id_producto,
                 nombre: producto.descripcion,
                 cantidad: cantidad,
-                precio_unitario: producto.precio_unitario,
-                diseño: 0,
-                envio: 0
+                precio_unitario: parseFloat(producto.precio_unitario),
+                precio_disenio: 0
             });
         }
         renderizarTabla();
@@ -222,31 +246,47 @@
 
     function actualizarCampo(index, campo, valor) {
         if (campo === 'cantidad') valor = Math.max(1, parseInt(valor) || 1);
-        if (campo === 'precio_unitario' || campo === 'diseño' || campo === 'envio') valor = parseFloat(valor) || 0;
+        if (campo === 'precio_unitario') valor = parseFloat(valor) || 0;
+        if (campo === 'precio_disenio') valor = parseFloat(valor) || 0;
         productosSeleccionados[index][campo] = valor;
         renderizarTabla();
     }
 
-    function calcularSubtotal(prod) {
-        return (prod.cantidad * prod.precio_unitario) + prod.diseño + prod.envio;
+    function calcularSubtotalProducto(prod) {
+        return (prod.cantidad * prod.precio_unitario) + prod.precio_disenio;
+    }
+
+    function calcularSubtotalProductos() {
+        let total = 0;
+        productosSeleccionados.forEach(p => total += calcularSubtotalProducto(p));
+        return total;
+    }
+
+    function obtenerPrecioEnvio() {
+        return parseFloat(precioEnvioGlobal.value) || 0;
     }
 
     function calcularTotalGeneral() {
-        let total = 0;
-        productosSeleccionados.forEach(p => total += calcularSubtotal(p));
-        totalSpan.innerText = `$${total.toFixed(2)}`;
-        return total;
+        const subtotalProductos = calcularSubtotalProductos();
+        const envio = obtenerPrecioEnvio();
+        const total = subtotalProductos + envio;
+        
+        subtotalProductosSpan.innerText = `$${subtotalProductos.toFixed(2)}`;
+        totalEnvioSpan.innerText = `$${envio.toFixed(2)}`;
+        totalGeneralSpan.innerText = `$${total.toFixed(2)}`;
+        
+        return { subtotalProductos, envio, total };
     }
 
     function renderizarTabla() {
         if (productosSeleccionados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">No hay productos agregados</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400">No hay productos agregados</td></tr>';
             calcularTotalGeneral();
             return;
         }
         tbody.innerHTML = '';
         productosSeleccionados.forEach((prod, idx) => {
-            const subtotal = calcularSubtotal(prod);
+            const subtotal = calcularSubtotalProducto(prod);
             const fila = `
                 <tr class="hover:bg-primary/5 transition-colors">
                     <td class="px-4 py-4 font-semibold text-slate-800">${escapeHtml(prod.nombre)}</td>
@@ -257,10 +297,7 @@
                         <input type="number" step="0.01" class="w-28 text-right border border-primary/30 rounded-lg px-2 py-1 campo-precio" value="${prod.precio_unitario.toFixed(2)}" data-index="${idx}" data-field="precio_unitario">
                     </td>
                     <td class="px-4 py-4 text-right">
-                        <input type="number" step="0.01" class="w-28 text-right border border-primary/30 rounded-lg px-2 py-1 campo-disenio" value="${prod.diseño.toFixed(2)}" data-index="${idx}" data-field="diseño">
-                    </td>
-                    <td class="px-4 py-4 text-right">
-                        <input type="number" step="0.01" class="w-28 text-right border border-primary/30 rounded-lg px-2 py-1 campo-envio" value="${prod.envio.toFixed(2)}" data-index="${idx}" data-field="envio">
+                        <input type="number" step="0.01" class="w-28 text-right border border-primary/30 rounded-lg px-2 py-1 campo-disenio" value="${prod.precio_disenio.toFixed(2)}" data-index="${idx}" data-field="precio_disenio">
                     </td>
                     <td class="px-4 py-4 text-right font-bold text-accent">$${subtotal.toFixed(2)}</td>
                     <td class="px-4 py-4 text-center">
@@ -272,8 +309,8 @@
             `;
             tbody.insertAdjacentHTML('beforeend', fila);
         });
-        // Eventos dinámicos
-        document.querySelectorAll('.campo-cantidad, .campo-precio, .campo-disenio, .campo-envio').forEach(input => {
+        
+        document.querySelectorAll('.campo-cantidad, .campo-precio, .campo-disenio').forEach(input => {
             input.addEventListener('change', (e) => {
                 const idx = parseInt(input.dataset.index);
                 const field = input.dataset.field;
@@ -284,98 +321,90 @@
                 actualizarCampo(idx, field, val);
             });
         });
+        
         document.querySelectorAll('.eliminar-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.index);
                 eliminarProducto(idx);
             });
         });
+        
         calcularTotalGeneral();
     }
 
-    // === Funciones para generar la cotización (crea pedido temporal y luego cotizaciones) ===
-    async function crearPedidoTemporal(total) {
-        // Ajusta estos valores según lo que requiera tu backend de pedidos
-        const payload = {
-            id_cliente: 1, // Crea un cliente genérico "Cotizaciones" con ID 1 o usa el que corresponda
-            id_direccion: 1,
-            id_estado: 6, // Estado "Cotización" (cambia si es necesario)
-            fecha_entrega: new Date(Date.now() + 7*86400000).toISOString(),
-            fecha_pedido: new Date().toISOString(),
-            comentario: "Cotización generada automáticamente",
-            tipo_entrega: true,
-            subtotal: total,
-            total: total
-        };
-        const res = await fetch(`${API_BASE}/pedidos/`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || 'Error al crear pedido base');
-        }
-        const pedido = await res.json();
-        return pedido.id_pedido;
-    }
-
-    async function guardarCotizaciones(idPedido) {
-        const errores = [];
-        for (const prod of productosSeleccionados) {
-            const payload = {
-                id_pedido: idPedido,
-                id_producto: prod.id,
-                id_estado: 6, // mismo estado "Cotización"
-                cantidad: prod.cantidad,
-                precio_disenio: prod.diseño,
-                precio_envio: prod.envio
-            };
-            try {
-                const res = await fetch(`${API_BASE}/cotizacion/`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify(payload)
-                });
-                if (!res.ok) {
-                    const err = await res.json();
-                    errores.push(`${prod.nombre}: ${err.detail || 'Error'}`);
-                }
-            } catch(e) {
-                errores.push(`${prod.nombre}: ${e.message}`);
-            }
-        }
-        if (errores.length > 0) {
-            throw new Error(`Algunos productos no se guardaron: ${errores.join('; ')}`);
-        }
-    }
-
+    // === Función para generar la cotización usando el endpoint /api/cotizacion/Crear%20Cotizacion ===
     async function generarCotizacion() {
         if (productosSeleccionados.length === 0) {
             mostrarError('Debe agregar al menos un producto');
             return;
         }
-        const total = calcularTotalGeneral();
+        
+        const { subtotalProductos, envio, total } = calcularTotalGeneral();
+        
+        // Construir el body según la imagen:
+        // {
+        //   "precio_envio": 0,
+        //   "detalles": [
+        //     { "id_producto": 0, "cantidad": 0, "precio_disenio": 0 }
+        //   ]
+        // }
+        const detalles = productosSeleccionados.map(prod => ({
+            id_producto: prod.id_producto,
+            cantidad: prod.cantidad,
+            precio_disenio: prod.precio_disenio
+        }));
+        
+        const payload = {
+            precio_envio: envio,
+            detalles: detalles
+        };
+        
+        console.log('Payload a enviar:', payload);
+        
         const btn = document.getElementById('btn-generar');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Generando...';
         btn.disabled = true;
 
         try {
-            const idPedido = await crearPedidoTemporal(total);
-            await guardarCotizaciones(idPedido);
+            // URL encode para el espacio en "Crear Cotizacion"
+            const endpoint = `${API_BASE}/cotizacion/`;
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+            
+            if (!res.ok) {
+                let errorDetail = `Error ${res.status}`;
+                try {
+                    const errorData = await res.json();
+                    errorDetail = errorData.detail || JSON.stringify(errorData);
+                } catch(e) {
+                    errorDetail = await res.text();
+                }
+                throw new Error(errorDetail);
+            }
+            
+            const responseData = await res.json();
+            console.log('Respuesta del servidor:', responseData);
+            
             mostrarExito(() => {
                 window.location.href = 'cotizaciones.html';
             });
         } catch (error) {
+            console.error('Error:', error);
             mostrarError('Error al generar cotización: ' + error.message);
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     }
 
+    // Eventos
     document.getElementById('btn-agregar').addEventListener('click', agregarProducto);
     document.getElementById('btn-generar').addEventListener('click', generarCotizacion);
+    precioEnvioGlobal.addEventListener('change', () => calcularTotalGeneral());
+    precioEnvioGlobal.addEventListener('input', () => calcularTotalGeneral());
 
     function escapeHtml(str) {
         if (!str) return '';

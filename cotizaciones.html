@@ -21,17 +21,7 @@
     </script>
     <style>
         body { background-color: #FEBDC6; font-family: 'Montserrat', sans-serif; }
-        .toast-notification {
-            position: fixed; top: 20px; right: 20px; z-index: 1000;
-            min-width: 280px; background: white; border-radius: 0.75rem;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            padding: 1rem; display: flex; align-items: center; gap: 0.75rem;
-            transform: translateX(400px); transition: transform 0.3s ease-out;
-            border-left: 4px solid;
-        }
-        .toast-notification.show { transform: translateX(0); }
-        .toast-notification.success { border-left-color: #10b981; }
-        .toast-notification.error { border-left-color: #ef4444; }
+        .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .loading-spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #5d1927;
@@ -50,6 +40,47 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+        .detalle-row {
+            background-color: #fef2f3;
+            border-bottom: 1px solid #fecdd3;
+        }
+        .detalle-row td {
+            padding-left: 2rem;
+        }
+        .cotizacion-row {
+            cursor: pointer;
+        }
+        .cotizacion-row:hover {
+            background-color: #fef2f3;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-detalles {
+            background-color: #5d1927;
+            color: white;
+        }
+        
+        /* Toast notifications */
+        .toast-notification {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            min-width: 280px; background: white; border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            padding: 1rem; display: flex; align-items: center; gap: 0.75rem;
+            transform: translateX(400px); transition: transform 0.3s ease-out;
+            border-left: 4px solid;
+        }
+        .toast-notification.show { transform: translateX(0); }
+        .toast-notification.success { border-left-color: #10b981; background: #f0fdf4; }
+        .toast-notification.error { border-left-color: #ef4444; background: #fef2f2; }
+        .toast-notification.warning { border-left-color: #f59e0b; background: #fffbeb; }
+        .toast-notification.info { border-left-color: #3b82f6; background: #eff6ff; }
+        .toast-close { cursor: pointer; padding: 4px; border-radius: 50%; }
+        .toast-close:hover { background-color: rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="min-h-screen p-4">
@@ -72,7 +103,7 @@
             <div class="p-6 border-b border-primary/10 flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-extrabold text-primary">Cotizaciones</h1>
-                    <p class="text-slate-500">Gestión de ítems cotizados por pedido</p>
+                    <p class="text-slate-500">Gestión de cotizaciones con múltiples productos por cotización</p>
                 </div>
                 <a href="cotizacion_nuevo.html" class="bg-primary text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90 transition-all">
                     <span class="material-symbols-outlined">add_circle</span>
@@ -86,31 +117,70 @@
                             <span class="material-symbols-outlined">refresh</span>
                             Actualizar
                         </button>
+                   
                     </div>
                     <div id="info-cantidad" class="text-sm text-slate-500"></div>
                 </div>
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-primary/80 text-sm font-bold border-b border-primary/10">
+                            <th class="pb-3 w-8"></th>
                             <th class="pb-3">ID Cotización</th>
-                            <th class="pb-3">ID Pedido</th>
-                            <th class="pb-3">ID Producto</th>
-                            <th class="pb-3">Producto</th>
-                            <th class="pb-3">Cantidad</th>
-                            <th class="pb-3">Precio Unitario</th>
-                            <th class="pb-3">Diseño</th>
-                            <th class="pb-3">Envío</th>
-                            <th class="pb-3">Subtotal</th>
+                            <th class="pb-3">Productos</th>
+                            <th class="pb-3 text-right">Envío</th>
+                            <th class="pb-3 text-right">Subtotal Productos</th>
+                            <th class="pb-3 text-right">Total Cotización</th>
                             <th class="pb-3 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-cotizaciones" class="divide-y divide-primary/5">
-                        <tr><td colspan="10" class="text-center py-8"><div class="loading-spinner"></div><p class="text-slate-400 mt-2">Cargando cotizaciones...</p></td></tr>
+                        <tr><td colspan="7" class="text-center py-8"><div class="loading-spinner"></div><p class="text-slate-400 mt-2">Cargando cotizaciones...</p></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <!-- Modal de confirmación personalizado para eliminar -->
+    <div id="modal-confirmacion" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <div class="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-amber-600 text-4xl">warning</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Confirmar eliminación</h3>
+            <p class="text-slate-500 mt-2">¿Estás seguro de eliminar esta cotización? Esta acción no se puede deshacer.</p>
+            <div class="flex gap-3 mt-6">
+                <button id="btn-cancelar-eliminar" class="flex-1 px-4 py-2 border-2 border-primary/30 text-primary font-semibold rounded-xl hover:bg-primary/5 transition">Cancelar</button>
+                <button id="btn-confirmar-eliminar" class="flex-1 bg-red-600 text-white rounded-xl py-2 font-semibold hover:bg-red-700 transition">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-green-600 text-5xl mb-2">check_circle</span>
+            <h3 class="text-xl font-bold text-slate-900">¡Cotización eliminada!</h3>
+            <p class="text-slate-500 mt-2">La cotización se ha eliminado correctamente.</p>
+            <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Continuar</button>
+        </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div id="modal-error" class="fixed inset-0 flex items-center justify-center z-50 hidden modal-mensaje">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+            <span class="material-symbols-outlined text-red-600 text-5xl mb-2">error</span>
+            <h3 class="text-xl font-bold text-slate-900">Error</h3>
+            <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+            <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white py-2 rounded-xl font-bold">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;"></div>
 
     <script>
         const API_BASE = 'http://3.15.13.161:8000/api';
@@ -124,19 +194,12 @@
             return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
         }
 
-        // Toast simple
         function showToast(msg, type = 'info') {
-            const container = document.getElementById('toast-container') || (() => {
-                const div = document.createElement('div');
-                div.id = 'toast-container';
-                div.style.cssText = 'position:fixed; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px;';
-                document.body.appendChild(div);
-                return div;
-            })();
+            const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast-notification ${type}`;
-            const icon = type === 'success' ? 'check_circle' : 'error';
-            const color = type === 'success' ? '#10b981' : '#ef4444';
+            const icon = type === 'success' ? 'check_circle' : (type === 'warning' ? 'warning' : 'error');
+            const color = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#ef4444');
             toast.innerHTML = `<div><span class="material-symbols-outlined" style="color:${color}">${icon}</span></div><div class="flex-1">${msg}</div><div class="toast-close cursor-pointer"><span class="material-symbols-outlined">close</span></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
@@ -152,9 +215,51 @@
             }, 4000);
         }
 
+        // Funciones para modales personalizados
+        function mostrarModalConfirmacion(onConfirm) {
+            const modal = document.getElementById('modal-confirmacion');
+            const aceptarBtn = document.getElementById('btn-confirmar-eliminar');
+            const cancelarBtn = document.getElementById('btn-cancelar-eliminar');
+            
+            modal.classList.remove('hidden');
+            
+            // Remover event listeners anteriores para evitar duplicados
+            const newAceptar = aceptarBtn.cloneNode(true);
+            const newCancelar = cancelarBtn.cloneNode(true);
+            aceptarBtn.parentNode.replaceChild(newAceptar, aceptarBtn);
+            cancelarBtn.parentNode.replaceChild(newCancelar, cancelarBtn);
+            
+            newAceptar.onclick = () => {
+                modal.classList.add('hidden');
+                if (onConfirm) onConfirm();
+            };
+            newCancelar.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
+
+        function mostrarExito(callback) {
+            const modal = document.getElementById('modal-exito');
+            modal.classList.remove('hidden');
+            const btn = document.getElementById('btn-cerrar-exito');
+            btn.onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) callback();
+            };
+        }
+
+        function mostrarError(mensaje) {
+            const modal = document.getElementById('modal-error');
+            document.getElementById('error-mensaje').innerText = mensaje;
+            modal.classList.remove('hidden');
+            document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+        }
+
         let productosMap = {};
         let preciosProductosMap = {};
-        let isLoading = false; // Controlar carga simultánea
+        let isLoading = false;
+        let expandedRows = new Set();
+        let cotizacionAEliminar = null;
 
         async function cargarProductos() {
             try {
@@ -185,17 +290,97 @@
             return data;
         }
 
-        function calcularSubtotal(cotizacion) {
-            const precioUnitario = preciosProductosMap[cotizacion.id_producto] || 0;
-            const cantidad = parseFloat(cotizacion.cantidad) || 0;
-            const diseño = parseFloat(cotizacion.precio_disenio) || 0;
-            const envio = parseFloat(cotizacion.precio_envio) || 0;
-            const subtotal = (cantidad * precioUnitario) + diseño + envio;
+        function calcularSubtotalProductos(detalles) {
+            let subtotal = 0;
+            if (!detalles || !Array.isArray(detalles)) return 0;
+            
+            detalles.forEach(detalle => {
+                const precioUnitario = preciosProductosMap[detalle.id_producto] || 0;
+                const cantidad = parseFloat(detalle.cantidad) || 0;
+                const precioDisenio = parseFloat(detalle.precio_disenio) || 0;
+                subtotal += (cantidad * precioUnitario) + precioDisenio;
+            });
             return subtotal;
         }
 
+        function calcularTotalCotizacion(cotizacion) {
+            const subtotalProductos = calcularSubtotalProductos(cotizacion.detalles);
+            const precioEnvio = parseFloat(cotizacion.precio_envio) || 0;
+            return subtotalProductos + precioEnvio;
+        }
+
+        async function eliminarCotizacionPorId(idCotizacion) {
+            const res = await fetch(`${API_BASE}/cotizacion/${idCotizacion}`, {
+                method: 'DELETE',
+                headers: getHeaders()
+            });
+            if (!res.ok) {
+                let errorMsg = 'Error al eliminar';
+                try {
+                    const errorData = await res.json();
+                    if (errorData.detail) {
+                        errorMsg = Array.isArray(errorData.detail) ? errorData.detail.map(d => d.msg).join(', ') : errorData.detail;
+                    }
+                } catch(e) {}
+                throw new Error(errorMsg);
+            }
+            return true;
+        }
+
+        function toggleDetalles(idCotizacion) {
+            const detallesRow = document.getElementById(`detalles-${idCotizacion}`);
+            const icon = document.querySelector(`#icon-${idCotizacion}`);
+            if (detallesRow) {
+                const isHidden = detallesRow.style.display === 'none';
+                detallesRow.style.display = isHidden ? 'table-row' : 'none';
+                if (icon) {
+                    icon.textContent = isHidden ? 'expand_more' : 'chevron_right';
+                }
+                if (isHidden) {
+                    expandedRows.add(idCotizacion);
+                } else {
+                    expandedRows.delete(idCotizacion);
+                }
+            }
+        }
+
+   
+
+        // Función que maneja la eliminación con modal personalizado
+        function handleEliminarCotizacion(idCotizacion) {
+            if (!idCotizacion) {
+                showToast('ID de cotización inválido', 'error');
+                return;
+            }
+            
+            cotizacionAEliminar = idCotizacion;
+            
+            mostrarModalConfirmacion(async () => {
+                const btns = document.querySelectorAll(`.btn-eliminar[data-id="${cotizacionAEliminar}"]`);
+                btns.forEach(btn => {
+                    btn.classList.add('btn-disabled');
+                    btn.disabled = true;
+                });
+                
+                try {
+                    console.log(`Intentando eliminar cotización ID: ${cotizacionAEliminar}`);
+                    await eliminarCotizacionPorId(cotizacionAEliminar);
+                    mostrarExito(() => {
+                        cargarYRenderizar();
+                    });
+                } catch (error) {
+                    console.error('Error en eliminación:', error);
+                    mostrarError('Error al eliminar: ' + error.message);
+                    btns.forEach(btn => {
+                        btn.classList.remove('btn-disabled');
+                        btn.disabled = false;
+                    });
+                }
+                cotizacionAEliminar = null;
+            });
+        }
+
         async function cargarYRenderizar() {
-            // Evitar múltiples cargas simultáneas
             if (isLoading) {
                 console.log('Ya hay una carga en proceso, omitiendo...');
                 return;
@@ -206,62 +391,131 @@
             const infoCantidad = document.getElementById('info-cantidad');
             const refreshBtn = document.getElementById('btn-refresh');
             
-            // Deshabilitar botón de refresh durante la carga
             if (refreshBtn) {
                 refreshBtn.classList.add('btn-disabled');
                 refreshBtn.disabled = true;
             }
             
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8"><div class="loading-spinner"></div><p class="text-slate-400 mt-2">Cargando cotizaciones...</p></td></td>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8"><div class="loading-spinner"></div><p class="text-slate-400 mt-2">Cargando cotizaciones...</p></tr></tr>';
             
             try {
                 await cargarProductos();
                 const cotizaciones = await listarCotizaciones();
                 
                 if (!cotizaciones || cotizaciones.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400">📋 No hay cotizaciones registradas. Crea la primera usando el botón "Nueva Cotización".</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">📋 No hay cotizaciones registradas. Crea la primera usando el botón "Nueva Cotización".</td></tr>';
                     infoCantidad.textContent = '0 cotizaciones';
                     return;
                 }
                 
                 infoCantidad.textContent = `${cotizaciones.length} cotizaciones encontradas`;
                 tbody.innerHTML = '';
+                expandedRows.clear();
                 
-                cotizaciones.forEach((c) => {
-                    const producto = productosMap[c.id_producto] || `Producto ${c.id_producto}`;
-                    const precioUnitario = preciosProductosMap[c.id_producto] || 0;
-                    const subtotal = calcularSubtotal(c);
+                cotizaciones.forEach((cotizacion) => {
+                    const idCotizacion = cotizacion.id_cotizacion;
+                    const detalles = cotizacion.detalles || [];
+                    const cantidadProductos = detalles.length;
+                    const subtotalProductos = calcularSubtotalProductos(detalles);
+                    const totalCotizacion = calcularTotalCotizacion(cotizacion);
+                    const precioEnvio = parseFloat(cotizacion.precio_envio) || 0;
                     
-                    const fila = `
-                        <tr class="hover:bg-primary/5 transition-colors" data-cotizacion-id="${c.id_cotizacion}">
-                            <td class="py-3 font-mono text-sm">${c.id_cotizacion || 'N/A'}</td>
-                            <td class="py-3">${c.id_pedido}</td>
-                            <td class="py-3 font-mono text-sm">${c.id_producto}</td>
-                            <td class="py-3 font-medium">${escapeHtml(producto)}</td>
-                            <td class="py-3 text-center">${c.cantidad}</td>
-                            <td class="py-3 text-right">$${precioUnitario.toFixed(2)}</td>
-                            <td class="py-3 text-right">$${parseFloat(c.precio_disenio || 0).toFixed(2)}</td>
-                            <td class="py-3 text-right">$${parseFloat(c.precio_envio || 0).toFixed(2)}</td>
-                            <td class="py-3 text-right font-bold text-primary text-lg">$${subtotal.toFixed(2)}</td>
+                    const resumenProductos = detalles.map(d => productosMap[d.id_producto] || `Prod ${d.id_producto}`).join(', ');
+                    const resumenCorto = resumenProductos.length > 50 ? resumenProductos.substring(0, 50) + '...' : resumenProductos;
+                    
+                    const filaPrincipal = `
+                        <tr class="cotizacion-row hover:bg-primary/5 transition-colors">
+                            <td class="py-3 text-center" onclick="window.toggleDetalles(${idCotizacion})">
+                                <span class="material-symbols-outlined text-primary cursor-pointer" id="icon-${idCotizacion}">chevron_right</span>
+                            </td>
+                            <td class="py-3 font-mono text-sm font-semibold" onclick="window.toggleDetalles(${idCotizacion})">${idCotizacion}</td>
+                            <td class="py-3" onclick="window.toggleDetalles(${idCotizacion})">
+                                <span class="badge badge-detalles">${cantidadProductos} producto${cantidadProductos !== 1 ? 's' : ''}</span>
+                                <span class="text-slate-500 text-sm ml-2">${escapeHtml(resumenCorto)}</span>
+                            </td>
+                            <td class="py-3 text-right text-slate-600" onclick="window.toggleDetalles(${idCotizacion})">$${precioEnvio.toFixed(2)}</td>
+                            <td class="py-3 text-right font-semibold text-slate-700" onclick="window.toggleDetalles(${idCotizacion})">$${subtotalProductos.toFixed(2)}</td>
+                            <td class="py-3 text-right font-bold text-primary text-xl" onclick="window.toggleDetalles(${idCotizacion})">$${totalCotizacion.toFixed(2)}</td>
                             <td class="py-3 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <button onclick="editarCotizacion(${c.id_cotizacion}, ${c.id_pedido}, ${c.id_producto})" class="text-primary hover:bg-primary/10 p-1 rounded transition-colors" title="Editar">
+                                    <button onclick="event.stopPropagation(); window.editarCotizacion(${idCotizacion})" class="text-primary hover:bg-primary/10 p-1 rounded transition-colors" title="Editar">
                                         <span class="material-symbols-outlined">edit</span>
                                     </button>
-                                    <button onclick="eliminarCotizacion(${c.id_cotizacion})" class="btn-eliminar text-red-600 hover:bg-red-50 p-1 rounded transition-colors" title="Eliminar" data-id="${c.id_cotizacion}">
+                                    <button onclick="event.stopPropagation(); window.handleEliminarCotizacion(${idCotizacion})" class="btn-eliminar text-red-600 hover:bg-red-50 p-1 rounded transition-colors" title="Eliminar" data-id="${idCotizacion}">
                                         <span class="material-symbols-outlined">delete</span>
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     `;
-                    tbody.insertAdjacentHTML('beforeend', fila);
+                    
+                    let detallesHtml = `
+                        <tr id="detalles-${idCotizacion}" style="display: none;" class="detalle-row">
+                            <td colspan="7" class="py-2 px-4">
+                                <div class="ml-8">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="text-primary/60 border-b border-primary/10">
+                                                <th class="py-2 text-left">ID Producto</th>
+                                                <th class="py-2 text-left">Producto</th>
+                                                <th class="py-2 text-center">Cantidad</th>
+                                                <th class="py-2 text-right">Precio Unitario</th>
+                                                <th class="py-2 text-right">Precio Diseño</th>
+                                                <th class="py-2 text-right">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                    `;
+                    
+                    detalles.forEach(detalle => {
+                        const nombreProducto = productosMap[detalle.id_producto] || `Producto ${detalle.id_producto}`;
+                        const precioUnitario = preciosProductosMap[detalle.id_producto] || 0;
+                        const cantidad = parseFloat(detalle.cantidad) || 0;
+                        const precioDisenio = parseFloat(detalle.precio_disenio) || 0;
+                        const subtotalDetalle = (cantidad * precioUnitario) + precioDisenio;
+                        
+                        detallesHtml += `
+                            <tr class="border-b border-primary/5">
+                                <td class="py-2 font-mono text-xs">${detalle.id_producto}</td>
+                                <td class="py-2 font-medium">${escapeHtml(nombreProducto)}</td>
+                                <td class="py-2 text-center">${cantidad}</td>
+                                <td class="py-2 text-right">$${precioUnitario.toFixed(2)}</td>
+                                <td class="py-2 text-right">$${precioDisenio.toFixed(2)}</td>
+                                <td class="py-2 text-right font-semibold">$${subtotalDetalle.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    detallesHtml += `
+                                        </tbody>
+                                        <tfoot class="border-t-2 border-primary/20">
+                                            <tr>
+                                                <td colspan="5" class="py-2 text-right font-bold">Subtotal Productos:</td>
+                                                <td class="py-2 text-right font-bold text-primary">$${subtotalProductos.toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="5" class="py-2 text-right font-bold">Envío:</td>
+                                                <td class="py-2 text-right font-bold text-primary">$${precioEnvio.toFixed(2)}</td>
+                                            </tr>
+                                            <tr class="bg-primary/5">
+                                                <td colspan="5" class="py-2 text-right font-bold text-primary text-base">TOTAL COTIZACIÓN:</td>
+                                                <td class="py-2 text-right font-bold text-primary text-xl">$${totalCotizacion.toFixed(2)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    tbody.insertAdjacentHTML('beforeend', filaPrincipal);
+                    tbody.insertAdjacentHTML('beforeend', detallesHtml);
                 });
                 
                 showToast(`Se cargaron ${cotizaciones.length} cotizaciones correctamente`, 'success');
             } catch (error) {
                 console.error('Error en cargarYRenderizar:', error);
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-500">❌ Error al cargar: ${error.message}<br><br><button onclick="cargarYRenderizar()" class="mt-2 px-4 py-2 bg-primary text-white rounded-lg">Reintentar</button></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-500">❌ Error al cargar: ${error.message}<br><br><button onclick="cargarYRenderizar()" class="mt-2 px-4 py-2 bg-primary text-white rounded-lg">Reintentar</button></td></tr>`;
                 showToast('Error al cargar cotizaciones: ' + error.message, 'error');
             } finally {
                 isLoading = false;
@@ -278,57 +532,13 @@
         }
         
         // Funciones globales para acciones
-        window.editarCotizacion = function(idCotizacion, idPedido, idProducto) {
-            window.location.href = `cotizacion_editar.html?id_cotizacion=${idCotizacion}&id_pedido=${idPedido}&id_producto=${idProducto}`;
+        window.toggleDetalles = toggleDetalles;
+        window.editarCotizacion = function(idCotizacion) {
+            window.location.href = `cotizacion_editar.html?id_cotizacion=${idCotizacion}`;
         };
+        window.handleEliminarCotizacion = handleEliminarCotizacion;
         
-        window.eliminarCotizacion = async function(idCotizacion) {
-            if (!idCotizacion) {
-                showToast('ID de cotización inválido', 'error');
-                return;
-            }
-            
-            if (confirm(`¿Estás seguro de eliminar esta cotización?`)) {
-                // Deshabilitar temporalmente el botón de eliminar
-                const btns = document.querySelectorAll(`.btn-eliminar[data-id="${idCotizacion}"]`);
-                btns.forEach(btn => {
-                    btn.classList.add('btn-disabled');
-                    btn.disabled = true;
-                });
-                
-                try {
-                    console.log(`Intentando eliminar cotización ID: ${idCotizacion}`);
-                    const res = await fetch(`${API_BASE}/cotizacion/${idCotizacion}`, {
-                        method: 'DELETE',
-                        headers: getHeaders()
-                    });
-                    
-                    console.log('Respuesta DELETE:', res.status, res.statusText);
-                    
-                    if (res.ok) {
-                        showToast('Cotización eliminada correctamente', 'success');
-                        // Recargar la tabla después de eliminar
-                        setTimeout(() => {
-                            cargarYRenderizar();
-                        }, 500);
-                    } else {
-                        const errorText = await res.text();
-                        console.error('Error respuesta:', errorText);
-                        throw new Error(`Error ${res.status}: ${errorText || 'No se pudo eliminar'}`);
-                    }
-                } catch (error) {
-                    console.error('Error en eliminación:', error);
-                    showToast('Error al eliminar: ' + error.message, 'error');
-                    // Reactivar botones en caso de error
-                    btns.forEach(btn => {
-                        btn.classList.remove('btn-disabled');
-                        btn.disabled = false;
-                    });
-                }
-            }
-        };
-        
-        // Refresh button
+        // Event listeners
         document.getElementById('btn-refresh')?.addEventListener('click', (e) => {
             e.preventDefault();
             if (!isLoading) {
@@ -336,25 +546,16 @@
             }
         });
         
-        // Cargar datos al iniciar (una sola vez)
-        cargarYRenderizar();
-        
-        // ELIMINADO: El setInterval que causaba recargas automáticas
-        // Si quieres mantener actualizaciones automáticas, descomenta esto pero con mayor intervalo
-        /*
-        let refreshInterval = setInterval(() => {
-            if (document.visibilityState === 'visible' && !isLoading) {
-                cargarYRenderizar();
-            }
-        }, 60000); // Ahora cada 60 segundos en lugar de 30
-        */
-        
-        // Limpiar intervalo al salir de la página (opcional)
-        window.addEventListener('beforeunload', () => {
-            if (window.refreshInterval) {
-                clearInterval(window.refreshInterval);
-            }
+        document.getElementById('btn-expandir-todo')?.addEventListener('click', () => {
+            expandirTodos();
         });
+        
+        document.getElementById('btn-colapsar-todo')?.addEventListener('click', () => {
+            colapsarTodos();
+        });
+        
+        // Cargar datos al iniciar
+        cargarYRenderizar();
     </script>
 </body>
 </html>
