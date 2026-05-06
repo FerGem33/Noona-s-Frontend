@@ -21,10 +21,15 @@
 </script>
 <style>
     body { font-family: 'Montserrat', sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    /* Fijar anchos mínimos para columnas */
+    .tabla-productos th, .tabla-productos td {
+        vertical-align: middle;
+    }
 </style>
 </head>
 <body class="bg-brand-pink min-h-screen font-display">
-<main class="max-w-4xl mx-auto px-6 py-12">
+<main class="max-w-6xl mx-auto px-6 py-12">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div class="space-y-1">
             <nav class="flex items-center gap-2 text-primary/70 text-sm font-medium mb-2">
@@ -33,25 +38,24 @@
                 <span class="text-slate-900">Editar</span>
             </nav>
             <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">EDITAR PEDIDO</h1>
-            <p class="text-slate-700">Actualice la información logística y de costos del pedido</p>
+            <p class="text-slate-700">Actualice la información general y los productos del pedido</p>
         </div>
         <a href="pedidos.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 font-bold rounded-lg shadow-sm border border-slate-200 hover:bg-slate-50 transition-all text-sm">← Volver a la lista</a>
     </div>
     <div class="bg-white rounded-2xl shadow-xl shadow-primary/5 overflow-hidden">
-        <div class="p-8 border-b border-slate-100 bg-slate-50/50">
-            <div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">edit_note</span><h2 class="text-lg font-bold text-slate-900">Información General</h2></div>
-        </div>
         <form id="form-editar" class="p-8 space-y-8">
-            <div class="grid grid-cols-1 gap-6">
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-slate-700">Cliente</label>
-                    <select id="id_cliente" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-slate-700">Dirección</label>
-                    <select id="id_direccion" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
-                </div>
+            <!-- Información General -->
+            <div class="border-b border-slate-100 pb-6">
+                <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">edit_note</span><h2 class="text-lg font-bold text-slate-900">Información General</h2></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-700">Cliente</label>
+                        <select id="id_cliente" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-700">Dirección</label>
+                        <select id="id_direccion" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                    </div>
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-slate-700">Fecha y Hora de Entrega</label>
                         <input id="fecha_entrega" type="datetime-local" class="w-full h-12 px-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" required>
@@ -61,61 +65,171 @@
                         <select id="id_estado" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
                     </div>
                 </div>
-                <div class="space-y-2">
+                <div class="mt-6 space-y-2">
                     <label class="block text-sm font-bold text-slate-700">Comentarios internos</label>
-                    <textarea id="comentario" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" rows="3" placeholder="Notas para el equipo..."></textarea>
-                </div>
-                <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
-                    <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">payments</span><h2 class="text-lg font-bold text-slate-900">Detalles de Cobro</h2></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="block text-sm font-bold text-slate-700">Subtotal ($)</label><input id="subtotal" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl"></div>
-                        <div><label class="block text-sm font-bold text-slate-700">Total ($)</label><input id="total" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl"></div>
-                    </div>
+                    <textarea id="comentario" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" rows="2" placeholder="Notas para el equipo..."></textarea>
                 </div>
             </div>
-            <div class="flex flex-col md:flex-row items-center justify-between p-6 border-t border-slate-100 gap-6">
-                <div class="flex items-center gap-4"><div class="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary"><span class="material-symbols-outlined">receipt_long</span></div><div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</p><p id="total-preview" class="text-2xl font-black text-slate-900">$0.00</p></div></div>
+
+            <!-- Productos del pedido -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">shopping_cart</span><h2 class="text-lg font-bold text-slate-900">Productos del Pedido</h2></div>
+                    <button type="button" id="btn-agregar-producto" class="text-sm bg-primary/10 text-primary px-4 py-2 rounded-xl font-semibold hover:bg-primary/20 transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">add_circle</span> Agregar producto
+                    </button>
+                </div>
+                <div class="overflow-x-auto border border-slate-100 rounded-xl">
+                    <table class="tabla-productos w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                <th class="px-4 py-3">Producto</th>
+                                <th class="px-4 py-3 text-center w-28">Cantidad</th>
+                                <th class="px-4 py-3 text-right w-36">Precio Unitario</th>
+                                <th class="px-4 py-3 text-right w-36">Diseño</th>
+                                <th class="px-4 py-3 text-right w-36">Envío</th>
+                                <th class="px-4 py-3 text-right w-36">Subtotal</th>
+                                <th class="px-4 py-3 text-center w-20">Acción</th>
+                            <tr>
+                        </thead>
+                        <tbody id="tabla-productos" class="divide-y divide-slate-100">
+                            <tr><td colspan="7" class="text-center py-6 text-slate-400">Cargando productos...学</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-slate-50">
+                                <td colspan="5" class="px-4 py-3 text-right font-bold">TOTAL ESTIMADO</td>
+                                <td class="px-4 py-3 text-right font-black text-primary text-lg" id="total-productos">$0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detalles financieros -->
+            <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">payments</span><h2 class="text-lg font-bold text-slate-900">Resumen Financiero</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="block text-sm font-bold text-slate-700">Subtotal ($)</label><input id="subtotal" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl bg-white" readonly></div>
+                    <div><label class="block text-sm font-bold text-slate-700">Total ($)</label><input id="total" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl bg-white" readonly></div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-slate-100 gap-6">
+                <div class="flex items-center gap-4"><div class="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary"><span class="material-symbols-outlined">receipt_long</span></div><div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total a pagar</p><p id="total-preview" class="text-2xl font-black text-slate-900">$0.00</p></div></div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
                     <a href="pedidos.html" class="flex-1 md:flex-none px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors">Cancelar</a>
-                    <button type="submit" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2">💾 Actualizar pedido</button>
+                    <button type="submit" id="btn-submit" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2">💾 Actualizar pedido</button>
                 </div>
             </div>
         </form>
     </div>
 </main>
 
+<!-- MODALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 class="text-xl font-bold text-slate-900">¡Pedido actualizado!</h3>
+        <p class="text-slate-500 mt-2">Los cambios se han guardado correctamente.</p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Advertencia</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
 <script>
     const API_BASE = 'http://3.15.13.161:8000/api';
-    const TOKEN = localStorage.token;
+    const TOKEN = localStorage.token || localStorage.getItem('token');
+    if (!TOKEN) { alert('No hay sesión activa'); window.location.href = 'index.html'; }
     function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
 
     const urlParams = new URLSearchParams(window.location.search);
     const pedidoId = urlParams.get('id');
-    if (!pedidoId) { alert('No se especificó pedido'); window.location.href='pedidos.html'; }
+    if (!pedidoId) mostrarError('No se especificó pedido', true);
 
-    let clientes = [];
-    let direcciones = [];
+    let clientes = [], direccionesTotales = [], productosCatalogo = [];
+    let productosPedido = []; // cada elemento: { id_producto, nombre, cantidad, precio_unitario, diseno, envio }
+    let subtotalGeneral = 0, totalGeneral = 0;
 
-    async function cargarClientes(selectedId) {
-        const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
-        if (res.ok) clientes = await res.json();
-        const select = document.getElementById('id_cliente');
-        select.innerHTML = '<option value="">Seleccione cliente</option>';
-        clientes.forEach(c => { const opt = document.createElement('option'); opt.value = c.id_cliente; opt.textContent = `${c.nombre} ${c.apellido}`.trim(); if (selectedId && c.id_cliente == selectedId) opt.selected = true; select.appendChild(opt); });
+    function mostrarExito(callback) {
+        const modal = document.getElementById('modal-exito');
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
+    function mostrarError(mensaje, redirigir = false) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => {
+            modal.classList.add('hidden');
+            if (redirigir) window.location.href = 'pedidos.html';
+        };
+    }
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
     }
 
-    async function cargarDirecciones(selectedId) {
-        const select = document.getElementById('id_direccion');
-        select.innerHTML = '<option value="">Seleccione dirección</option>';
+    // ========== CARGAR DATOS MAESTROS ==========
+    async function cargarClientes(selectedId) {
+        try {
+            const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
+            if (res.ok) clientes = await res.json();
+            const select = document.getElementById('id_cliente');
+            select.innerHTML = '<option value="">Seleccione cliente</option>';
+            clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id_cliente;
+                opt.textContent = `${c.nombre} ${c.apellido}`.trim();
+                if (selectedId && c.id_cliente == selectedId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        } catch(e) { mostrarError('No se pudieron cargar los clientes'); }
+    }
+
+    async function cargarDireccionesPorCliente(clienteId, selectedId) {
+        const selectDir = document.getElementById('id_direccion');
+        selectDir.innerHTML = '<option value="">Cargando direcciones...</option>';
         try {
             const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
             if (res.ok) {
                 const todas = await res.json();
-                const clienteId = document.getElementById('id_cliente').value;
+                direccionesTotales = todas;
                 const filtradas = todas.filter(d => d.id_cliente == clienteId);
-                filtradas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id_direccion; opt.textContent = d.direccion || `Dir ${d.id_direccion}`; if (selectedId && d.id_direccion == selectedId) opt.selected = true; select.appendChild(opt); });
+                selectDir.innerHTML = '<option value="">Seleccione dirección</option>';
+                filtradas.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id_direccion;
+                    opt.textContent = d.descripcion || `Dir ${d.id_direccion}`;
+                    if (selectedId && d.id_direccion == selectedId) opt.selected = true;
+                    selectDir.appendChild(opt);
+                });
             }
-        } catch(e) {}
+        } catch(e) { mostrarError('Error al cargar direcciones'); }
     }
 
     async function cargarEstados(selectedId) {
@@ -124,61 +238,242 @@
             const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
             if (res.ok) estadosList = await res.json();
         } catch(e) {}
-        if (estadosList.length === 0) estadosList = [{ id_estado: 1, descripcion: 'Pendiente' }, { id_estado: 2, descripcion: 'Preparación' }, { id_estado: 3, descripcion: 'Enviado' }, { id_estado: 4, descripcion: 'Entregado' }, { id_estado: 5, descripcion: 'Cancelado' }];
+        if (estadosList.length === 0) estadosList = [{ id_estado: 1, descripcion: 'Pendiente' }, { id_estado: 2, descripcion: 'Preparación' }, { id_estado: 3, descripcion: 'Enviado' }, { id_estado: 4, descripcion: 'Entregado' }, { id_estado: 5, descripcion: 'Cancelado' }, { id_estado: 6, descripcion: 'Cotización' }];
         const select = document.getElementById('id_estado');
         select.innerHTML = '<option value="">Seleccione estado</option>';
-        estadosList.forEach(e => { const opt = document.createElement('option'); opt.value = e.id_estado; opt.textContent = e.descripcion; if (selectedId && e.id_estado == selectedId) opt.selected = true; select.appendChild(opt); });
+        estadosList.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id_estado;
+            opt.textContent = e.descripcion;
+            if (selectedId && e.id_estado == selectedId) opt.selected = true;
+            select.appendChild(opt);
+        });
     }
 
-    async function obtenerPedido() {
-        const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: getHeaders() });
-        if (!res.ok) throw new Error('Pedido no encontrado');
-        return res.json();
+    async function cargarProductosCatalogo() {
+        try {
+            const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
+            if (res.ok) productosCatalogo = await res.json();
+            else throw new Error('No se pudo cargar catálogo');
+        } catch(e) { mostrarError('Error al cargar catálogo de productos'); }
     }
 
-    async function cargarDatos() {
-        const pedido = await obtenerPedido();
-        await cargarClientes(pedido.id_cliente);
-        await cargarDirecciones(pedido.id_direccion);
-        await cargarEstados(pedido.id_estado);
-        document.getElementById('fecha_entrega').value = pedido.fecha_entrega ? pedido.fecha_entrega.slice(0,16) : '';
-        document.getElementById('comentario').value = pedido.comentario || '';
-        document.getElementById('subtotal').value = pedido.subtotal || 0;
-        document.getElementById('total').value = pedido.total || 0;
-        actualizarPreview();
+    // ========== CARGAR PEDIDO COMPLETO ==========
+    async function cargarPedidoCompleto() {
+        try {
+            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: getHeaders() });
+            if (!res.ok) throw new Error('Pedido no encontrado');
+            const pedido = await res.json();
+            await cargarClientes(pedido.id_cliente);
+            await cargarDireccionesPorCliente(pedido.id_cliente, pedido.id_direccion);
+            await cargarEstados(pedido.id_estado);
+            document.getElementById('fecha_entrega').value = pedido.fecha_entrega ? pedido.fecha_entrega.slice(0,16) : '';
+            document.getElementById('comentario').value = pedido.comentario || '';
+            if (pedido.productos && Array.isArray(pedido.productos)) {
+                productosPedido = pedido.productos.map(p => {
+                    const prodCatalogo = productosCatalogo.find(c => c.id_producto === p.id_producto);
+                    return {
+                        id_producto: p.id_producto,
+                        nombre: prodCatalogo ? prodCatalogo.descripcion : (p.producto || `Producto ${p.id_producto}`),
+                        cantidad: p.cantidad,
+                        precio_unitario: prodCatalogo ? prodCatalogo.precio_unitario : 0,
+                        diseno: typeof p.precio_disenio === 'string' ? parseFloat(p.precio_disenio) : (p.precio_disenio || 0),
+                        envio: typeof p.precio_envio === 'string' ? parseFloat(p.precio_envio) : (p.precio_envio || 0)
+                    };
+                });
+            } else {
+                productosPedido = [];
+            }
+            renderizarTablaProductos();
+        } catch(e) {
+            mostrarError('Error al cargar el pedido: ' + e.message, true);
+        }
     }
 
-    function actualizarPreview() {
-        const total = parseFloat(document.getElementById('total').value) || 0;
-        document.getElementById('total-preview').innerText = `$${total.toFixed(2)}`;
+    // ========== LÓGICA DE TABLA ==========
+    function calcularTotales() {
+        let subtotal = 0, total = 0;
+        productosPedido.forEach(p => {
+            subtotal += p.cantidad * p.precio_unitario;
+            total += (p.cantidad * p.precio_unitario) + p.diseno + p.envio;
+        });
+        subtotalGeneral = subtotal;
+        totalGeneral = total;
+        document.getElementById('subtotal').value = subtotalGeneral.toFixed(2);
+        document.getElementById('total').value = totalGeneral.toFixed(2);
+        document.getElementById('total-preview').innerHTML = `$${totalGeneral.toFixed(2)}`;
+        document.getElementById('total-productos').innerHTML = `$${totalGeneral.toFixed(2)}`;
     }
-    document.getElementById('subtotal').addEventListener('input', actualizarPreview);
-    document.getElementById('total').addEventListener('input', actualizarPreview);
-    document.getElementById('id_cliente').addEventListener('change', (e) => { if(e.target.value) cargarDirecciones(); });
 
+    function renderizarTablaProductos() {
+        const tbody = document.getElementById('tabla-productos');
+        if (!productosPedido.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">No hay productos en este pedido. Agrega usando el botón superior.</td></tr>';
+            calcularTotales();
+            return;
+        }
+        tbody.innerHTML = '';
+        productosPedido.forEach((prod, idx) => {
+            const subtotal = (prod.cantidad * prod.precio_unitario) + prod.diseno + prod.envio;
+            const fila = `
+                <tr>
+                    <td class="px-4 py-3 font-semibold">${escapeHtml(prod.nombre)}</td>
+                    <td class="px-4 py-3 text-center"><input type="number" class="cantidad w-20 text-center border rounded-lg px-2 py-1" value="${prod.cantidad}" min="1" data-idx="${idx}"></td>
+                    <td class="px-4 py-3 text-right font-mono">$${prod.precio_unitario.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-right"><input type="number" step="0.01" class="diseno w-28 text-right border rounded-lg px-2 py-1" value="${prod.diseno.toFixed(2)}" data-idx="${idx}"></td>
+                    <td class="px-4 py-3 text-right"><input type="number" step="0.01" class="envio w-28 text-right border rounded-lg px-2 py-1" value="${prod.envio.toFixed(2)}" data-idx="${idx}"></td>
+                    <td class="px-4 py-3 text-right font-bold">$${subtotal.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-center"><button class="eliminar-prod text-red-500 hover:bg-red-50 p-1 rounded-full" data-idx="${idx}"><span class="material-symbols-outlined">delete</span></button></td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', fila);
+        });
+        // Eventos: cantidad, diseño, envío (precio unitario NO editable)
+        document.querySelectorAll('.cantidad').forEach(inp => inp.addEventListener('change', (e) => {
+            const idx = parseInt(inp.dataset.idx);
+            let val = parseInt(inp.value);
+            if (isNaN(val) || val < 1) val = 1;
+            productosPedido[idx].cantidad = val;
+            renderizarTablaProductos();
+        }));
+        document.querySelectorAll('.diseno, .envio').forEach(inp => inp.addEventListener('change', (e) => {
+            const idx = parseInt(inp.dataset.idx);
+            let val = parseFloat(inp.value);
+            if (isNaN(val)) val = 0;
+            if (inp.classList.contains('diseno')) productosPedido[idx].diseno = val;
+            else productosPedido[idx].envio = val;
+            renderizarTablaProductos();
+        }));
+        document.querySelectorAll('.eliminar-prod').forEach(btn => btn.addEventListener('click', (e) => {
+            const idx = parseInt(btn.dataset.idx);
+            productosPedido.splice(idx, 1);
+            renderizarTablaProductos();
+        }));
+        calcularTotales();
+    }
+
+    // Modal para agregar producto (solo se copia del anterior)
+    function mostrarModalAgregarProducto() {
+        if (productosCatalogo.length === 0) { mostrarWarning('No hay productos disponibles en el catálogo'); return; }
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Agregar Producto</h3>
+                <div class="space-y-4">
+                    <select id="select-producto" class="w-full p-3 border rounded-xl">
+                        <option value="">Seleccione producto</option>
+                        ${productosCatalogo.map(p => `<option value="${p.id_producto}" data-precio="${p.precio_unitario}" data-nombre="${escapeHtml(p.descripcion)}">${escapeHtml(p.descripcion)} - $${p.precio_unitario}</option>`).join('')}
+                    </select>
+                    <input type="number" id="cantidad-nueva" class="w-full p-3 border rounded-xl" placeholder="Cantidad" min="1" value="1">
+                    <input type="number" step="0.01" id="diseno-nuevo" class="w-full p-3 border rounded-xl" placeholder="Precio diseño" value="0">
+                    <input type="number" step="0.01" id="envio-nuevo" class="w-full p-3 border rounded-xl" placeholder="Precio envío" value="0">
+                    <div class="flex gap-3 justify-end mt-4">
+                        <button id="cancelar-modal" class="px-4 py-2 border rounded-xl">Cancelar</button>
+                        <button id="confirmar-modal" class="px-4 py-2 bg-primary text-white rounded-xl">Agregar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('#cancelar-modal').onclick = () => modal.remove();
+        modal.querySelector('#confirmar-modal').onclick = () => {
+            const select = modal.querySelector('#select-producto');
+            const id_producto = parseInt(select.value);
+            if (!id_producto) { mostrarWarning('Seleccione un producto'); return; }
+            const cantidad = parseInt(modal.querySelector('#cantidad-nueva').value);
+            if (isNaN(cantidad) || cantidad < 1) { mostrarWarning('Cantidad inválida'); return; }
+            const diseno = parseFloat(modal.querySelector('#diseno-nuevo').value) || 0;
+            const envio = parseFloat(modal.querySelector('#envio-nuevo').value) || 0;
+            const selectedOption = select.options[select.selectedIndex];
+            const nombre = selectedOption.getAttribute('data-nombre');
+            const precio_unitario = parseFloat(selectedOption.getAttribute('data-precio'));
+            const existente = productosPedido.find(p => p.id_producto === id_producto);
+            if (existente) {
+                existente.cantidad += cantidad;
+            } else {
+                productosPedido.push({ id_producto, nombre, cantidad, precio_unitario, diseno, envio });
+            }
+            renderizarTablaProductos();
+            modal.remove();
+        };
+    }
+
+    // ========== ACTUALIZAR PEDIDO ==========
     async function actualizarPedido(event) {
         event.preventDefault();
-        const datos = {
-            id_direccion: parseInt(document.getElementById('id_direccion').value),
-            id_estado: parseInt(document.getElementById('id_estado').value),
-            id_cliente: parseInt(document.getElementById('id_cliente').value),
-            fecha_entrega: new Date(document.getElementById('fecha_entrega').value).toISOString(),
+        const id_cliente = parseInt(document.getElementById('id_cliente').value);
+        const id_direccion = parseInt(document.getElementById('id_direccion').value);
+        const id_estado = parseInt(document.getElementById('id_estado').value);
+        const fecha_entrega = document.getElementById('fecha_entrega').value;
+        const comentario = document.getElementById('comentario').value;
+
+        if (!id_cliente || !id_direccion || !id_estado || !fecha_entrega) {
+            mostrarWarning('Complete todos los campos obligatorios');
+            return;
+        }
+        if (productosPedido.length === 0) {
+            mostrarWarning('Debe haber al menos un producto en el pedido');
+            return;
+        }
+
+        const productosParaAPI = productosPedido.map(p => ({
+            id_producto: p.id_producto,
+            cantidad: p.cantidad,
+            precio_disenio: p.diseno,
+            precio_envio: p.envio
+        }));
+
+        const payload = {
+            id_cliente,
+            id_direccion,
+            id_estado,
+            fecha_entrega: new Date(fecha_entrega).toISOString(),
             fecha_pedido: new Date().toISOString(),
-            comentario: document.getElementById('comentario').value,
+            comentario,
             tipo_entrega: true,
-            subtotal: parseFloat(document.getElementById('subtotal').value) || 0,
-            total: parseFloat(document.getElementById('total').value) || 0
+            subtotal: subtotalGeneral,
+            total: totalGeneral,
+            productos: productosParaAPI
         };
+
+        const btn = document.getElementById('btn-submit');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Actualizando...';
+        btn.disabled = true;
+
         try {
-            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(datos) });
-            if (!res.ok) throw new Error((await res.json()).detail);
-            alert('Pedido actualizado');
-            window.location.href = 'pedidos.html';
-        } catch(e) { alert('Error: ' + e.message); }
+            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.detail || 'Error al actualizar el pedido');
+            }
+            mostrarExito(() => window.location.href = 'pedidos.html');
+        } catch (error) {
+            mostrarError('Error al guardar cambios: ' + error.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
+    // Eventos
+    document.getElementById('btn-agregar-producto').addEventListener('click', mostrarModalAgregarProducto);
     document.getElementById('form-editar').addEventListener('submit', actualizarPedido);
-    cargarDatos();
+    document.getElementById('id_cliente').addEventListener('change', (e) => {
+        if (e.target.value) cargarDireccionesPorCliente(e.target.value);
+    });
+
+    async function init() {
+        await cargarProductosCatalogo();
+        await cargarPedidoCompleto();
+    }
+    init();
+
+    function escapeHtml(s) { return s ? s.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;') : ''; }
 </script>
 </body>
 </html>
