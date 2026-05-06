@@ -109,6 +109,15 @@ body {
 .toast-close:hover {
     color: #4b5563;
 }
+
+.cotizacion-hint {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 
@@ -191,7 +200,7 @@ body {
                 <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
                     <h2 class="text-xl font-bold text-zinc-800 flex items-center gap-2">
                         <span class="material-symbols-outlined text-brand-accent">cake</span>
-                        Productos de la cotización
+                        Productos del pedido
                     </h2>
 
                     <button type="button" id="btn-agregar-producto" class="text-sm font-bold text-brand-accent hover:bg-rose-50 px-4 py-2 rounded-xl transition-colors flex items-center gap-1">
@@ -200,7 +209,7 @@ body {
                 </div>
 
                 <div class="mb-4 text-sm text-zinc-600 bg-zinc-50 rounded-xl p-4">
-                    <p><strong>Producto:</strong> pastel o artículo que se incluirá en la cotización.</p>
+                    <p><strong>Producto:</strong> pastel o artículo que se incluirá en el pedido.</p>
                     <p><strong>Cantidad:</strong> número de unidades solicitadas.</p>
                     <p><strong>Precio de diseño:</strong> costo extra por decoración o personalización.</p>
                 </div>
@@ -532,6 +541,7 @@ async function cargarProductosCatalogo() {
         }
 
         productosCatalogo = await res.json();
+        console.log('Productos catálogo cargados:', productosCatalogo.length);
 
     } catch (e) {
         productosCatalogo = [];
@@ -629,7 +639,7 @@ function mostrarModalAgregarProducto() {
 
     modalProducto.innerHTML = `
         <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold mb-2">Agregar Producto a Cotización</h3>
+            <h3 class="text-xl font-bold mb-2">Agregar Producto al Pedido</h3>
 
             <p class="text-sm text-zinc-500 mb-4">
                 Selecciona el producto, indica la cantidad solicitada y agrega el precio de diseño personalizado.
@@ -950,6 +960,144 @@ async function nuevaDireccion() {
     };
 }
 
+// ============================================
+// FUNCIÓN PARA CARGAR DATOS DESDE COTIZACIÓN CONFIRMADA
+// ============================================
+function cargarDatosDesdeCotizacion() {
+    const datosGuardados = sessionStorage.getItem("datos_pedido_desde_cotizacion");
+    
+    if (!datosGuardados) {
+        console.log("No hay cotización pendiente para convertir en pedido");
+        return false;
+    }
+    
+    try {
+        const cotizacion = JSON.parse(datosGuardados);
+        console.log("Cargando datos desde cotización:", cotizacion);
+        
+        // 1. Mostrar mensaje de qué cotización se está usando
+        showToast(`📋 Usando cotización #${cotizacion.id_cotizacion_original} para este pedido`, 'info', 4000);
+        
+        // 2. Agregar una nota visual en el formulario
+        const notasTextarea = document.getElementById('comentario');
+        const fechaCotizacion = cotizacion.fecha_cotizacion ? new Date(cotizacion.fecha_cotizacion).toLocaleDateString() : new Date().toLocaleDateString();
+        const notaCotizacion = `[Pedido generado desde cotización #${cotizacion.id_cotizacion_original} - ${fechaCotizacion}]\n\n`;
+        
+        if (!notasTextarea.value.includes("generado desde cotización")) {
+            notasTextarea.value = notaCotizacion + (notasTextarea.value || "");
+        }
+        
+        // 3. Cargar el precio de envío desde la cotización
+        if (cotizacion.envio > 0) {
+            const envioInput = document.getElementById('precio_envio');
+            envioInput.value = cotizacion.envio;
+            actualizarResumen();
+        }
+        
+        // 4. IMPORTANTE: Esperar a que los productos del catálogo estén cargados
+        if (productosCatalogo.length === 0) {
+            // Si aún no hay productos cargados, esperar
+            const checkInterval = setInterval(() => {
+                if (productosCatalogo.length > 0) {
+                    clearInterval(checkInterval);
+                    procesarProductosCotizacion(cotizacion.productos);
+                }
+            }, 100);
+            
+            // Timeout por si algo falla
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (productosCatalogo.length === 0) {
+                    showToast("Error: No se pudieron cargar los productos del catálogo", "error");
+                }
+            }, 5000);
+        } else {
+            procesarProductosCotizacion(cotizacion.productos);
+        }
+        
+        // 5. Sugerir el cliente si existe en la cotización
+        if (cotizacion.cliente_nombre && cotizacion.cliente_nombre !== "Cliente de cotización") {
+            const clienteField = document.getElementById('id_cliente').parentElement;
+            if (!clienteField.querySelector('.cotizacion-hint')) {
+                const clienteHint = document.createElement('div');
+                clienteHint.className = 'text-xs text-brand-primary mt-1 p-2 bg-brand-primary/5 rounded-lg cotizacion-hint';
+                clienteHint.innerHTML = `💡 Cliente sugerido de cotización: <strong>${escapeHtml(cotizacion.cliente_nombre)}</strong>`;
+                clienteField.appendChild(clienteHint);
+                
+                // Opcional: Intentar buscar y seleccionar automáticamente si existe el cliente
+                const clienteExacto = clientes.find(c => 
+                    `${c.nombre} ${c.apellido}`.toLowerCase() === cotizacion.cliente_nombre.toLowerCase()
+                );
+                if (clienteExacto) {
+                    setTimeout(() => {
+                        clienteSelect.value = clienteExacto.id_cliente;
+                        showToast(`Cliente "${cotizacion.cliente_nombre}" seleccionado automáticamente`, 'success');
+                    }, 500);
+                }
+            }
+        }
+        
+        // 6. Limpiar el storage después de un delay (para no reutilizar)
+        setTimeout(() => {
+            sessionStorage.removeItem("datos_pedido_desde_cotizacion");
+            console.log("Datos de cotización eliminados del sessionStorage");
+        }, 5000);
+        
+        return true;
+        
+    } catch (error) {
+        console.error("Error al procesar datos de cotización:", error);
+        showToast("Error al cargar los datos de la cotización", "error");
+        return false;
+    }
+}
+
+// Función auxiliar para procesar los productos de la cotización
+function procesarProductosCotizacion(productosCotizacion) {
+    if (!productosCotizacion || productosCotizacion.length === 0) {
+        showToast("La cotización no tiene productos", "warning");
+        return;
+    }
+    
+    console.log("Procesando productos de cotización:", productosCotizacion);
+    
+    // Mapear los productos de la cotización a productosPedido
+    const nuevosProductos = [];
+    
+    productosCotizacion.forEach(prodCot => {
+        // Buscar el producto en el catálogo para obtener su precio_unitario actual
+        const productoCatalogo = productosCatalogo.find(p => p.id_producto === prodCot.id_producto);
+        
+        if (productoCatalogo) {
+            nuevosProductos.push({
+                id_producto: prodCot.id_producto,
+                nombre: productoCatalogo.descripcion || prodCot.nombre || `Producto ${prodCot.id_producto}`,
+                cantidad: parseFloat(prodCot.cantidad),
+                precio_unitario: parseFloat(productoCatalogo.precio_unitario) || parseFloat(prodCot.precio_unitario) || 0,
+                precio_disenio: parseFloat(prodCot.precio_disenio) || 0
+            });
+        } else {
+            // Si no se encuentra en el catálogo, usar los datos de la cotización
+            nuevosProductos.push({
+                id_producto: prodCot.id_producto,
+                nombre: prodCot.nombre || `Producto ${prodCot.id_producto}`,
+                cantidad: parseFloat(prodCot.cantidad),
+                precio_unitario: parseFloat(prodCot.precio_unitario) || 0,
+                precio_disenio: parseFloat(prodCot.precio_disenio) || 0
+            });
+            console.warn(`Producto ${prodCot.id_producto} no encontrado en catálogo, usando datos guardados`);
+        }
+    });
+    
+    // Agregar los productos al pedido actual
+    if (nuevosProductos.length > 0) {
+        productosPedido.push(...nuevosProductos);
+        renderizarProductos();
+        showToast(`✅ Se cargaron ${nuevosProductos.length} producto(s) desde la cotización`, 'success');
+        actualizarResumen();
+    }
+}
+
 clienteSelect.addEventListener('change', async () => {
     const id = clienteSelect.value;
 
@@ -989,6 +1137,11 @@ async function init() {
     }
 
     actualizarResumen();
+    
+    // 🔥 Cargar datos desde cotización si existen (después de que todo esté cargado)
+    setTimeout(() => {
+        cargarDatosDesdeCotizacion();
+    }, 500);
 }
 
 init();

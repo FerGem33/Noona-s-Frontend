@@ -117,7 +117,6 @@
                             <span class="material-symbols-outlined">refresh</span>
                             Actualizar
                         </button>
-                   
                     </div>
                     <div id="info-cantidad" class="text-sm text-slate-500"></div>
                 </div>
@@ -223,7 +222,6 @@
             
             modal.classList.remove('hidden');
             
-            // Remover event listeners anteriores para evitar duplicados
             const newAceptar = aceptarBtn.cloneNode(true);
             const newCancelar = cancelarBtn.cloneNode(true);
             aceptarBtn.parentNode.replaceChild(newAceptar, aceptarBtn);
@@ -344,9 +342,49 @@
             }
         }
 
-   
+        // ✅ NUEVA FUNCIÓN: Confirmar cotización y enviar a pedido nuevo
+        function confirmarCotizacion(idCotizacion) {
+            // Buscar la cotización actual en los datos cargados (o podrías buscarla de nuevo desde API)
+            // Como tenemos los datos en el front, los buscamos en el DOM o en una variable global
+            // Para simplificar, haremos una petición GET específica para obtener todos los detalles exactos
+            fetch(`${API_BASE}/cotizacion/${idCotizacion}`, { headers: getHeaders() })
+                .then(res => res.json())
+                .then(cotizacion => {
+                    // Estructurar los datos para el pedido nuevo
+                    const datosParaPedido = {
+                        from_cotizacion: true,
+                        id_cotizacion_original: cotizacion.id_cotizacion,
+                        cliente_nombre: cotizacion.cliente_nombre || "Cliente de cotización",
+                        productos: cotizacion.detalles.map(detalle => ({
+                            id_producto: detalle.id_producto,
+                            nombre: productosMap[detalle.id_producto] || `Producto ${detalle.id_producto}`,
+                            cantidad: detalle.cantidad,
+                            precio_unitario: preciosProductosMap[detalle.id_producto] || 0,
+                            precio_disenio: detalle.precio_disenio || 0,
+                            subtotal: (parseFloat(detalle.cantidad) * (preciosProductosMap[detalle.id_producto] || 0)) + (parseFloat(detalle.precio_disenio) || 0)
+                        })),
+                        envio: parseFloat(cotizacion.precio_envio) || 0,
+                        total_general: calcularTotalCotizacion(cotizacion),
+                        notas: cotizacion.notas || "",
+                        fecha_cotizacion: cotizacion.fecha_creacion || new Date().toISOString()
+                    };
+                    
+                    // Guardar en sessionStorage para que pedido_nuevo.html lo recupere
+                    sessionStorage.setItem("datos_pedido_desde_cotizacion", JSON.stringify(datosParaPedido));
+                    
+                    showToast(`Cotización #${idCotizacion} confirmada. Redirigiendo a nuevo pedido...`, 'success');
+                    
+                    // Redirigir a la página de nuevo pedido
+                    setTimeout(() => {
+                        window.location.href = "pedido_nuevo.html";
+                    }, 800);
+                })
+                .catch(error => {
+                    console.error("Error al obtener cotización para confirmar:", error);
+                    mostrarError("No se pudo obtener los datos de la cotización para crear el pedido.");
+                });
+        }
 
-        // Función que maneja la eliminación con modal personalizado
         function handleEliminarCotizacion(idCotizacion) {
             if (!idCotizacion) {
                 showToast('ID de cotización inválido', 'error');
@@ -432,7 +470,7 @@
                             <td class="py-3" onclick="window.toggleDetalles(${idCotizacion})">
                                 <span class="badge badge-detalles">${cantidadProductos} producto${cantidadProductos !== 1 ? 's' : ''}</span>
                                 <span class="text-slate-500 text-sm ml-2">${escapeHtml(resumenCorto)}</span>
-                            </td>
+                             </td>
                             <td class="py-3 text-right text-slate-600" onclick="window.toggleDetalles(${idCotizacion})">$${precioEnvio.toFixed(2)}</td>
                             <td class="py-3 text-right font-semibold text-slate-700" onclick="window.toggleDetalles(${idCotizacion})">$${subtotalProductos.toFixed(2)}</td>
                             <td class="py-3 text-right font-bold text-primary text-xl" onclick="window.toggleDetalles(${idCotizacion})">$${totalCotizacion.toFixed(2)}</td>
@@ -492,20 +530,30 @@
                                             <tr>
                                                 <td colspan="5" class="py-2 text-right font-bold">Subtotal Productos:</td>
                                                 <td class="py-2 text-right font-bold text-primary">$${subtotalProductos.toFixed(2)}</td>
-                                            </tr>
+                                             </tr>
                                             <tr>
                                                 <td colspan="5" class="py-2 text-right font-bold">Envío:</td>
                                                 <td class="py-2 text-right font-bold text-primary">$${precioEnvio.toFixed(2)}</td>
-                                            </tr>
+                                             </tr>
                                             <tr class="bg-primary/5">
                                                 <td colspan="5" class="py-2 text-right font-bold text-primary text-base">TOTAL COTIZACIÓN:</td>
                                                 <td class="py-2 text-right font-bold text-primary text-xl">$${totalCotizacion.toFixed(2)}</td>
-                                            </tr>
+                                             </tr>
+                                            <!-- ✅ BOTÓN CONFIRMAR COTIZACIÓN (dentro del detalle, después del total) -->
+                                            <tr>
+                                                <td colspan="6" class="pt-4 pb-2 text-right">
+                                                    <button onclick="window.confirmarCotizacion(${idCotizacion})" 
+                                                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-all flex items-center gap-2 ml-auto shadow-md">
+                                                        <span class="material-symbols-outlined">check_circle</span>
+                                                        Confirmar Cotización
+                                                    </button>
+                                                </td>
+                                             </tr>
                                         </tfoot>
                                     </table>
                                 </div>
                             </td>
-                        </tr>
+                         </tr>
                     `;
                     
                     tbody.insertAdjacentHTML('beforeend', filaPrincipal);
@@ -533,6 +581,7 @@
         
         // Funciones globales para acciones
         window.toggleDetalles = toggleDetalles;
+        window.confirmarCotizacion = confirmarCotizacion;
         window.editarCotizacion = function(idCotizacion) {
             window.location.href = `cotizacion_editar.html?id_cotizacion=${idCotizacion}`;
         };
@@ -544,14 +593,6 @@
             if (!isLoading) {
                 cargarYRenderizar();
             }
-        });
-        
-        document.getElementById('btn-expandir-todo')?.addEventListener('click', () => {
-            expandirTodos();
-        });
-        
-        document.getElementById('btn-colapsar-todo')?.addEventListener('click', () => {
-            colapsarTodos();
         });
         
         // Cargar datos al iniciar

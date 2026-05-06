@@ -339,7 +339,7 @@
                     productoOpciones.forEach(prod => {
                         const opt = document.createElement('option');
                         opt.value = prod.id_producto;
-                        opt.textContent = `${prod.nombre || 'Producto'} (ID: ${prod.id_producto})`;
+                        opt.textContent = `${prod.descripcion}`;
                         if (prod.id_producto === detalle.id_producto) opt.selected = true;
                         productSelect.appendChild(opt);
                     });
