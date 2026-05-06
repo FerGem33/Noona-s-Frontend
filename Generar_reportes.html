@@ -155,6 +155,24 @@
     .error-message.active {
         display: block;
     }
+
+    /* Alert message styling */
+    .alert-message {
+        background-color: #fee2e2;
+        border-left: 4px solid #dc2626;
+        color: #991b1b;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .alert-message .material-symbols-outlined {
+        font-size: 20px;
+    }
 </style>
 </head>
 
@@ -293,7 +311,7 @@
     </div>
 </div>
 
-<!-- Modal para ingresar ID de Compra -->
+<!-- Modal mejorado para ingresar ID de Compra -->
 <div id="compraModal" class="modal-compra-overlay">
     <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
         <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
@@ -306,29 +324,39 @@
         <div class="p-6">
             <p class="text-gray-700 mb-4">Ingresa el ID de la compra para generar el reporte:</p>
 
-            <div class="mb-2">
+            <div class="mb-4">
                 <label class="block text-burgundy font-bold mb-2">ID de Compra:</label>
                 <input type="text" id="compraIdInput" placeholder="Ej: 1, 2, 3..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50 text-lg"
                        autocomplete="off">
                 <div id="idErrorMessage" class="error-message"></div>
             </div>
+
+            <!-- Contenedor para mensajes de alerta -->
+            <div id="compraAlertContainer"></div>
 
             <div class="flex gap-3 mt-6">
                 <button onclick="generateCompraReport()" id="generateCompraBtn"
                         class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
                     Generar Reporte
                 </button>
-                <button onclick="closeCompraModal()"
+                <button onclick="resetAndCloseCompraModal()"
                         class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
                     Cancelar
                 </button>
             </div>
+            
+            <button onclick="resetCompraForm()" 
+                    id="resetCompraBtn"
+                    style="display: none;"
+                    class="w-full mt-3 bg-gray-100 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors text-sm">
+                Intentar con otro ID
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Modal para ingresar ID de Pedido -->
+<!-- Modal mejorado para ingresar ID de Pedido -->
 <div id="pedidoModal" class="modal-compra-overlay">
     <div class="bg-white rounded-2xl shadow-2xl modal-content max-w-md w-full mx-4">
         <div class="bg-burgundy rounded-t-2xl px-6 py-4 flex justify-between items-center">
@@ -341,24 +369,34 @@
         <div class="p-6">
             <p class="text-gray-700 mb-4">Ingresa el ID del pedido para generar el reporte:</p>
 
-            <div class="mb-2">
+            <div class="mb-4">
                 <label class="block text-burgundy font-bold mb-2">ID de Pedido:</label>
                 <input type="text" id="pedidoIdInput" placeholder="Ej: 1, 2, 3..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/50 text-lg"
                        autocomplete="off">
                 <div id="pedidoIdErrorMessage" class="error-message"></div>
             </div>
+
+            <!-- Contenedor para mensajes de alerta -->
+            <div id="pedidoAlertContainer"></div>
 
             <div class="flex gap-3 mt-6">
                 <button onclick="generatePedidoReport()" id="generatePedidoBtn"
                         class="flex-1 bg-burgundy text-white py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">
                     Generar Reporte
                 </button>
-                <button onclick="closePedidoModal()"
+                <button onclick="resetAndClosePedidoModal()"
                         class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors">
                     Cancelar
                 </button>
             </div>
+            
+            <button onclick="resetPedidoForm()" 
+                    id="resetPedidoBtn"
+                    style="display: none;"
+                    class="w-full mt-3 bg-gray-100 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors text-sm">
+                Intentar con otro ID
+            </button>
         </div>
     </div>
 </div>
@@ -431,21 +469,38 @@
 
     function showCompraModal() {
         const modal = document.getElementById('compraModal');
-        const compraIdInput = document.getElementById('compraIdInput');
-        const errorMessage = document.getElementById('idErrorMessage');
-        
-        compraIdInput.value = '';
-        compraIdInput.classList.remove('input-error');
-        errorMessage.classList.remove('active');
-        errorMessage.textContent = '';
-        
+        resetCompraForm();
         modal.classList.add('active');
-        compraIdInput.focus();
+        document.getElementById('compraIdInput').focus();
     }
 
     function closeCompraModal() {
         const modal = document.getElementById('compraModal');
         modal.classList.remove('active');
+        resetCompraForm();
+    }
+
+    function resetCompraForm() {
+        const compraIdInput = document.getElementById('compraIdInput');
+        const errorMessage = document.getElementById('idErrorMessage');
+        const alertContainer = document.getElementById('compraAlertContainer');
+        const resetBtn = document.getElementById('resetCompraBtn');
+        const generateBtn = document.getElementById('generateCompraBtn');
+        
+        compraIdInput.value = '';
+        compraIdInput.classList.remove('input-error');
+        compraIdInput.disabled = false;
+        errorMessage.classList.remove('active');
+        errorMessage.textContent = '';
+        alertContainer.innerHTML = '';
+        resetBtn.style.display = 'none';
+        generateBtn.style.display = 'block';
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = 'Generar Reporte';
+    }
+
+    function resetAndCloseCompraModal() {
+        closeCompraModal();
     }
 
     function showToast(message, isError = false) {
@@ -462,23 +517,60 @@
         }, 3000);
     }
 
+    function showErrorAlert(containerId, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+            <div class="alert-message">
+                <span class="material-symbols-outlined">error</span>
+                <span>${message}</span>
+            </div>
+        `;
+    }
+
+    function showSuccessAlert(containerId, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+            <div class="alert-message" style="background-color: #e6f4ea; border-left-color: #34a853; color: #137333;">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>${message}</span>
+            </div>
+        `;
+    }
+
     function showPedidoModal() {
         const modal = document.getElementById('pedidoModal');
-        const pedidoIdInput = document.getElementById('pedidoIdInput');
-        const errorMessage = document.getElementById('pedidoIdErrorMessage');
-
-        pedidoIdInput.value = '';
-        pedidoIdInput.classList.remove('input-error');
-        errorMessage.classList.remove('active');
-        errorMessage.textContent = '';
-
+        resetPedidoForm();
         modal.classList.add('active');
-        pedidoIdInput.focus();
+        document.getElementById('pedidoIdInput').focus();
     }
 
     function closePedidoModal() {
         const modal = document.getElementById('pedidoModal');
         modal.classList.remove('active');
+        resetPedidoForm();
+    }
+
+    function resetPedidoForm() {
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const alertContainer = document.getElementById('pedidoAlertContainer');
+        const resetBtn = document.getElementById('resetPedidoBtn');
+        const generateBtn = document.getElementById('generatePedidoBtn');
+        
+        pedidoIdInput.value = '';
+        pedidoIdInput.classList.remove('input-error');
+        pedidoIdInput.disabled = false;
+        errorMessage.classList.remove('active');
+        errorMessage.textContent = '';
+        alertContainer.innerHTML = '';
+        resetBtn.style.display = 'none';
+        generateBtn.style.display = 'block';
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = 'Generar Reporte';
+    }
+
+    function resetAndClosePedidoModal() {
+        closePedidoModal();
     }
 
     function validatePedidoIdFormat(pedidoId) {
@@ -534,19 +626,19 @@
             }
 
             if (response.status === 404) {
-                return { exists: false, error: 'El ID de pedido no existe en la base de datos' };
+                return { exists: false, error: '❌ El ID de pedido no existe en la base de datos. Por favor, verifica el número e intenta nuevamente.' };
             }
 
-            return { exists: false, error: `Error del servidor (Código: ${response.status})` };
+            return { exists: false, error: `⚠️ No se encontro el pedido.` };
 
         } catch (error) {
             console.error('Error verificando pedido:', error);
 
             if (error.name === 'AbortError') {
-                return { exists: false, error: 'La solicitud ha excedido el tiempo de espera' };
+                return { exists: false, error: '⏱️ La solicitud ha excedido el tiempo de espera. Verifica tu conexión.' };
             }
 
-            return { exists: false, error: 'Error de conexión. No se pudo verificar el ID' };
+            return { exists: false, error: '🔌 Error de conexión. No se pudo verificar el ID. Revisa tu red.' };
         }
     }
 
@@ -554,9 +646,13 @@
         const pedidoIdInput = document.getElementById('pedidoIdInput');
         const generateBtn = document.getElementById('generatePedidoBtn');
         const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const alertContainer = document.getElementById('pedidoAlertContainer');
+        const resetBtn = document.getElementById('resetPedidoBtn');
 
         let pedidoId = pedidoIdInput.value.trim();
 
+        // Limpiar alertas previas
+        alertContainer.innerHTML = '';
         errorMessage.classList.remove('active');
         pedidoIdInput.classList.remove('input-error');
 
@@ -574,32 +670,43 @@
             const checkResult = await checkPedidoExists(idNumber);
 
             if (!checkResult.exists) {
-                errorMessage.textContent = checkResult.error;
-                errorMessage.classList.add('active');
+                // Mostrar alerta de error
+                showErrorAlert('pedidoAlertContainer', checkResult.error);
                 pedidoIdInput.classList.add('input-error');
+                
+                // Mostrar botón de reintento y ocultar el de generar temporalmente
+                generateBtn.style.display = 'none';
+                resetBtn.style.display = 'block';
+                
                 showToast(checkResult.error, true);
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
                 return;
             }
 
+         
+            
             const url = `${API_BASE_URL}/pedido/${idNumber}`;
-            const newWindow = window.open(url, '_blank');
+            
+            // Pequeña pausa para mostrar el mensaje de éxito
+            setTimeout(() => {
+                const newWindow = window.open(url, '_blank');
 
-            if (newWindow) {
-                showToast(`Abriendo reporte de pedido #${idNumber}...`);
-                closePedidoModal();
-            } else {
-                showToast('Por favor, permite ventanas emergentes para ver el reporte', true);
-            }
+                if (newWindow) {
+                    showToast(`📄 Abriendo reporte de pedido #${idNumber}...`);
+                    setTimeout(() => {
+                        closePedidoModal();
+                    }, 500);
+                } else {
+                    showToast('⚠️ Por favor, permite ventanas emergentes para ver el reporte', true);
+                }
+            }, 800);
 
         } catch (error) {
             console.error('Error al generar el reporte:', error);
-
-            errorMessage.textContent = 'Error al verificar el ID. Intenta nuevamente.';
-            errorMessage.classList.add('active');
-            pedidoIdInput.classList.add('input-error');
-            showToast('Error al verificar el ID de pedido', true);
+            showErrorAlert('pedidoAlertContainer', '❌ Error inesperado al generar el reporte. Intenta nuevamente.');
+            showToast('Error al generar el reporte', true);
+            
+            generateBtn.style.display = 'none';
+            resetBtn.style.display = 'block';
         } finally {
             generateBtn.innerHTML = originalText;
             generateBtn.disabled = false;
@@ -685,12 +792,10 @@
         }
     }
 
-    // Función para validar el formato del ID (solo números positivos, sin letras ni negativos)
     function validateCompraIdFormat(compraId) {
         const errorMessage = document.getElementById('idErrorMessage');
         const compraIdInput = document.getElementById('compraIdInput');
         
-        // Verificar si está vacío
         if (!compraId || compraId.trim() === '') {
             errorMessage.textContent = 'Por favor, ingresa el ID de la compra';
             errorMessage.classList.add('active');
@@ -698,7 +803,6 @@
             return false;
         }
         
-        // Verificar que solo contenga números
         if (!/^\d+$/.test(compraId)) {
             errorMessage.textContent = 'El ID debe contener solo números (sin letras, espacios o símbolos)';
             errorMessage.classList.add('active');
@@ -706,7 +810,6 @@
             return false;
         }
         
-        // Convertir a número y verificar que sea positivo
         const idNumber = parseInt(compraId, 10);
         if (idNumber <= 0) {
             errorMessage.textContent = 'El ID debe ser un número positivo mayor que cero';
@@ -715,7 +818,6 @@
             return false;
         }
         
-        // Limpiar errores de formato
         errorMessage.classList.remove('active');
         compraIdInput.classList.remove('input-error');
         errorMessage.textContent = '';
@@ -723,15 +825,12 @@
         return true;
     }
 
-    // Función para verificar si el ID existe en la base de datos usando GET
     async function checkCompraExists(compraId) {
         try {
             const url = `${API_BASE_URL}/compra/${compraId}`;
             
-            // Usamos fetch con método GET para verificar si el recurso existe
-            // Configuramos un timeout para no esperar demasiado
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -740,28 +839,24 @@
             
             clearTimeout(timeoutId);
             
-            // Si la respuesta es ok (200) el recurso existe
             if (response.ok) {
                 return { exists: true, error: null };
             }
             
-            // Si es 404, no existe
             if (response.status === 404) {
-                return { exists: false, error: 'El ID de compra no existe en la base de datos' };
+                return { exists: false, error: '❌ El ID de compra no existe en la base de datos. Por favor, verifica el número e intenta nuevamente.' };
             }
             
-            // Para otros códigos de error (500, 403, etc.)
-            return { exists: false, error: `Error del servidor (Código: ${response.status})` };
+            return { exists: false, error: `⚠️ Error al encontrar la compra ` };
             
         } catch (error) {
             console.error('Error verificando compra:', error);
             
             if (error.name === 'AbortError') {
-                return { exists: false, error: 'La solicitud ha excedido el tiempo de espera' };
+                return { exists: false, error: '⏱️ La solicitud ha excedido el tiempo de espera. Verifica tu conexión.' };
             }
             
-            // Si hay error de conexión o CORS
-            return { exists: false, error: 'Error de conexión. No se pudo verificar el ID' };
+            return { exists: false, error: '🔌 Error de conexión. No se pudo verificar el ID. Revisa tu red.' };
         }
     }
 
@@ -769,18 +864,20 @@
         const compraIdInput = document.getElementById('compraIdInput');
         const generateBtn = document.getElementById('generateCompraBtn');
         const errorMessage = document.getElementById('idErrorMessage');
+        const alertContainer = document.getElementById('compraAlertContainer');
+        const resetBtn = document.getElementById('resetCompraBtn');
+        
         let compraId = compraIdInput.value.trim();
 
-        // Limpiar errores previos
+        // Limpiar alertas previas
+        alertContainer.innerHTML = '';
         errorMessage.classList.remove('active');
         compraIdInput.classList.remove('input-error');
 
-        // Validar formato del ID
         if (!validateCompraIdFormat(compraId)) {
             return;
         }
 
-        // Convertir a número entero (ya validado que es número positivo)
         const idNumber = parseInt(compraId, 10);
         
         const originalText = generateBtn.innerHTML;
@@ -788,41 +885,46 @@
         generateBtn.disabled = true;
 
         try {
-            // Verificar si el ID existe en la base de datos usando GET
             const checkResult = await checkCompraExists(idNumber);
             
             if (!checkResult.exists) {
-                errorMessage.textContent = checkResult.error;
-                errorMessage.classList.add('active');
+                // Mostrar alerta de error
+                showErrorAlert('compraAlertContainer', checkResult.error);
                 compraIdInput.classList.add('input-error');
+                
+                // Mostrar botón de reintento y ocultar el de generar temporalmente
+                generateBtn.style.display = 'none';
+                resetBtn.style.display = 'block';
+                
                 showToast(checkResult.error, true);
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
                 return;
             }
             
-            // Si existe, proceder a abrir el reporte
+      
+            
             const url = `${API_BASE_URL}/compra/${idNumber}`;
             
-            // Intentar abrir el reporte en nueva pestaña
-            const newWindow = window.open(url, '_blank');
-            
-            if (newWindow) {
-                showToast(`Abriendo reporte de compra #${idNumber}...`);
-                closeCompraModal();
-            } else {
-                // Si el navegador bloqueó el popup, mostrar mensaje alternativo
-                showToast('Por favor, permite ventanas emergentes para ver el reporte', true);
-            }
+            // Pequeña pausa para mostrar el mensaje de éxito
+            setTimeout(() => {
+                const newWindow = window.open(url, '_blank');
+                
+                if (newWindow) {
+                    showToast(`📄 Abriendo reporte de compra #${idNumber}...`);
+                    setTimeout(() => {
+                        closeCompraModal();
+                    }, 500);
+                } else {
+                    showToast('⚠️ Por favor, permite ventanas emergentes para ver el reporte', true);
+                }
+            }, 800);
 
         } catch (error) {
             console.error('Error al generar el reporte:', error);
+            showErrorAlert('compraAlertContainer', '❌ Error inesperado al generar el reporte. Intenta nuevamente.');
+            showToast('Error al generar el reporte', true);
             
-            // Mostrar mensaje de error genérico
-            errorMessage.textContent = 'Error al verificar el ID. Intenta nuevamente.';
-            errorMessage.classList.add('active');
-            compraIdInput.classList.add('input-error');
-            showToast('Error al verificar el ID de compra', true);
+            generateBtn.style.display = 'none';
+            resetBtn.style.display = 'block';
         } finally {
             generateBtn.innerHTML = originalText;
             generateBtn.disabled = false;
@@ -848,14 +950,17 @@
         const value = e.target.value;
         const errorMessage = document.getElementById('idErrorMessage');
         const compraIdInput = document.getElementById('compraIdInput');
+        const alertContainer = document.getElementById('compraAlertContainer');
+        
+        // Limpiar alerta al empezar a escribir
+        alertContainer.innerHTML = '';
         
         // Permitir solo números mientras escribe
         if (value && !/^\d*$/.test(value)) {
-            // Si se ingresa un carácter no numérico, lo eliminamos
             e.target.value = value.replace(/[^\d]/g, '');
         }
         
-        // Si el campo está vacío o tiene valor negativo, limpiar error al escribir
+        // Si el campo está vacío o tiene valor, limpiar error al escribir
         if (errorMessage.classList.contains('active')) {
             errorMessage.classList.remove('active');
             compraIdInput.classList.remove('input-error');
@@ -883,31 +988,35 @@
     });
 
     document.getElementById('pedidoModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closePedidoModal();
-    }
-});
+        if (e.target === this) {
+            closePedidoModal();
+        }
+    });
 
-document.getElementById('pedidoIdInput').addEventListener('input', function(e) {
-    const value = e.target.value;
-    const errorMessage = document.getElementById('pedidoIdErrorMessage');
-    const pedidoIdInput = document.getElementById('pedidoIdInput');
+    document.getElementById('pedidoIdInput').addEventListener('input', function(e) {
+        const value = e.target.value;
+        const errorMessage = document.getElementById('pedidoIdErrorMessage');
+        const pedidoIdInput = document.getElementById('pedidoIdInput');
+        const alertContainer = document.getElementById('pedidoAlertContainer');
+        
+        // Limpiar alerta al empezar a escribir
+        alertContainer.innerHTML = '';
 
-    if (value && !/^\d*$/.test(value)) {
-        e.target.value = value.replace(/[^\d]/g, '');
-    }
+        if (value && !/^\d*$/.test(value)) {
+            e.target.value = value.replace(/[^\d]/g, '');
+        }
 
-    if (errorMessage.classList.contains('active')) {
-        errorMessage.classList.remove('active');
-        pedidoIdInput.classList.remove('input-error');
-    }
-});
+        if (errorMessage.classList.contains('active')) {
+            errorMessage.classList.remove('active');
+            pedidoIdInput.classList.remove('input-error');
+        }
+    });
 
-document.getElementById('pedidoIdInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        generatePedidoReport();
-    }
-});
+    document.getElementById('pedidoIdInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generatePedidoReport();
+        }
+    });
 </script>
 
 </body>
