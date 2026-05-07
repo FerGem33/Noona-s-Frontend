@@ -41,6 +41,24 @@ body {
 .modal-overlay {
     background-color: rgba(0,0,0,0.5);
     backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease-out;
+}
+.modal-content {
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 </style>
 </head>
@@ -226,12 +244,230 @@ async function parseErrorResponse(res, fallback) {
     }
 }
 
+// Modal Personalizado
+function mostrarModalConfirmacion(titulo, mensaje, onConfirm) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">info</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">${escapeHtml(titulo)}</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancelar" class="px-5 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors">
+                    Cancelar
+                </button>
+                <button id="modal-confirmar" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-md">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#modal-cancelar').addEventListener('click', () => modal.remove());
+    modal.querySelector('#modal-confirmar').addEventListener('click', () => {
+        modal.remove();
+        if (onConfirm) onConfirm();
+    });
+}
+
+function mostrarModalError(mensaje) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 text-2xl">error</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Error</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end">
+                <button id="modal-cerrar" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.querySelector('#modal-cerrar').addEventListener('click', () => modal.remove());
+}
+
+function mostrarModalExito(mensaje, redirectUrl = null) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Éxito</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end">
+                <button id="modal-ok" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.querySelector('#modal-ok').addEventListener('click', () => {
+        modal.remove();
+        if (redirectUrl) {
+            window.location.href = redirectUrl;
+        }
+    });
+}
+
+function mostrarModalInfo(mensaje) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 text-2xl">info</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Información</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end">
+                <button id="modal-cerrar" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.querySelector('#modal-cerrar').addEventListener('click', () => modal.remove());
+}
+
+function mostrarModalAgregarProducto(onProductAdded) {
+    if (productosCatalogo.length === 0) {
+        mostrarModalError('No hay productos disponibles');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2">Agregar producto a cotización</h3>
+            <p class="text-sm text-slate-500 mb-4">
+                Selecciona el producto, cantidad y precio de diseño.
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Producto</label>
+                    <select id="select-producto" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20">
+                        <option value="">Seleccione producto</option>
+                        ${productosCatalogo.map(p => `
+                            <option
+                                value="${p.id_producto}"
+                                data-precio="${p.precio_unitario || 0}"
+                                data-nombre="${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)}"
+                            >
+                                ${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)} - $${Number(p.precio_unitario || 0).toFixed(2)}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Cantidad</label>
+                    <input id="cantidad-producto" type="number" value="1" min="1" step="1" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Precio de diseño</label>
+                    <input id="precio-disenio-producto" type="number" value="0" min="0" step="0.01" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelar-producto" type="button" class="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">Cancelar</button>
+                <button id="confirmar-producto" type="button" class="px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors">Agregar</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#cancelar-producto').addEventListener('click', () => {
+        modal.remove();
+    });
+
+    modal.querySelector('#confirmar-producto').addEventListener('click', () => {
+        const select = modal.querySelector('#select-producto');
+        const idProducto = select.value;
+
+        if (!idProducto) {
+            mostrarModalError('Seleccione un producto');
+            return;
+        }
+
+        const cantidad = Number(modal.querySelector('#cantidad-producto').value);
+        const precioDisenio = Number(modal.querySelector('#precio-disenio-producto').value);
+
+        if (Number.isNaN(cantidad) || cantidad < 1) {
+            mostrarModalError('Cantidad inválida');
+            return;
+        }
+
+        if (Number.isNaN(precioDisenio) || precioDisenio < 0) {
+            mostrarModalError('Precio de diseño inválido');
+            return;
+        }
+
+        const selected = select.options[select.selectedIndex];
+
+        const existente = productosCotizacion.find(p => String(p.id_producto) === String(idProducto));
+
+        if (existente) {
+            existente.cantidad += cantidad;
+            existente.precio_disenio += precioDisenio;
+        } else {
+            productosCotizacion.push({
+                id_producto: Number(idProducto),
+                producto: selected.dataset.nombre,
+                nombre: selected.dataset.nombre,
+                cantidad,
+                precio_unitario: Number(selected.dataset.precio || 0),
+                precio_disenio: precioDisenio
+            });
+        }
+
+        renderizarProductos();
+        modal.remove();
+        if (onProductAdded) onProductAdded();
+    });
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const pedidoId = urlParams.get('id');
 
 if (!pedidoId) {
-    alert('No se especificó pedido');
-    window.location.href = 'pedidos.html';
+    mostrarModalError('No se especificó pedido', () => {
+        window.location.href = 'pedidos.html';
+    });
 }
 
 let clientes = [];
@@ -463,108 +699,6 @@ function renderizarProductos() {
     actualizarResumen();
 }
 
-function mostrarModalAgregarProducto() {
-    if (productosCatalogo.length === 0) {
-        alert('No hay productos disponibles');
-        return;
-    }
-
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
-
-    modal.innerHTML = `
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold mb-2">Agregar producto a cotización</h3>
-            <p class="text-sm text-slate-500 mb-4">
-                Selecciona el producto, cantidad y precio de diseño.
-            </p>
-
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Producto</label>
-                    <select id="select-producto" class="w-full p-3 border rounded-xl">
-                        <option value="">Seleccione producto</option>
-                        ${productosCatalogo.map(p => `
-                            <option
-                                value="${p.id_producto}"
-                                data-precio="${p.precio_unitario || 0}"
-                                data-nombre="${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)}"
-                            >
-                                ${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)} - $${Number(p.precio_unitario || 0).toFixed(2)}
-                            </option>
-                        `).join('')}
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Cantidad</label>
-                    <input id="cantidad-producto" type="number" value="1" min="1" step="1" class="w-full p-3 border rounded-xl">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Precio de diseño</label>
-                    <input id="precio-disenio-producto" type="number" value="0" min="0" step="0.01" class="w-full p-3 border rounded-xl">
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 mt-6">
-                <button id="cancelar-producto" type="button" class="px-4 py-2 border rounded-xl">Cancelar</button>
-                <button id="confirmar-producto" type="button" class="px-4 py-2 bg-primary text-white rounded-xl">Agregar</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    modal.querySelector('#cancelar-producto').addEventListener('click', () => {
-        modal.remove();
-    });
-
-    modal.querySelector('#confirmar-producto').addEventListener('click', () => {
-        const select = modal.querySelector('#select-producto');
-        const idProducto = select.value;
-
-        if (!idProducto) {
-            alert('Seleccione un producto');
-            return;
-        }
-
-        const cantidad = Number(modal.querySelector('#cantidad-producto').value);
-        const precioDisenio = Number(modal.querySelector('#precio-disenio-producto').value);
-
-        if (Number.isNaN(cantidad) || cantidad < 1) {
-            alert('Cantidad inválida');
-            return;
-        }
-
-        if (Number.isNaN(precioDisenio) || precioDisenio < 0) {
-            alert('Precio de diseño inválido');
-            return;
-        }
-
-        const selected = select.options[select.selectedIndex];
-
-        const existente = productosCotizacion.find(p => String(p.id_producto) === String(idProducto));
-
-        if (existente) {
-            existente.cantidad += cantidad;
-            existente.precio_disenio += precioDisenio;
-        } else {
-            productosCotizacion.push({
-                id_producto: Number(idProducto),
-                producto: selected.dataset.nombre,
-                nombre: selected.dataset.nombre,
-                cantidad,
-                precio_unitario: Number(selected.dataset.precio || 0),
-                precio_disenio: precioDisenio
-            });
-        }
-
-        renderizarProductos();
-        modal.remove();
-    });
-}
-
 async function cargarDatos() {
     try {
         pedidoActual = await obtenerPedido();
@@ -604,8 +738,10 @@ async function cargarDatos() {
         renderizarProductos();
 
     } catch (e) {
-        alert('Error al cargar datos: ' + e.message);
-        window.location.href = 'pedidos.html';
+        mostrarModalError('Error al cargar datos: ' + e.message);
+        setTimeout(() => {
+            window.location.href = 'pedidos.html';
+        }, 2000);
     }
 }
 
@@ -630,53 +766,58 @@ async function actualizarPedido(event) {
     event.preventDefault();
 
     if (productosCotizacion.length === 0) {
-        alert('La cotización debe tener al menos un producto');
+        mostrarModalError('La cotización debe tener al menos un producto');
         return;
     }
 
-    const btn = document.getElementById('btn-submit');
-    const originalText = btn.innerHTML;
+    mostrarModalConfirmacion(
+        'Confirmar actualización',
+        '¿Estás seguro de que deseas actualizar este pedido?',
+        async () => {
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerHTML;
 
-    btn.innerHTML = 'Actualizando...';
-    btn.disabled = true;
+            btn.innerHTML = 'Actualizando...';
+            btn.disabled = true;
 
-    try {
-        await actualizarCotizacion();
+            try {
+                await actualizarCotizacion();
 
-        const subtotal = getSubtotal();
-        const total = subtotal + getPrecioEnvio();
+                const subtotal = getSubtotal();
+                const total = subtotal + getPrecioEnvio();
 
-        const datosPedido = {
-            id_direccion: Number(document.getElementById('id_direccion').value),
-            id_estado: Number(document.getElementById('id_estado').value),
-            id_cliente: Number(document.getElementById('id_cliente').value),
-            id_cotizacion: Number(pedidoActual.id_cotizacion),
-            fecha_entrega: new Date(document.getElementById('fecha_entrega').value).toISOString(),
-            fecha_pedido: pedidoActual.fecha_pedido,
-            comentario: document.getElementById('comentario').value,
-            tipo_entrega: document.getElementById('tipo_entrega').value === 'true',
-            subtotal,
-            total
-        };
+                const datosPedido = {
+                    id_direccion: Number(document.getElementById('id_direccion').value),
+                    id_estado: Number(document.getElementById('id_estado').value),
+                    id_cliente: Number(document.getElementById('id_cliente').value),
+                    id_cotizacion: Number(pedidoActual.id_cotizacion),
+                    fecha_entrega: new Date(document.getElementById('fecha_entrega').value).toISOString(),
+                    fecha_pedido: pedidoActual.fecha_pedido,
+                    comentario: document.getElementById('comentario').value,
+                    tipo_entrega: document.getElementById('tipo_entrega').value === 'true',
+                    subtotal,
+                    total
+                };
 
-        const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, {
-            method: 'PUT',
-            headers: getHeaders(),
-            body: JSON.stringify(datosPedido)
-        });
+                const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify(datosPedido)
+                });
 
-        if (!res.ok) {
-            throw new Error(await parseErrorResponse(res, 'Error al actualizar pedido'));
+                if (!res.ok) {
+                    throw new Error(await parseErrorResponse(res, 'Error al actualizar pedido'));
+                }
+
+                mostrarModalExito('Pedido actualizado correctamente', 'pedidos.html');
+
+            } catch (e) {
+                mostrarModalError('Error: ' + e.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
-
-        alert('Pedido actualizado');
-        window.location.href = 'pedidos.html';
-
-    } catch (e) {
-        alert('Error: ' + e.message);
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
+    );
 }
 
 clienteSelect.addEventListener('change', () => {
@@ -685,7 +826,9 @@ clienteSelect.addEventListener('change', () => {
 
 precioEnvioInput.addEventListener('input', actualizarResumen);
 
-document.getElementById('btn-agregar-producto').addEventListener('click', mostrarModalAgregarProducto);
+document.getElementById('btn-agregar-producto').addEventListener('click', () => {
+    mostrarModalAgregarProducto();
+});
 document.getElementById('form-editar').addEventListener('submit', actualizarPedido);
 
 cargarDatos();
