@@ -4,32 +4,67 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Editar Pedido - Nonna DB</title>
+
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
 <script>
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                colors: { "primary": "#5D1927", "background-light": "#f8f6f6", "brand-pink": "#FEBDC6" },
-                fontFamily: { "display": ["Montserrat", "sans-serif"] },
-                borderRadius: {"DEFAULT": "0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                primary: "#5D1927",
+                "background-light": "#f8f6f6",
+                "brand-pink": "#FEBDC6"
+            },
+            fontFamily: {
+                display: ["Montserrat", "sans-serif"]
+            },
+            borderRadius: {
+                DEFAULT: "0.25rem",
+                lg: "0.5rem",
+                xl: "0.75rem",
+                full: "9999px"
             },
         },
-    }
+    },
+}
 </script>
+
 <style>
-    body { font-family: 'Montserrat', sans-serif; background-color: #FEBDC6; }
-    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
-    /* Fijar anchos mínimos para columnas */
-    .tabla-productos th, .tabla-productos td {
-        vertical-align: middle;
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #FEBDC6;
+}
+.modal-overlay {
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease-out;
+}
+.modal-content {
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
     }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
 </style>
 </head>
+
 <body class="bg-brand-pink min-h-screen font-display">
-<main class="max-w-6xl mx-auto px-6 py-12">
+<main class="max-w-5xl mx-auto px-6 py-12">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div class="space-y-1">
             <nav class="flex items-center gap-2 text-primary/70 text-sm font-medium mb-2">
@@ -37,90 +72,124 @@
                 <span class="material-symbols-outlined text-xs">chevron_right</span>
                 <span class="text-slate-900">Editar</span>
             </nav>
+
             <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">EDITAR PEDIDO</h1>
-            <p class="text-slate-700">Actualice la información general y los productos del pedido</p>
+            <p class="text-slate-700">Actualice la información del pedido y su cotización asociada</p>
         </div>
-        <a href="pedidos.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 font-bold rounded-lg shadow-sm border border-slate-200 hover:bg-slate-50 transition-all text-sm">← Volver a la lista</a>
+
+        <a href="pedidos.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 font-bold rounded-lg shadow-sm border border-slate-200 hover:bg-slate-50 transition-all text-sm">
+            ← Volver a la lista
+        </a>
     </div>
+
     <div class="bg-white rounded-2xl shadow-xl shadow-primary/5 overflow-hidden">
+        <div class="p-8 border-b border-slate-100 bg-slate-50/50">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">edit_note</span>
+                <h2 class="text-lg font-bold text-slate-900">Información General</h2>
+            </div>
+        </div>
+
         <form id="form-editar" class="p-8 space-y-8">
-            <!-- Información General -->
-            <div class="border-b border-slate-100 pb-6">
-                <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">edit_note</span><h2 class="text-lg font-bold text-slate-900">Información General</h2></div>
+            <div class="grid grid-cols-1 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cliente</label>
+                    <select id="id_cliente" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Dirección</label>
+                    <select id="id_direccion" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-slate-700">Cliente</label>
-                        <select id="id_cliente" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-slate-700">Dirección</label>
-                        <select id="id_direccion" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
-                    </div>
+                    
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-slate-700">Fecha y Hora de Entrega</label>
                         <input id="fecha_entrega" type="datetime-local" class="w-full h-12 px-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" required>
                     </div>
+
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-slate-700">Estado del Pedido</label>
                         <select id="id_estado" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required></select>
                     </div>
                 </div>
-                <div class="mt-6 space-y-2">
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Tipo de entrega</label>
+                    <select id="tipo_entrega" class="w-full h-12 pl-4 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 bg-white font-medium" required>
+                        <option value="true">A domicilio</option>
+                        <option value="false">Recoger en tienda</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
                     <label class="block text-sm font-bold text-slate-700">Comentarios internos</label>
-                    <textarea id="comentario" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" rows="2" placeholder="Notas para el equipo..."></textarea>
+                    <textarea id="comentario" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20" rows="3" placeholder="Notas para el equipo..."></textarea>
+                </div>
+
+                <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                    <div class="flex items-center justify-between gap-3 mb-6">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary">receipt_long</span>
+                            <h2 class="text-lg font-bold text-slate-900">Cotización asociada</h2>
+                        </div>
+
+                        <button type="button" id="btn-agregar-producto" class="px-4 py-2 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all">
+                            + Agregar producto
+                        </button>
+                    </div>
+
+                    <div class="mb-4 text-sm text-slate-600 bg-white rounded-xl p-4 border border-primary/10">
+                        <p><strong>Producto:</strong> artículo incluido en la cotización.</p>
+                        <p><strong>Cantidad:</strong> unidades solicitadas.</p>
+                        <p><strong>Precio de diseño:</strong> costo extra por decoración o personalización.</p>
+                        <p><strong>Subtotal:</strong> suma de (precio unitario × cantidad) + precio de diseño por producto.</p>
+                    </div>
+
+                    <div id="productos-container" class="space-y-3 mb-6">
+                        <div class="text-center text-slate-400 py-4">Cargando productos...</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700">Subtotal ($)</label>
+                            <input id="subtotal" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl bg-slate-100" readonly>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700">Precio de envío ($)</label>
+                            <input id="precio_envio" type="number" min="0" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700">Total ($)</label>
+                            <input id="total" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl bg-slate-100" readonly>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Productos del pedido -->
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">shopping_cart</span><h2 class="text-lg font-bold text-slate-900">Productos del Pedido</h2></div>
-                    <button type="button" id="btn-agregar-producto" class="text-sm bg-primary/10 text-primary px-4 py-2 rounded-xl font-semibold hover:bg-primary/20 transition flex items-center gap-1">
-                        <span class="material-symbols-outlined text-base">add_circle</span> Agregar producto
-                    </button>
-                </div>
-                <div class="overflow-x-auto border border-slate-100 rounded-xl">
-                    <table class="tabla-productos w-full text-left border-collapse min-w-[900px]">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                                <th class="px-4 py-3">Producto</th>
-                                <th class="px-4 py-3 text-center w-28">Cantidad</th>
-                                <th class="px-4 py-3 text-right w-36">Precio Unitario</th>
-                                <th class="px-4 py-3 text-right w-36">Diseño</th>
-                                <th class="px-4 py-3 text-right w-36">Envío</th>
-                                <th class="px-4 py-3 text-right w-36">Subtotal</th>
-                                <th class="px-4 py-3 text-center w-20">Acción</th>
-                            <tr>
-                        </thead>
-                        <tbody id="tabla-productos" class="divide-y divide-slate-100">
-                            <tr><td colspan="7" class="text-center py-6 text-slate-400">Cargando productos...学</td></tr>
-                        </tbody>
-                        <tfoot>
-                            <tr class="bg-slate-50">
-                                <td colspan="5" class="px-4 py-3 text-right font-bold">TOTAL ESTIMADO</td>
-                                <td class="px-4 py-3 text-right font-black text-primary text-lg" id="total-productos">$0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
+            <div class="flex flex-col md:flex-row items-center justify-between p-6 border-t border-slate-100 gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
 
-            <!-- Detalles financieros -->
-            <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10">
-                <div class="flex items-center gap-3 mb-6"><span class="material-symbols-outlined text-primary">payments</span><h2 class="text-lg font-bold text-slate-900">Resumen Financiero</h2></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label class="block text-sm font-bold text-slate-700">Subtotal ($)</label><input id="subtotal" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl bg-white" readonly></div>
-                    <div><label class="block text-sm font-bold text-slate-700">Total ($)</label><input id="total" type="number" step="0.01" class="w-full h-12 px-4 border border-slate-200 rounded-xl bg-white" readonly></div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</p>
+                        <p id="total-preview" class="text-2xl font-black text-slate-900">$0.00</p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Botones de acción -->
-            <div class="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-slate-100 gap-6">
-                <div class="flex items-center gap-4"><div class="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary"><span class="material-symbols-outlined">receipt_long</span></div><div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total a pagar</p><p id="total-preview" class="text-2xl font-black text-slate-900">$0.00</p></div></div>
                 <div class="flex items-center gap-3 w-full md:w-auto">
-                    <a href="pedidos.html" class="flex-1 md:flex-none px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors">Cancelar</a>
-                    <button type="submit" id="btn-submit" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2">💾 Actualizar pedido</button>
+                    <a href="pedidos.html" class="flex-1 md:flex-none px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors text-center">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" id="btn-submit" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2">
+                        💾 Actualizar pedido
+                    </button>
                 </div>
             </div>
         </form>
@@ -157,323 +226,642 @@
 </div>
 
 <script>
-    const API_BASE = 'http://3.15.13.161:8000/api';
-    const TOKEN = localStorage.token || localStorage.getItem('token');
-    if (!TOKEN) { alert('No hay sesión activa'); window.location.href = 'index.html'; }
-    function getHeaders() { return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }; }
+const API_BASE = 'http://3.15.13.161:8000/api';
+const TOKEN = localStorage.token;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const pedidoId = urlParams.get('id');
-    if (!pedidoId) mostrarError('No se especificó pedido', true);
+function getHeaders() {
+    return {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+        'Content-Type': 'application/json'
+    };
+}
 
-    let clientes = [], direccionesTotales = [], productosCatalogo = [];
-    let productosPedido = []; // cada elemento: { id_producto, nombre, cantidad, precio_unitario, diseno, envio }
-    let subtotalGeneral = 0, totalGeneral = 0;
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
 
-    function mostrarExito(callback) {
-        const modal = document.getElementById('modal-exito');
-        modal.classList.remove('hidden');
-        document.getElementById('btn-cerrar-exito').onclick = () => {
-            modal.classList.add('hidden');
-            if (callback) callback();
-        };
-    }
-    function mostrarError(mensaje, redirigir = false) {
-        const modal = document.getElementById('modal-error');
-        document.getElementById('error-mensaje').innerText = mensaje;
-        modal.classList.remove('hidden');
-        document.getElementById('btn-cerrar-error').onclick = () => {
-            modal.classList.add('hidden');
-            if (redirigir) window.location.href = 'pedidos.html';
-        };
-    }
-    function mostrarWarning(mensaje) {
-        const modal = document.getElementById('modal-warning');
-        document.getElementById('warning-mensaje').innerText = mensaje;
-        modal.classList.remove('hidden');
-        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    return String(value).replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[m]));
+}
+
+function getErrorMessage(data, fallback = 'Error inesperado') {
+    if (!data) return fallback;
+
+    if (typeof data.detail === 'string') {
+        return data.detail;
     }
 
-    // ========== CARGAR DATOS MAESTROS ==========
-    async function cargarClientes(selectedId) {
-        try {
-            const res = await fetch(`${API_BASE}/cliente/`, { headers: getHeaders() });
-            if (res.ok) clientes = await res.json();
-            const select = document.getElementById('id_cliente');
-            select.innerHTML = '<option value="">Seleccione cliente</option>';
-            clientes.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id_cliente;
-                opt.textContent = `${c.nombre} ${c.apellido}`.trim();
-                if (selectedId && c.id_cliente == selectedId) opt.selected = true;
-                select.appendChild(opt);
-            });
-        } catch(e) { mostrarError('No se pudieron cargar los clientes'); }
+    if (Array.isArray(data.detail)) {
+        return data.detail
+            .map(e => `${Array.isArray(e.loc) ? e.loc.join('.') : ''}: ${e.msg}`)
+            .join('\n');
     }
 
-    async function cargarDireccionesPorCliente(clienteId, selectedId) {
-        const selectDir = document.getElementById('id_direccion');
-        selectDir.innerHTML = '<option value="">Cargando direcciones...</option>';
-        try {
-            const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
-            if (res.ok) {
-                const todas = await res.json();
-                direccionesTotales = todas;
-                const filtradas = todas.filter(d => d.id_cliente == clienteId);
-                selectDir.innerHTML = '<option value="">Seleccione dirección</option>';
-                filtradas.forEach(d => {
-                    const opt = document.createElement('option');
-                    opt.value = d.id_direccion;
-                    opt.textContent = d.descripcion || `Dir ${d.id_direccion}`;
-                    if (selectedId && d.id_direccion == selectedId) opt.selected = true;
-                    selectDir.appendChild(opt);
-                });
-            }
-        } catch(e) { mostrarError('Error al cargar direcciones'); }
-    }
+    return data.message || fallback;
+}
 
-    async function cargarEstados(selectedId) {
-        let estadosList = [];
-        try {
-            const res = await fetch(`${API_BASE}/estado/`, { headers: getHeaders() });
-            if (res.ok) estadosList = await res.json();
-        } catch(e) {}
-        if (estadosList.length === 0) estadosList = [{ id_estado: 1, descripcion: 'Pendiente' }, { id_estado: 2, descripcion: 'Preparación' }, { id_estado: 3, descripcion: 'Enviado' }, { id_estado: 4, descripcion: 'Entregado' }, { id_estado: 5, descripcion: 'Cancelado' }, { id_estado: 6, descripcion: 'Cotización' }];
-        const select = document.getElementById('id_estado');
-        select.innerHTML = '<option value="">Seleccione estado</option>';
-        estadosList.forEach(e => {
-            const opt = document.createElement('option');
-            opt.value = e.id_estado;
-            opt.textContent = e.descripcion;
-            if (selectedId && e.id_estado == selectedId) opt.selected = true;
-            select.appendChild(opt);
-        });
+async function parseErrorResponse(res, fallback) {
+    try {
+        const data = await res.json();
+        return getErrorMessage(data, fallback);
+    } catch (_) {
+        return fallback;
     }
+}
 
-    async function cargarProductosCatalogo() {
-        try {
-            const res = await fetch(`${API_BASE}/producto/`, { headers: getHeaders() });
-            if (res.ok) productosCatalogo = await res.json();
-            else throw new Error('No se pudo cargar catálogo');
-        } catch(e) { mostrarError('Error al cargar catálogo de productos'); }
-    }
+// Modal Personalizado
+function mostrarModalConfirmacion(titulo, mensaje, onConfirm) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">info</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">${escapeHtml(titulo)}</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancelar" class="px-5 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors">
+                    Cancelar
+                </button>
+                <button id="modal-confirmar" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-md">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#modal-cancelar').addEventListener('click', () => modal.remove());
+    modal.querySelector('#modal-confirmar').addEventListener('click', () => {
+        modal.remove();
+        if (onConfirm) onConfirm();
+    });
+}
 
-    // ========== CARGAR PEDIDO COMPLETO ==========
-    async function cargarPedidoCompleto() {
-        try {
-            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: getHeaders() });
-            if (!res.ok) throw new Error('Pedido no encontrado');
-            const pedido = await res.json();
-            await cargarClientes(pedido.id_cliente);
-            await cargarDireccionesPorCliente(pedido.id_cliente, pedido.id_direccion);
-            await cargarEstados(pedido.id_estado);
-            document.getElementById('fecha_entrega').value = pedido.fecha_entrega ? pedido.fecha_entrega.slice(0,16) : '';
-            document.getElementById('comentario').value = pedido.comentario || '';
-            if (pedido.productos && Array.isArray(pedido.productos)) {
-                productosPedido = pedido.productos.map(p => {
-                    const prodCatalogo = productosCatalogo.find(c => c.id_producto === p.id_producto);
-                    return {
-                        id_producto: p.id_producto,
-                        nombre: prodCatalogo ? prodCatalogo.descripcion : (p.producto || `Producto ${p.id_producto}`),
-                        cantidad: p.cantidad,
-                        precio_unitario: prodCatalogo ? prodCatalogo.precio_unitario : 0,
-                        diseno: typeof p.precio_disenio === 'string' ? parseFloat(p.precio_disenio) : (p.precio_disenio || 0),
-                        envio: typeof p.precio_envio === 'string' ? parseFloat(p.precio_envio) : (p.precio_envio || 0)
-                    };
-                });
-            } else {
-                productosPedido = [];
-            }
-            renderizarTablaProductos();
-        } catch(e) {
-            mostrarError('Error al cargar el pedido: ' + e.message, true);
+function mostrarModalError(mensaje) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 text-2xl">error</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Error</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end">
+                <button id="modal-cerrar" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.querySelector('#modal-cerrar').addEventListener('click', () => modal.remove());
+}
+
+function mostrarModalExito(mensaje, redirectUrl = null) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Éxito</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end">
+                <button id="modal-ok" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.querySelector('#modal-ok').addEventListener('click', () => {
+        modal.remove();
+        if (redirectUrl) {
+            window.location.href = redirectUrl;
         }
+    });
+}
+
+function mostrarModalInfo(mensaje) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
+    
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 text-2xl">info</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Información</h3>
+            </div>
+            <p class="text-slate-600 mb-6">${escapeHtml(mensaje)}</p>
+            <div class="flex justify-end">
+                <button id="modal-cerrar" class="px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.querySelector('#modal-cerrar').addEventListener('click', () => modal.remove());
+}
+
+function mostrarModalAgregarProducto(onProductAdded) {
+    if (productosCatalogo.length === 0) {
+        mostrarModalError('No hay productos disponibles');
+        return;
     }
 
-    // ========== LÓGICA DE TABLA ==========
-    function calcularTotales() {
-        let subtotal = 0, total = 0;
-        productosPedido.forEach(p => {
-            subtotal += p.cantidad * p.precio_unitario;
-            total += (p.cantidad * p.precio_unitario) + p.diseno + p.envio;
-        });
-        subtotalGeneral = subtotal;
-        totalGeneral = total;
-        document.getElementById('subtotal').value = subtotalGeneral.toFixed(2);
-        document.getElementById('total').value = totalGeneral.toFixed(2);
-        document.getElementById('total-preview').innerHTML = `$${totalGeneral.toFixed(2)}`;
-        document.getElementById('total-productos').innerHTML = `$${totalGeneral.toFixed(2)}`;
-    }
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50';
 
-    function renderizarTablaProductos() {
-        const tbody = document.getElementById('tabla-productos');
-        if (!productosPedido.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">No hay productos en este pedido. Agrega usando el botón superior.</td></tr>';
-            calcularTotales();
+    modal.innerHTML = `
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2">Agregar producto a cotización</h3>
+            <p class="text-sm text-slate-500 mb-4">
+                Selecciona el producto, cantidad y precio de diseño.
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Producto</label>
+                    <select id="select-producto" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20">
+                        <option value="">Seleccione producto</option>
+                        ${productosCatalogo.map(p => `
+                            <option
+                                value="${p.id_producto}"
+                                data-precio="${p.precio_unitario || 0}"
+                                data-nombre="${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)}"
+                            >
+                                ${escapeHtml(p.descripcion || `Producto ${p.id_producto}`)} - $${Number(p.precio_unitario || 0).toFixed(2)}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Cantidad</label>
+                    <input id="cantidad-producto" type="number" value="1" min="1" step="1" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Precio de diseño</label>
+                    <input id="precio-disenio-producto" type="number" value="0" min="0" step="0.01" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelar-producto" type="button" class="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">Cancelar</button>
+                <button id="confirmar-producto" type="button" class="px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors">Agregar</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#cancelar-producto').addEventListener('click', () => {
+        modal.remove();
+    });
+
+    modal.querySelector('#confirmar-producto').addEventListener('click', () => {
+        const select = modal.querySelector('#select-producto');
+        const idProducto = select.value;
+
+        if (!idProducto) {
+            mostrarModalError('Seleccione un producto');
             return;
         }
-        tbody.innerHTML = '';
-        productosPedido.forEach((prod, idx) => {
-            const subtotal = (prod.cantidad * prod.precio_unitario) + prod.diseno + prod.envio;
-            const fila = `
-                <tr>
-                    <td class="px-4 py-3 font-semibold">${escapeHtml(prod.nombre)}</td>
-                    <td class="px-4 py-3 text-center"><input type="number" class="cantidad w-20 text-center border rounded-lg px-2 py-1" value="${prod.cantidad}" min="1" data-idx="${idx}"></td>
-                    <td class="px-4 py-3 text-right font-mono">$${prod.precio_unitario.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-right"><input type="number" step="0.01" class="diseno w-28 text-right border rounded-lg px-2 py-1" value="${prod.diseno.toFixed(2)}" data-idx="${idx}"></td>
-                    <td class="px-4 py-3 text-right"><input type="number" step="0.01" class="envio w-28 text-right border rounded-lg px-2 py-1" value="${prod.envio.toFixed(2)}" data-idx="${idx}"></td>
-                    <td class="px-4 py-3 text-right font-bold">$${subtotal.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-center"><button class="eliminar-prod text-red-500 hover:bg-red-50 p-1 rounded-full" data-idx="${idx}"><span class="material-symbols-outlined">delete</span></button></td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML('beforeend', fila);
-        });
-        // Eventos: cantidad, diseño, envío (precio unitario NO editable)
-        document.querySelectorAll('.cantidad').forEach(inp => inp.addEventListener('change', (e) => {
-            const idx = parseInt(inp.dataset.idx);
-            let val = parseInt(inp.value);
-            if (isNaN(val) || val < 1) val = 1;
-            productosPedido[idx].cantidad = val;
-            renderizarTablaProductos();
-        }));
-        document.querySelectorAll('.diseno, .envio').forEach(inp => inp.addEventListener('change', (e) => {
-            const idx = parseInt(inp.dataset.idx);
-            let val = parseFloat(inp.value);
-            if (isNaN(val)) val = 0;
-            if (inp.classList.contains('diseno')) productosPedido[idx].diseno = val;
-            else productosPedido[idx].envio = val;
-            renderizarTablaProductos();
-        }));
-        document.querySelectorAll('.eliminar-prod').forEach(btn => btn.addEventListener('click', (e) => {
-            const idx = parseInt(btn.dataset.idx);
-            productosPedido.splice(idx, 1);
-            renderizarTablaProductos();
-        }));
-        calcularTotales();
+
+        const cantidad = Number(modal.querySelector('#cantidad-producto').value);
+        const precioDisenio = Number(modal.querySelector('#precio-disenio-producto').value);
+
+        if (Number.isNaN(cantidad) || cantidad < 1) {
+            mostrarModalError('Cantidad inválida');
+            return;
+        }
+
+        if (Number.isNaN(precioDisenio) || precioDisenio < 0) {
+            mostrarModalError('Precio de diseño inválido');
+            return;
+        }
+
+        const selected = select.options[select.selectedIndex];
+
+        const existente = productosCotizacion.find(p => String(p.id_producto) === String(idProducto));
+
+        if (existente) {
+            existente.cantidad += cantidad;
+            existente.precio_disenio += precioDisenio;
+        } else {
+            productosCotizacion.push({
+                id_producto: Number(idProducto),
+                producto: selected.dataset.nombre,
+                nombre: selected.dataset.nombre,
+                cantidad,
+                precio_unitario: Number(selected.dataset.precio || 0),
+                precio_disenio: precioDisenio
+            });
+        }
+
+        renderizarProductos();
+        modal.remove();
+        if (onProductAdded) onProductAdded();
+    });
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const pedidoId = urlParams.get('id');
+
+if (!pedidoId) {
+    mostrarModalError('No se especificó pedido', () => {
+        window.location.href = 'pedidos.html';
+    });
+}
+
+let clientes = [];
+let direcciones = [];
+let estados = [];
+let productosCatalogo = [];
+let productosCotizacion = [];
+let pedidoActual = null;
+let cotizacionActual = null;
+
+const clienteSelect = document.getElementById('id_cliente');
+const direccionSelect = document.getElementById('id_direccion');
+const estadoSelect = document.getElementById('id_estado');
+const productosContainer = document.getElementById('productos-container');
+const subtotalInput = document.getElementById('subtotal');
+const precioEnvioInput = document.getElementById('precio_envio');
+const totalInput = document.getElementById('total');
+
+async function fetchJson(url, options = {}) {
+    const res = await fetch(url, {
+        ...options,
+        headers: options.headers || getHeaders()
+    });
+
+    if (!res.ok) {
+        throw new Error(await parseErrorResponse(res, `Error HTTP ${res.status}`));
     }
 
-    // Modal para agregar producto (solo se copia del anterior)
-    function mostrarModalAgregarProducto() {
-        if (productosCatalogo.length === 0) { mostrarWarning('No hay productos disponibles en el catálogo'); return; }
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
-        modal.innerHTML = `
-            <div class="bg-white rounded-2xl p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Agregar Producto</h3>
-                <div class="space-y-4">
-                    <select id="select-producto" class="w-full p-3 border rounded-xl">
-                        <option value="">Seleccione producto</option>
-                        ${productosCatalogo.map(p => `<option value="${p.id_producto}" data-precio="${p.precio_unitario}" data-nombre="${escapeHtml(p.descripcion)}">${escapeHtml(p.descripcion)} - $${p.precio_unitario}</option>`).join('')}
-                    </select>
-                    <input type="number" id="cantidad-nueva" class="w-full p-3 border rounded-xl" placeholder="Cantidad" min="1" value="1">
-                    <input type="number" step="0.01" id="diseno-nuevo" class="w-full p-3 border rounded-xl" placeholder="Precio diseño" value="0">
-                    <input type="number" step="0.01" id="envio-nuevo" class="w-full p-3 border rounded-xl" placeholder="Precio envío" value="0">
-                    <div class="flex gap-3 justify-end mt-4">
-                        <button id="cancelar-modal" class="px-4 py-2 border rounded-xl">Cancelar</button>
-                        <button id="confirmar-modal" class="px-4 py-2 bg-primary text-white rounded-xl">Agregar</button>
-                    </div>
+    return res.json();
+}
+
+async function cargarClientes(selectedId) {
+    clientes = await fetchJson(`${API_BASE}/cliente/`);
+
+    clienteSelect.innerHTML = '<option value="">Seleccione cliente</option>';
+
+    clientes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id_cliente;
+        opt.textContent = `${c.nombre || ''} ${c.apellido || ''}`.trim() || `Cliente ${c.id_cliente}`;
+
+        if (selectedId && Number(c.id_cliente) === Number(selectedId)) {
+            opt.selected = true;
+        }
+
+        clienteSelect.appendChild(opt);
+    });
+}
+
+async function cargarDirecciones(selectedId) {
+    direcciones = await fetchJson(`${API_BASE}/direccion/`);
+    renderizarDirecciones(selectedId);
+}
+
+function renderizarDirecciones(selectedId) {
+    const clienteId = clienteSelect.value;
+
+    direccionSelect.innerHTML = '<option value="">Seleccione dirección</option>';
+
+    const filtradas = direcciones.filter(d => String(d.id_cliente) === String(clienteId));
+
+    filtradas.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id_direccion;
+        opt.textContent = d.descripcion || d.direccion || `Dir ${d.id_direccion}`;
+
+        if (selectedId && Number(d.id_direccion) === Number(selectedId)) {
+            opt.selected = true;
+        }
+
+        direccionSelect.appendChild(opt);
+    });
+}
+
+async function cargarEstados(selectedId) {
+    try {
+        estados = await fetchJson(`${API_BASE}/estado/`);
+    } catch (_) {
+        estados = [
+            { id_estado: 2, descripcion: 'Pendiente' },
+            { id_estado: 3, descripcion: 'En proceso' },
+            { id_estado: 7, descripcion: 'En camino' },
+            { id_estado: 5, descripcion: 'Entregado' },
+            { id_estado: 6, descripcion: 'Cancelado' }
+        ];
+    }
+
+    estadoSelect.innerHTML = '<option value="">Seleccione estado</option>';
+
+    estados.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id_estado;
+        opt.textContent = e.descripcion;
+
+        if (selectedId && Number(e.id_estado) === Number(selectedId)) {
+            opt.selected = true;
+        }
+
+        estadoSelect.appendChild(opt);
+    });
+}
+
+async function cargarProductosCatalogo() {
+    productosCatalogo = await fetchJson(`${API_BASE}/producto/`);
+}
+
+async function obtenerProducto(idProducto) {
+    return fetchJson(`${API_BASE}/producto/${idProducto}`);
+}
+
+async function obtenerPedido() {
+    return fetchJson(`${API_BASE}/pedidos/${pedidoId}`);
+}
+
+async function obtenerCotizacion(idCotizacion) {
+    return fetchJson(`${API_BASE}/cotizacion/${idCotizacion}`);
+}
+
+function getPrecioEnvio() {
+    const value = Number(precioEnvioInput.value);
+    return Number.isNaN(value) || value < 0 ? 0 : value;
+}
+
+function getSubtotal() {
+    return productosCotizacion.reduce((acc, p) => {
+        const precioUnitario = Number(p.precio_unitario);
+        const cantidad = Number(p.cantidad);
+        const precioDisenio = Number(p.precio_disenio);
+
+        return acc + (precioUnitario * cantidad) + precioDisenio;
+    }, 0);
+}
+
+function actualizarResumen() {
+    const subtotal = getSubtotal();
+    const envio = getPrecioEnvio();
+    const total = subtotal + envio;
+
+    subtotalInput.value = subtotal.toFixed(2);
+    totalInput.value = total.toFixed(2);
+    document.getElementById('total-preview').innerText = `$${total.toFixed(2)}`;
+}
+
+function renderizarProductos() {
+    if (productosCotizacion.length === 0) {
+        productosContainer.innerHTML = `
+            <div class="text-center text-slate-400 py-4">
+                No hay productos en la cotización.
+            </div>
+        `;
+        actualizarResumen();
+        return;
+    }
+
+    productosContainer.innerHTML = '';
+
+    productosCotizacion.forEach((p, idx) => {
+        const subtotalProducto =
+            (Number(p.precio_unitario) * Number(p.cantidad)) + Number(p.precio_disenio);
+
+        const div = document.createElement('div');
+        div.className = 'flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-white rounded-xl border border-slate-200';
+
+        div.innerHTML = `
+            <div>
+                <p class="font-bold text-slate-900">${escapeHtml(p.producto || p.nombre)}</p>
+                <p class="text-sm text-slate-600">
+                    Precio unitario: $${Number(p.precio_unitario).toFixed(2)}
+                </p>
+                <p class="text-sm text-slate-600">
+                    Subtotal producto: $${subtotalProducto.toFixed(2)}
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:w-[420px]">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Cantidad</label>
+                    <input type="number" min="1" step="1" value="${escapeHtml(p.cantidad)}"
+                           class="cantidad-producto w-full h-10 px-3 border border-slate-200 rounded-lg"
+                           data-idx="${idx}">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Precio diseño</label>
+                    <input type="number" min="0" step="0.01" value="${escapeHtml(p.precio_disenio)}"
+                           class="precio-disenio-producto w-full h-10 px-3 border border-slate-200 rounded-lg"
+                           data-idx="${idx}">
+                </div>
+
+                <div class="flex items-end">
+                    <button type="button" class="eliminar-producto w-full h-10 bg-red-50 text-red-600 rounded-lg font-bold" data-idx="${idx}">
+                        Eliminar
+                    </button>
                 </div>
             </div>
         `;
-        document.body.appendChild(modal);
-        modal.querySelector('#cancelar-modal').onclick = () => modal.remove();
-        modal.querySelector('#confirmar-modal').onclick = () => {
-            const select = modal.querySelector('#select-producto');
-            const id_producto = parseInt(select.value);
-            if (!id_producto) { mostrarWarning('Seleccione un producto'); return; }
-            const cantidad = parseInt(modal.querySelector('#cantidad-nueva').value);
-            if (isNaN(cantidad) || cantidad < 1) { mostrarWarning('Cantidad inválida'); return; }
-            const diseno = parseFloat(modal.querySelector('#diseno-nuevo').value) || 0;
-            const envio = parseFloat(modal.querySelector('#envio-nuevo').value) || 0;
-            const selectedOption = select.options[select.selectedIndex];
-            const nombre = selectedOption.getAttribute('data-nombre');
-            const precio_unitario = parseFloat(selectedOption.getAttribute('data-precio'));
-            const existente = productosPedido.find(p => p.id_producto === id_producto);
-            if (existente) {
-                existente.cantidad += cantidad;
-            } else {
-                productosPedido.push({ id_producto, nombre, cantidad, precio_unitario, diseno, envio });
-            }
-            renderizarTablaProductos();
-            modal.remove();
-        };
-    }
 
-    // ========== ACTUALIZAR PEDIDO ==========
-    async function actualizarPedido(event) {
-        event.preventDefault();
-        const id_cliente = parseInt(document.getElementById('id_cliente').value);
-        const id_direccion = parseInt(document.getElementById('id_direccion').value);
-        const id_estado = parseInt(document.getElementById('id_estado').value);
-        const fecha_entrega = document.getElementById('fecha_entrega').value;
-        const comentario = document.getElementById('comentario').value;
-
-        if (!id_cliente || !id_direccion || !id_estado || !fecha_entrega) {
-            mostrarWarning('Complete todos los campos obligatorios');
-            return;
-        }
-        if (productosPedido.length === 0) {
-            mostrarWarning('Debe haber al menos un producto en el pedido');
-            return;
-        }
-
-        const productosParaAPI = productosPedido.map(p => ({
-            id_producto: p.id_producto,
-            cantidad: p.cantidad,
-            precio_disenio: p.diseno,
-            precio_envio: p.envio
-        }));
-
-        const payload = {
-            id_cliente,
-            id_direccion,
-            id_estado,
-            fecha_entrega: new Date(fecha_entrega).toISOString(),
-            fecha_pedido: new Date().toISOString(),
-            comentario,
-            tipo_entrega: true,
-            subtotal: subtotalGeneral,
-            total: totalGeneral,
-            productos: productosParaAPI
-        };
-
-        const btn = document.getElementById('btn-submit');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Actualizando...';
-        btn.disabled = true;
-
-        try {
-            const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, {
-                method: 'PUT',
-                headers: getHeaders(),
-                body: JSON.stringify(payload)
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.detail || 'Error al actualizar el pedido');
-            }
-            mostrarExito(() => window.location.href = 'pedidos.html');
-        } catch (error) {
-            mostrarError('Error al guardar cambios: ' + error.message);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    // Eventos
-    document.getElementById('btn-agregar-producto').addEventListener('click', mostrarModalAgregarProducto);
-    document.getElementById('form-editar').addEventListener('submit', actualizarPedido);
-    document.getElementById('id_cliente').addEventListener('change', (e) => {
-        if (e.target.value) cargarDireccionesPorCliente(e.target.value);
+        productosContainer.appendChild(div);
     });
 
-    async function init() {
-        await cargarProductosCatalogo();
-        await cargarPedidoCompleto();
-    }
-    init();
+    document.querySelectorAll('.cantidad-producto').forEach(input => {
+        input.addEventListener('input', () => {
+            const idx = Number(input.dataset.idx);
+            const value = Number(input.value);
 
-    function escapeHtml(s) { return s ? s.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;') : ''; }
+            productosCotizacion[idx].cantidad = Number.isNaN(value) || value < 1 ? 1 : value;
+            renderizarProductos();
+        });
+    });
+
+    document.querySelectorAll('.precio-disenio-producto').forEach(input => {
+        input.addEventListener('input', () => {
+            const idx = Number(input.dataset.idx);
+            const value = Number(input.value);
+
+            productosCotizacion[idx].precio_disenio = Number.isNaN(value) || value < 0 ? 0 : value;
+            renderizarProductos();
+        });
+    });
+
+    document.querySelectorAll('.eliminar-producto').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = Number(btn.dataset.idx);
+            productosCotizacion.splice(idx, 1);
+            renderizarProductos();
+        });
+    });
+
+    actualizarResumen();
+}
+
+async function cargarDatos() {
+    try {
+        pedidoActual = await obtenerPedido();
+
+        await Promise.all([
+            cargarClientes(pedidoActual.id_cliente),
+            cargarDirecciones(pedidoActual.id_direccion),
+            cargarEstados(pedidoActual.id_estado),
+            cargarProductosCatalogo()
+        ]);
+
+        cotizacionActual = await obtenerCotizacion(pedidoActual.id_cotizacion);
+
+        document.getElementById('fecha_entrega').value = pedidoActual.fecha_entrega
+            ? pedidoActual.fecha_entrega.slice(0, 16)
+            : '';
+
+        document.getElementById('comentario').value = pedidoActual.comentario || '';
+        document.getElementById('tipo_entrega').value = String(Boolean(pedidoActual.tipo_entrega));
+        precioEnvioInput.value = Number(cotizacionActual.precio_envio || 0).toFixed(2);
+
+        productosCotizacion = await Promise.all(
+            cotizacionActual.detalles.map(async d => {
+                const productoInfo = await obtenerProducto(d.id_producto);
+
+                return {
+                    id_producto: d.id_producto,
+                    cantidad: Number(d.cantidad),
+                    precio_disenio: Number(d.precio_disenio || 0),
+                    producto: productoInfo.descripcion,
+                    nombre: productoInfo.descripcion,
+                    precio_unitario: Number(productoInfo.precio_unitario || 0)
+                };
+            })
+        );
+
+        renderizarProductos();
+
+    } catch (e) {
+        mostrarModalError('Error al cargar datos: ' + e.message);
+        setTimeout(() => {
+            window.location.href = 'pedidos.html';
+        }, 2000);
+    }
+}
+
+async function actualizarCotizacion() {
+    const datosCotizacion = {
+        precio_envio: getPrecioEnvio(),
+        detalles: productosCotizacion.map(p => ({
+            id_producto: Number(p.id_producto),
+            cantidad: Number(p.cantidad),
+            precio_disenio: Number(p.precio_disenio)
+        }))
+    };
+
+    return fetchJson(`${API_BASE}/cotizacion/${pedidoActual.id_cotizacion}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(datosCotizacion)
+    });
+}
+
+async function actualizarPedido(event) {
+    event.preventDefault();
+
+    if (productosCotizacion.length === 0) {
+        mostrarModalError('La cotización debe tener al menos un producto');
+        return;
+    }
+
+    mostrarModalConfirmacion(
+        'Confirmar actualización',
+        '¿Estás seguro de que deseas actualizar este pedido?',
+        async () => {
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = 'Actualizando...';
+            btn.disabled = true;
+
+            try {
+                await actualizarCotizacion();
+
+                const subtotal = getSubtotal();
+                const total = subtotal + getPrecioEnvio();
+
+                const datosPedido = {
+                    id_direccion: Number(document.getElementById('id_direccion').value),
+                    id_estado: Number(document.getElementById('id_estado').value),
+                    id_cliente: Number(document.getElementById('id_cliente').value),
+                    id_cotizacion: Number(pedidoActual.id_cotizacion),
+                    fecha_entrega: new Date(document.getElementById('fecha_entrega').value).toISOString(),
+                    fecha_pedido: pedidoActual.fecha_pedido,
+                    comentario: document.getElementById('comentario').value,
+                    tipo_entrega: document.getElementById('tipo_entrega').value === 'true',
+                    subtotal,
+                    total
+                };
+
+                const res = await fetch(`${API_BASE}/pedidos/${pedidoId}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify(datosPedido)
+                });
+
+                if (!res.ok) {
+                    throw new Error(await parseErrorResponse(res, 'Error al actualizar pedido'));
+                }
+
+                mostrarModalExito('Pedido actualizado correctamente', 'pedidos.html');
+
+            } catch (e) {
+                mostrarModalError('Error: ' + e.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    );
+}
+
+clienteSelect.addEventListener('change', () => {
+    renderizarDirecciones();
+});
+
+precioEnvioInput.addEventListener('input', actualizarResumen);
+
+document.getElementById('btn-agregar-producto').addEventListener('click', () => {
+    mostrarModalAgregarProducto();
+});
+document.getElementById('form-editar').addEventListener('submit', actualizarPedido);
+
+cargarDatos();
 </script>
 </body>
 </html>

@@ -156,7 +156,7 @@
 
     async function cargarUsuario() {
         try {
-            const res = await fetch(`${API_BASE}/usuario/${usuarioNombre}`, { headers: getHeaders() });
+            const res = await fetch(`${API_BASE}/usuario/nombre/${usuarioNombre}`, { headers: getHeaders() });
             if (res.status === 404) {
                 throw new Error(`Usuario "${usuarioNombre}" no encontrado.`);
             }
@@ -196,7 +196,7 @@
             if (res.status === 404) {
                 // Intentar con el nombre original (o el nuevo)
                 const nombreOriginal = document.getElementById('nombre_original').value;
-                res = await fetch(`${API_BASE}/usuario/${nombreOriginal}`, {
+                res = await fetch(`${API_BASE}/usuario/nombre/${nombreOriginal}`, {
                     method: 'PUT',
                     headers: getHeaders(),
                     body: JSON.stringify(datos)
