@@ -82,7 +82,7 @@ body {
 <div class="max-w-7xl mx-auto">
 
   <div class="flex justify-between items-center mb-6">
-    <a href="reportes.html" class="flex items-center gap-2 text-primary font-semibold hover:opacity-80">
+    <a href="Generar_reportes.html" class="flex items-center gap-2 text-primary font-semibold hover:opacity-80">
       <span class="material-symbols-outlined">arrow_back</span>
       <span>Volver a reportes</span>
     </a>
@@ -144,7 +144,6 @@ body {
               <th class="pb-3">Proveedor</th>
               <th class="pb-3">Fecha</th>
               <th class="pb-3 text-right">Total</th>
-              <th class="pb-3 text-center">Estado</th>
               <th class="pb-3 text-right">Acciones</th>
             </tr>
           </thead>
@@ -255,49 +254,83 @@ function calcularStats(compras) {
   document.getElementById('stat-promedio').innerText = formatMoney(promedio);
 }
 
-function renderizarDetallePlaceholder(idCompra) {
+function renderizarDetalleCompra(compra) {
+  const idCompra = compra.id_compra;
+  const detalle = Array.isArray(compra.detalle) ? compra.detalle : [];
+
+  let detalleRows = '';
+
+  if (detalle.length === 0) {
+    detalleRows = `
+      <tr>
+        <td colspan="5" class="text-center py-6 text-slate-400">
+          Esta compra no tiene detalle registrado.
+        </td>
+      </tr>
+    `;
+  } else {
+    detalleRows = detalle.map(item => {
+      const cantidad = Number(item.cantidad || 0);
+      const precioUnitario = Number(item.precio_unitario || 0);
+      const subtotal = cantidad * precioUnitario;
+
+      return `
+        <tr class="border-b border-primary/5">
+          <td class="py-2 font-mono text-xs">${escapeHtml(item.id_materia)}</td>
+          <td class="py-2 font-medium">${escapeHtml(item.descripcion)}</td>
+          <td class="py-2 text-center">${cantidad}</td>
+          <td class="py-2 text-right">${formatMoney(precioUnitario)}</td>
+          <td class="py-2 text-right font-semibold">${formatMoney(subtotal)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
   return `
     <tr id="detalle-${idCompra}" class="detalle-row" style="display:none;">
       <td colspan="7" class="py-4 px-6">
         <div class="ml-6 bg-white border border-primary/10 rounded-xl p-4">
-          <div class="flex items-start gap-3">
-            <span class="material-symbols-outlined text-primary">info</span>
-            <div>
-              <p class="font-bold text-primary">Detalle de compra pendiente de conectar</p>
-              <p class="text-sm text-slate-500 mt-1">
-                Aquí se mostrarán las materias primas, cantidades, unidades, precios unitarios y subtotales
-                cuando exista un endpoint que devuelva el detalle de la compra #${idCompra}.
-              </p>
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-primary">receipt_long</span>
+              <div>
+                <p class="font-bold text-primary">Detalle de compra #${idCompra}</p>
+                <p class="text-sm text-slate-500 mt-1">
+                  Materias primas incluidas en esta compra.
+                </p>
+              </div>
             </div>
+
+            <button onclick="abrirReporteCompra(${idCompra})"
+                    class="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 flex items-center gap-2">
+              <span class="material-symbols-outlined">picture_as_pdf</span>
+              Generar PDF
+            </button>
           </div>
 
-          <div class="mt-4 overflow-x-auto">
+          <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
                 <tr class="text-primary/70 border-b border-primary/10">
+                  <th class="py-2 text-left">ID Materia</th>
                   <th class="py-2 text-left">Materia prima</th>
                   <th class="py-2 text-center">Cantidad</th>
-                  <th class="py-2 text-center">Unidad</th>
                   <th class="py-2 text-right">Precio unitario</th>
                   <th class="py-2 text-right">Subtotal</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td colspan="5" class="text-center py-6 text-slate-400">
-                    Sin datos de detalle por ahora.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
 
-          <div class="flex justify-end mt-4">
-            <button onclick="abrirReporteCompra(${idCompra})"
-                    class="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 flex items-center gap-2">
-              <span class="material-symbols-outlined">picture_as_pdf</span>
-              Generar reporte de esta compra
-            </button>
+              <tbody>
+                ${detalleRows}
+              </tbody>
+
+              <tfoot class="border-t-2 border-primary/20">
+                <tr>
+                  <td colspan="4" class="py-2 text-right font-bold">Total compra:</td>
+                  <td class="py-2 text-right font-bold text-primary">${formatMoney(compra.total)}</td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </div>
       </td>
@@ -364,12 +397,6 @@ function renderizarCompras(compras) {
 
         <td class="py-3 text-right font-bold text-primary">${total}</td>
 
-        <td class="py-3 text-center">
-          <span class="badge ${efectuada ? 'badge-success' : 'badge-muted'}">
-            ${efectuada ? 'Efectuada' : 'Pendiente'}
-          </span>
-        </td>
-
         <td class="py-3 text-right" onclick="event.stopPropagation()">
           <button onclick="abrirReporteCompra(${id})"
                   class="text-primary hover:bg-primary/10 p-2 rounded transition-colors"
@@ -381,7 +408,7 @@ function renderizarCompras(compras) {
     `;
 
     tbody.insertAdjacentHTML('beforeend', fila);
-    tbody.insertAdjacentHTML('beforeend', renderizarDetallePlaceholder(id));
+    tbody.insertAdjacentHTML('beforeend', renderizarDetalleCompra(compra));
   });
 
   calcularStats(compras);
