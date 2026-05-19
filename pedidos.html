@@ -7,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
@@ -32,16 +33,52 @@
 </style>
 </head>
 <body class="min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
-<header class="w-full px-6 py-4 flex justify-between items-center bg-white/50 dark:bg-black/30 backdrop-blur-md sticky top-0 z-50">
-    <div class="flex items-center gap-3">
-        <div class="bg-primary p-2 rounded-full"><span class="material-icons-round text-white">restaurant</span></div>
-        <span class="text-2xl font-display font-bold text-primary dark:text-pink-200">Nonna</span>
-    </div>
-    <a href="index.html" class="flex items-center gap-2 px-4 py-2 text-primary dark:text-pink-200 hover:bg-primary/10 rounded-full transition-all">
-        <span class="material-icons-round">arrow_back</span>
-        <span class="font-medium">CRUD's del Sistema</span>
-    </a>
-</header>
+<!-- Top Navigation Bar Begins-->
+    <header
+        class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="h-8 w-[1px] bg-primary/20"></div>
+        <a href="menuprincipal.html" class="flex items-center gap-2 text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors duration-200">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-bold leading-normal">Menú Principal</span>
+        </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Nombre de usuario
+                    </p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+                </div>
+            </div>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion"
+                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <script>
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "registro.html";
+        });
+    </script>
+    <!-- Top Navigation Bar Ends-->
 <main class="max-w-7xl mx-auto px-6 py-10">
     <div class="mb-10">
         <h1 class="text-4xl font-display font-bold text-primary dark:text-pink-100 tracking-tight">GESTIÓN DE PEDIDOS</h1>

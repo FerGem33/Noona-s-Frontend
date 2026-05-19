@@ -209,7 +209,7 @@
         </div>
 
         <!-- Report Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <!-- Ventas -->
             <button onclick="showModal('ventas')"
                     class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
@@ -244,25 +244,7 @@
                     <span class="material-symbols-outlined text-[#5d1927] text-7xl">edit_note</span>
                 </div>
                 <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Pedidos</span>
-            </button>
-
-            <!-- Compra (por ID) -->
-            <button onclick="showCompraModal()"
-                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
-                <div class="bg-[#5d1927]/10 p-6 rounded-full">
-                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">receipt_long</span>
-                </div>
-                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Compra</span>
-            </button>
-
-            <!-- Pedido (por ID) -->
-            <button onclick="showPedidoModal()"
-                    class="bg-white hover:bg-white/90 aspect-square rounded-2xl flex flex-col items-center justify-center p-8 gap-6 shadow-xl transition-all hover:scale-[1.02]">
-                <div class="bg-[#5d1927]/10 p-6 rounded-full">
-                    <span class="material-symbols-outlined text-[#5d1927] text-7xl">description</span>
-                </div>
-                <span class="text-[#5d1927] text-2xl font-bold tracking-widest uppercase">Pedido</span>
-            </button>   
+            </button> 
         </div>        
 
         <!-- Footer Decorative Element -->
@@ -769,13 +751,22 @@
                     url = `${API_BASE_URL}/ventas?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     break;
                 case 'compras':
+
                     url = `${API_BASE_URL}/compras?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     url = `reporte_compra.html?pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin};
                     window.location.href = url;`
                     break;
+
+                    url = `reporte_compra.html?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    window.location.href = url;
+                    return;
+                    //url = `${API_BASE_URL}/compras?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    //break;
+
                 case 'pedidos':
-                    url = `${API_BASE_URL}/pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-                    break;
+                    url = `reporte_pedido.html?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    window.location.href = url;
+                    return;
                 default:
                     throw new Error('Tipo de reporte no válido');
             }

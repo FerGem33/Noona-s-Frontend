@@ -6,6 +6,7 @@
 <title>Gestión de Clientes - Nonna DB</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 <script>
     tailwind.config = {
@@ -33,18 +34,52 @@
 </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark min-h-screen font-sans transition-colors duration-300">
-<header class="w-full py-4 px-6 lg:px-12 flex justify-between items-center bg-white/30 dark:bg-black/20 backdrop-blur-md sticky top-0 z-50 border-b border-primary/10">
-    <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">
-            <span class="material-icons-outlined">restaurant</span>
+<!-- Top Navigation Bar Begins-->
+    <header
+        class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
         </div>
-        <span class="text-2xl font-display font-bold text-primary dark:text-white tracking-wide">Nonna</span>
-    </div>
-    <a href="index.html" class="flex items-center gap-2 px-4 py-2 text-primary dark:text-pink-200 hover:bg-white/40 dark:hover:bg-white/10 rounded-full transition-all font-medium">
-        <span class="material-icons-outlined text-sm">arrow_back</span>
-        Regresar
-    </a>
-</header>
+        <div class="h-8 w-[1px] bg-primary/20"></div>
+        <a href="menuprincipal.html" class="flex items-center gap-2 text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors duration-200">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-bold leading-normal">Menú Principal</span>
+        </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Nombre de usuario
+                    </p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+                </div>
+            </div>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion"
+                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <script>
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "registro.html";
+        });
+    </script>
+    <!-- Top Navigation Bar Ends-->
 <main class="max-w-7xl mx-auto px-6 lg:px-12 py-10">
     <div class="mb-10">
         <h1 class="text-4xl lg:text-5xl font-display font-bold text-primary dark:text-pink-100 mb-2">GESTIÓN DE CLIENTES</h1>
@@ -84,11 +119,6 @@
         </div>
     </div>
 </main>
-<div class="fixed bottom-6 right-6 z-50">
-    <button class="w-12 h-12 rounded-full bg-primary text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-95" onclick="document.documentElement.classList.toggle('dark')">
-        <span class="material-icons-outlined">dark_mode</span>
-    </button>
-</div>
 
 <script>
     const API_BASE = 'http://3.15.13.161:8000/api';
