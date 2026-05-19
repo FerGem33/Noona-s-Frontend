@@ -650,7 +650,6 @@
         const resetBtn = document.getElementById('resetPedidoBtn');
 
         let pedidoId = pedidoIdInput.value.trim();
-
         // Limpiar alertas previas
         alertContainer.innerHTML = '';
         errorMessage.classList.remove('active');
@@ -771,6 +770,8 @@
                     break;
                 case 'compras':
                     url = `${API_BASE_URL}/compras?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                    url = `reporte_compra.html?pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin};
+                    window.location.href = url;`
                     break;
                 case 'pedidos':
                     url = `${API_BASE_URL}/pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
