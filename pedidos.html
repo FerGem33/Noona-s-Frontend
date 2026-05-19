@@ -30,6 +30,10 @@
 <style>
     body { font-family: 'Inter', sans-serif; background-color: #FEBDC6; }
     .font-display { font-family: 'Playfair Display', serif; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+    }
 </style>
 </head>
 <body class="min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
@@ -112,7 +116,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabla-pedidos-body" class="divide-y divide-gray-100 dark:divide-zinc-800">
-                    <tr><td colspan="6" class="text-center py-10 text-primary/50">Cargando pedidos...</td></tr>
+                    <tr><td colspan="6" class="text-center py-10 text-primary/50">Cargando pedidos...NonNull
                 </tbody>
             </table>
         </div>
@@ -144,7 +148,7 @@ function renderizarPedidos(pedidos) {
   const tbody = document.getElementById('tabla-pedidos-body');
 
   if (!pedidos.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-primary/50">No hay pedidos. ¡Crea el primero!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-primary/50">No hay pedidos. ¡Crea el primero!NonNull`;
     document.getElementById('total-registros').innerText = 'Mostrando 0 pedidos';
     return;
   }
@@ -190,14 +194,14 @@ function renderizarPedidos(pedidos) {
 
         <td class="px-6 py-4 whitespace-nowrap text-center">
           <div class="flex justify-center gap-2">
-            <a href="pedido_ver.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Ver Detalles">
-              <span class="material-icons-round text-xl">visibility</span>
+            <a href="pedido_ver.html?id=${id}" class="p-2 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Ver Detalles">
+              <span class="material-symbols-outlined text-xl">visibility</span>
             </a>
-            <a href="pedido_editar.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Editar">
-              <span class="material-icons-round text-xl">edit</span>
+            <a href="pedido_editar.html?id=${id}" class="p-2 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Editar">
+              <span class="material-symbols-outlined text-xl">edit</span>
             </a>
-            <a href="pedido_eliminar.html?id=${id}" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Eliminar">
-              <span class="material-icons-round text-xl text-red-600 dark:text-red-400">delete</span>
+            <a href="pedido_eliminar.html?id=${id}" class="p-2 text-primary/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+              <span class="material-symbols-outlined text-xl">delete</span>
             </a>
           </div>
         </td>
@@ -212,7 +216,7 @@ function renderizarPedidos(pedidos) {
 
 async function cargarPedidos() {
   const tbody = document.getElementById('tabla-pedidos-body');
-  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10">Cargando...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10">Cargando...NonNull`;
 
   try {
     todosPedidos = await listarPedidos();
@@ -224,7 +228,7 @@ async function cargarPedidos() {
         ? 'Error de CORS o conexión.'
         : error.message;
 
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">Error: ${mensaje}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">Error: ${mensaje}NonNull`;
   }
 }
 
