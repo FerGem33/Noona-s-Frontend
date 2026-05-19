@@ -6,6 +6,7 @@
   <title>Nonna - Gestión de Productos</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
   <!-- No cargamos Material Symbols para evitar problemas -->
   <script>
     tailwind.config = {
@@ -23,19 +24,56 @@
   </style>
 </head>
 <body class="bg-accent-pink min-h-screen">
+  <!-- Top Navigation Bar Begins-->
+    <header
+        class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-primary/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+            </div>
+            <h1 class="text-primary text-xl font-bold tracking-tight">Nonna</h1>
+        </div>
+        <div class="h-8 w-[1px] bg-primary/20"></div>
+        <a href="menuprincipal.html" class="flex items-center gap-2 text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors duration-200">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-bold leading-normal">Menú Principal</span>
+        </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Nombre de usuario
+                    </p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
+                </div>
+            </div>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion"
+                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <script>
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "registro.html";
+        });
+    </script>
+    <!-- Top Navigation Bar Ends-->
   <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
     <div class="layout-container flex h-full grow flex-col">
       <main class="flex flex-1 justify-center py-8 px-4 sm:px-10 lg:px-20">
         <div class="layout-content-container flex flex-col max-w-[1200px] flex-1 gap-6">
-          
-          <!-- ✅ Botón para volver al menú principal (CRUD's del Sistema) -->
-          <div class="flex items-center gap-2 mb-2">
-            <a href="index.html" class="flex items-center gap-1 text-primary font-semibold hover:underline transition-colors">
-              <span class="text-xl">←</span>
-              <span class="text-sm uppercase tracking-wide">CRUD's del Sistema</span>
-            </a>
-          </div>
-
           <div class="flex flex-wrap items-end justify-between gap-4">
             <div class="flex flex-col gap-1">
               <h1 class="text-primary text-4xl font-black tracking-[-0.033em]">Gestión de Productos</h1>
