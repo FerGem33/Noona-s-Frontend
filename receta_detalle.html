@@ -48,6 +48,10 @@
                     <h2 class="text-lg font-bold text-slate-900">Descripción</h2>
                 </div>
                 <p id="descripcion" class="text-slate-700 text-lg font-semibold">Cargando...</p>
+                <div class="mt-4 flex items-center gap-2 text-sm font-semibold text-primary/70">
+                    <span class="material-symbols-outlined text-lg">person</span>
+                    <span>Creada por: <span id="usuario-receta">Cargando...</span></span>
+                </div>
             </section>
             <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
                 <div class="flex items-center gap-3 mb-6">
@@ -101,8 +105,10 @@
             if (!res.ok) throw new Error();
             const receta = await res.json();
             document.getElementById('descripcion').innerText = receta.descripcion || 'Sin descripción';
+            document.getElementById('usuario-receta').innerText = receta.usuario || (receta.id_usuario ? `Usuario ${receta.id_usuario}` : 'Sin usuario');
         } catch(e) {
             document.getElementById('descripcion').innerText = 'Error al cargar receta';
+            document.getElementById('usuario-receta').innerText = 'No disponible';
         }
     }
 

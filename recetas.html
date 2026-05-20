@@ -114,11 +114,12 @@
                         <thead>
                             <tr class="bg-primary/5">
                                 <th class="px-8 py-5 text-primary/60 text-xs font-bold uppercase tracking-wider">RECETA (Descripción)</th>
+                                <th class="px-8 py-5 text-primary/60 text-xs font-bold uppercase tracking-wider">CREADA POR</th>
                                 <th class="px-8 py-5 text-primary/60 text-xs font-bold uppercase tracking-wider text-right">ACCIONES</th>
                              </tr>
                         </thead>
                         <tbody id="tabla-recetas" class="divide-y divide-primary/5">
-                            <tr><td colspan="2" class="text-center py-10 text-primary/50">Cargando recetas...</td></tr>
+                            <tr><td colspan="3" class="text-center py-10 text-primary/50">Cargando recetas...</td></tr>
                         </tbody>
                      </table>
                 </div>
@@ -152,14 +153,19 @@
 
     let todasRecetas = [];
 
+    function obtenerUsuarioReceta(receta) {
+        return receta.usuario || (receta.id_usuario ? `Usuario ${receta.id_usuario}` : 'Sin usuario');
+    }
+
     function renderizarTabla(recetas) {
         const tbody = document.getElementById('tabla-recetas');
         if (!recetas.length) {
-            tbody.innerHTML = `<tr><td colspan="2" class="text-center py-10 text-primary/50">No hay recetas. ¡Agrega la primera!NonNull`;
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-primary/50">No hay recetas. ¡Agrega la primera!</td></tr>`;
             return;
         }
         tbody.innerHTML = '';
         recetas.forEach(rec => {
+            const usuario = obtenerUsuarioReceta(rec);
             const fila = `
                 <tr class="hover:bg-primary/[0.02] transition-colors group">
                     <td class="px-8 py-6">
@@ -168,6 +174,12 @@
                                 <span class="material-symbols-outlined text-primary text-2xl">restaurant</span>
                             </div>
                             <span class="text-primary font-bold text-lg">${escapeHtml(rec.descripcion)}</span>
+                        </div>
+                    </td>
+                    <td class="px-8 py-6">
+                        <div class="flex items-center gap-2 text-primary/70 font-semibold">
+                            <span class="material-symbols-outlined text-lg">person</span>
+                            <span>${escapeHtml(usuario)}</span>
                         </div>
                     </td>
                     <td class="px-8 py-6">
@@ -198,14 +210,14 @@
 
     async function cargarRecetas() {
         const tbody = document.getElementById('tabla-recetas');
-        tbody.innerHTML = `<tr><td colspan="2" class="text-center py-10 text-primary/50">Cargando...NonNull`;
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-primary/50">Cargando...</td></tr>`;
         try {
             todasRecetas = await listarRecetas();
             renderizarTabla(todasRecetas);
         } catch (error) {
             console.error(error);
             let mensaje = error.message.includes('401') ? 'Token inválido. Actualiza TOKEN.' : (error.message.includes('Failed to fetch') ? 'Error de CORS o conexión.' : error.message);
-            tbody.innerHTML = `<tr><td colspan="2" class="text-center py-10 text-red-500">Error: ${mensaje}NonNull`;
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-red-500">Error: ${escapeHtml(mensaje)}</td></tr>`;
         }
     }
 
@@ -214,7 +226,10 @@
         buscador.addEventListener('input', (e) => {
             const texto = e.target.value.toLowerCase();
             if (!texto.trim()) return renderizarTabla(todasRecetas);
-            const filtradas = todasRecetas.filter(r => r.descripcion?.toLowerCase().includes(texto));
+            const filtradas = todasRecetas.filter(r =>
+                r.descripcion?.toLowerCase().includes(texto) ||
+                obtenerUsuarioReceta(r).toLowerCase().includes(texto)
+            );
             renderizarTabla(filtradas);
         });
     }

@@ -163,6 +163,7 @@
 <script>
     const API_BASE = 'http://3.15.13.161:8000/api';
     const TOKEN = localStorage.token;
+    const ID_USUARIO = parseInt(localStorage.getItem('id_usuario'));
 
     function getHeaders() {
         return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
@@ -307,6 +308,7 @@
     async function crearRecetaYIngredientes() {
         const descripcion = document.getElementById('descripcion').value.trim();
         if (!descripcion) { mostrarErrorValidacion('La descripción de la receta es obligatoria'); return; }
+        if (!ID_USUARIO) { mostrarErrorValidacion('No se encontró el usuario de la sesión. Inicie sesión nuevamente.'); return; }
         if (ingredientesTemp.length === 0) { mostrarErrorValidacion('Debe agregar al menos un ingrediente'); return; }
         if (descripcionDuplicada(descripcion)) {
             mostrarErrorValidacion('Ya existe una receta con esa descripción. Por favor, elija un nombre diferente.');
@@ -317,7 +319,7 @@
             const resReceta = await fetch(`${API_BASE}/receta/recetas/`, {
                 method: 'POST',
                 headers: getHeaders(),
-                body: JSON.stringify({ descripcion })
+                body: JSON.stringify({ descripcion, id_usuario: ID_USUARIO })
             });
             if (!resReceta.ok) {
                 const err = await resReceta.json();

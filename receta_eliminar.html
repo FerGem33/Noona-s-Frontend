@@ -163,7 +163,8 @@
             const res = await fetch(`${API_BASE}/receta/recetas/${recetaId}`, { headers: getHeaders() });
             if (!res.ok) throw new Error(`Error ${res.status}`);
             recetaActual = await res.json();
-            document.getElementById('mensaje-receta').innerHTML = `Esta acción no se puede deshacer.<br><strong class="text-primary">“${escapeHtml(recetaActual.descripcion)}”</strong>`;
+            const usuario = recetaActual.usuario || (recetaActual.id_usuario ? `Usuario ${recetaActual.id_usuario}` : 'Sin usuario');
+            document.getElementById('mensaje-receta').innerHTML = `Esta acción no se puede deshacer.<br><strong class="text-primary">“${escapeHtml(recetaActual.descripcion)}”</strong><br><span class="text-sm font-semibold">Creada por: ${escapeHtml(usuario)}</span>`;
 
             // Opcional: verificar si tiene ingredientes para personalizar mensaje de confirmación
             const relRes = await fetch(`${API_BASE}/receta_materia_prima/`, { headers: getHeaders() });
