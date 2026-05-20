@@ -178,27 +178,51 @@
 
 <body class="bg-background-light font-display text-slate-900 min-h-screen">
 <div class="layout-container flex h-full grow flex-col">
-    <!-- Main Wrapper with Max Width -->
-    <div class="mx-auto w-full max-w-[1200px] px-6 py-8">
-        <!-- Navigation Header -->
-        <header class="flex items-center justify-between mb-12">
-            <div class="flex items-center gap-4">
-                <button onclick="window.location.href='menuprincipal.html'"
-                        class="flex items-center justify-center bg-burgundy text-white px-5 py-2.5 rounded-full gap-2 transition-opacity hover:opacity-90">
-                    <span class="material-symbols-outlined text-sm">arrow_back</span>
-                    <span class="text-xs font-bold tracking-wider uppercase">Menú Principal</span>
-                </button>
-            </div>
-
+    <!-- Top Navigation Bar Begins-->
+    <header class="w-full bg-[#f3dfe0] dark:bg-slate-900 border-b border-[#5d1927]/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-6">
             <div class="flex items-center gap-3">
-                <div class="text-burgundy font-black text-3xl tracking-tighter">Nonna</div>
-                <div class="w-8 h-8 bg-burgundy rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary" fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
-                    </svg>
+                <div class="bg-[#5d1927] p-2 rounded-lg text-white">
+                    <span class="material-symbols-outlined block text-2xl">bakery_dining</span>
+                </div>
+                <h1 class="text-[#5d1927] text-xl font-bold tracking-tight">Nonna</h1>
+            </div>
+            <div class="h-8 w-[1px] bg-[#5d1927]/20"></div>
+            <a href="menuprincipal.html" class="flex items-center gap-2 text-[#5d1927] hover:bg-[#5d1927]/10 px-4 py-2 rounded-lg transition-colors duration-200">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-sm font-bold leading-normal">Menú Principal</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                <div class="text-right hidden sm:block">
+                    <p id="textoUsuario" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Nombre de usuario</p>
+                    <p id="textoRol" class="text-xs text-slate-500">Rol</p>
                 </div>
             </div>
-        </header>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="botonCerrarSesion" class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="hidden sm:inline text-sm font-medium">Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    <script>
+        document.getElementById("textoUsuario").innerText =
+            localStorage.getItem("usuario") || "Invitado";
+        document.getElementById("textoRol").innerText =
+            localStorage.getItem("rol") || "Sin rol";
+
+        const botonCerrarSesion = document.getElementById("botonCerrarSesion");
+        botonCerrarSesion.addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "registro.html";
+        });
+    </script>
+    <!-- Top Navigation Bar Ends-->
+
+    <!-- Main Wrapper with Max Width -->
+    <div class="mx-auto w-full max-w-[1200px] px-6 py-8">
 
         <!-- Page Title -->
         <div class="mb-10">
