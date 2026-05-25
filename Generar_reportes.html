@@ -775,17 +775,9 @@
                     url = `${API_BASE_URL}/ventas?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     break;
                 case 'compras':
-
-                    url = `${API_BASE_URL}/compras?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-                    url = `reporte_compra.html?pedidos?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin};
-                    window.location.href = url;`
-                    break;
-
                     url = `reporte_compra.html?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
                     window.location.href = url;
                     return;
-                    //url = `${API_BASE_URL}/compras?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-                    //break;
 
                 case 'pedidos':
                     url = `reporte_pedido.html?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
