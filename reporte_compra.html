@@ -194,7 +194,21 @@ document.getElementById('periodo-texto').innerText =
 
 function formatMoney(value) {
   const num = Number(value);
-  return Number.isNaN(num) ? '$0.00' : `$${num.toFixed(2)}`;
+  return Number.isNaN(num)
+    ? '$0.00'
+    : `$${num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+}
+
+function formatNumber(value) {
+  const num = Number(value);
+  return Number.isNaN(num)
+    ? '0'
+    : num.toLocaleString('en-US', {
+        maximumFractionDigits: 6
+      });
 }
 
 function formatDate(value) {
@@ -249,7 +263,7 @@ function calcularStats(compras) {
   const total = compras.reduce((acc, c) => acc + Number(c.total || 0), 0);
   const promedio = compras.length ? total / compras.length : 0;
 
-  document.getElementById('stat-compras').innerText = compras.length;
+  document.getElementById('stat-compras').innerText = formatNumber(compras.length);
   document.getElementById('stat-total').innerText = formatMoney(total);
   document.getElementById('stat-promedio').innerText = formatMoney(promedio);
 }
@@ -278,7 +292,7 @@ function renderizarDetalleCompra(compra) {
         <tr class="border-b border-primary/5">
           <td class="py-2 font-mono text-xs">${escapeHtml(item.id_materia)}</td>
           <td class="py-2 font-medium">${escapeHtml(item.descripcion)}</td>
-          <td class="py-2 text-center">${cantidad}</td>
+          <td class="py-2 text-center">${formatNumber(cantidad)}</td>
           <td class="py-2 text-right">${formatMoney(precioUnitario)}</td>
           <td class="py-2 text-right font-semibold">${formatMoney(subtotal)}</td>
         </tr>
