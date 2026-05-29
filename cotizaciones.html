@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cotizaciones - Nonna</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: { "primary": "#5d1927", "brand-pink": "#FEBDC6", "background-light": "#f8f6f6", "background-dark": "#1f1316" },
-                    fontFamily: { "display": ["Montserrat", "sans-serif"] },
+                    fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
                     borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                 },
             },
         }
     </script>
     <style>
-        body { background-color: #FEBDC6; font-family: 'Montserrat', sans-serif; }
+        body { background-color: #FEBDC6; font-family: 'Plus Jakarta Sans', sans-serif; }
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
@@ -290,7 +290,7 @@
         function renderizarTabla(cotizaciones) {
             const tbody = document.getElementById('tabla-cotizaciones');
             if (!cotizaciones.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400">No hay cotizaciones. Crea la primera.NonNull`;
+                tbody.innerHTML = `<td><td colspan="7" class="text-center py-8 text-slate-400">No hay cotizaciones. Crea la primera.NonNull`;
                 return;
             }
             tbody.innerHTML = '';
@@ -381,7 +381,7 @@
                                                 Confirmar Cotización
                                             </button>
                                         </td>
-                                    </tr>
+                                    <tr>
                                     </tfoot>
                                 </table>
                             </div>

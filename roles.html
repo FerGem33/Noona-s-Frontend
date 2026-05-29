@@ -81,7 +81,7 @@
 <main class="flex flex-1 justify-center py-12 px-10">
     <div class="layout-content-container flex flex-col max-w-[1000px] flex-1">
         <div class="flex flex-col gap-6 mb-8">
-            <h1 class="text-primary text-5xl font-black leading-tight tracking-[-0.033em] text-center">GESTIÓN DE ROLES</h1>
+            <h1 class="text-primary text-5xl font-black leading-tight tracking-[-0.033em] text-center">Gestión de roles</h1>
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex-1 min-w-[300px] relative">
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/50">search</span>
@@ -107,10 +107,8 @@
                     </tbody>
                 </table>
             </div>
-            <!-- Sección de paginación eliminada: ya no hay flechas ni números -->
             <div class="px-10 py-6 bg-primary/5 flex items-center justify-between border-t border-primary/10">
                 <p id="total-registros" class="text-primary/60 text-sm font-medium">Cargando...</p>
-                <!-- Los botones de paginación han sido removidos -->
             </div>
         </div>
     </div>
@@ -168,11 +166,9 @@
                     </td>
                     <td class="px-10 py-6">
                         <div class="flex items-center justify-end gap-2">
-                            <!-- Botón Editar - Mismo estilo que Recetas, Productos, Materia Prima y Usuarios -->
                             <a href="rol_editar.html?id=${rol.id_rol}" class="p-2 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all" title="Editar">
                                 <span class="material-symbols-outlined text-xl">edit</span>
                             </a>
-                            <!-- Botón Eliminar - Mismo estilo que Recetas, Productos, Materia Prima y Usuarios -->
                             <a href="rol_eliminar.html?id=${rol.id_rol}" class="p-2 text-primary/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
                                 <span class="material-symbols-outlined text-xl">delete</span>
                             </a>
@@ -196,7 +192,7 @@
             let mensaje = error.message;
             if (mensaje.includes('401') || mensaje.includes('Token')) mensaje = 'Token inválido o expirado. Actualiza TOKEN.';
             else if (mensaje.includes('Failed to fetch')) mensaje = 'Error de CORS o conexión. Usa Live Server.';
-            tbody.innerHTML = `<tr><td colspan="2" class="text-center py-10 text-red-500">Error: ${mensaje}NonNull`;
+            tbody.innerHTML = `<td><td colspan="2" class="text-center py-10 text-red-500">Error: ${mensaje}NonNull`;
         }
     }
 

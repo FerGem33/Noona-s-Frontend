@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Gestión de Pedidos - Noona</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script>
@@ -19,8 +19,7 @@
                     "background-dark": "#1a070a",
                 },
                 fontFamily: {
-                    display: ["Playfair Display", "serif"],
-                    sans: ["Inter", "sans-serif"],
+                    display: ["Plus Jakarta Sans", "sans-serif"],
                 },
                 borderRadius: { DEFAULT: "0.75rem" },
             },
@@ -28,8 +27,7 @@
     };
 </script>
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #FEBDC6; }
-    .font-display { font-family: 'Playfair Display', serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FEBDC6; }
     .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         vertical-align: middle;
@@ -85,7 +83,7 @@
     <!-- Top Navigation Bar Ends-->
 <main class="max-w-7xl mx-auto px-6 py-10">
     <div class="mb-10">
-        <h1 class="text-4xl font-display font-bold text-primary dark:text-pink-100 tracking-tight">GESTIÓN DE PEDIDOS</h1>
+        <h1 class="text-4xl font-display font-bold text-primary dark:text-pink-100 tracking-tight">Gestión de pedidos</h1>
         <p class="text-primary/70 dark:text-pink-200/60 mt-2">Administra el flujo de pedidos y estados de entrega del sistema.</p>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -107,12 +105,12 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800">
-                        <th class="px-6 py-4 text-xs font-bold text-primary dark:text-pink-200 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-4 text-xs font-bold text-primary dark:text-pink-200 uppercase tracking-wider">Cliente</th>
-                        <th class="px-6 py-4 text-xs font-bold text-primary dark:text-pink-200 uppercase tracking-wider">Fecha Entrega</th>
-                        <th class="px-6 py-4 text-xs font-bold text-primary dark:text-pink-200 uppercase tracking-wider">Estado</th>
-                        <th class="px-6 py-4 text-xs font-bold text-primary dark:text-pink-200 uppercase tracking-wider text-right">Total</th>
-                        <th class="px-6 py-4 text-xs font-bold text-primary dark:text-pink-200 uppercase tracking-wider text-center">Acciones</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider">Fecha Entrega</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider text-right">Total</th>
+                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-pedidos-body" class="divide-y divide-gray-100 dark:divide-zinc-800">

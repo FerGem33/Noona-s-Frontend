@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Gestión de Clientes - Nonna DB</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
@@ -18,8 +18,7 @@
                     "background-dark": "#2D0A11",
                 },
                 fontFamily: {
-                    display: ["Playfair Display", "serif"],
-                    sans: ["Inter", "sans-serif"],
+                    display: ["Plus Jakarta Sans", "sans-serif"],
                 },
                 borderRadius: { DEFAULT: "0.75rem" },
             },
@@ -74,7 +73,7 @@
 <!-- Top Navigation Bar Ends-->
 <main class="max-w-7xl mx-auto px-6 lg:px-12 py-10">
     <div class="mb-10">
-        <h1 class="text-4xl lg:text-5xl font-display font-bold text-primary dark:text-pink-100 mb-2">GESTIÓN DE CLIENTES</h1>
+        <h1 class="text-4xl lg:text-5xl font-display font-bold text-primary dark:text-pink-100 mb-2">Gestión de clientes</h1>
         <p class="text-primary/70 dark:text-pink-200/60 font-medium">Administración de base de datos de usuarios registrados.</p>
     </div>
     <div class="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
@@ -97,7 +96,7 @@
                         <th class="px-6 py-5 text-sm font-bold text-primary dark:text-pink-200 tracking-wider uppercase">Apellido</th>
                         <th class="px-6 py-5 text-sm font-bold text-primary dark:text-pink-200 tracking-wider uppercase">Teléfono</th>
                         <th class="px-6 py-5 text-sm font-bold text-primary dark:text-pink-200 tracking-wider uppercase text-center">Acciones</th>
-                    </tr>
+                    <tr>
                 </thead>
                 <tbody id="tabla-clientes" class="divide-y divide-primary/5 dark:divide-white/5">
                     <tr><td colspan="5" class="text-center py-10 text-primary/50">Cargando clientes...</td></tr>
