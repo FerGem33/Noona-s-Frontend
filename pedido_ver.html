@@ -37,13 +37,18 @@
             <div class="flex items-center gap-4">
                 <h1 id="titulo-pedido" class="text-primary text-3xl font-black tracking-tight">DETALLES DEL PEDIDO</h1>
             </div>
-            
         </div>
-        <!-- Botón para volver al calendario -->
-        <button onclick="window.location.href='calendario.html'" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-bold transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg">
-      
-            <span>VER CALENDARIO</span>
-        </button>
+        <div class="flex gap-3">
+            <!-- Botón REGRESAR (nuevo) -->
+            <button onclick="window.location.href='pedidos.html'" class="bg-white hover:bg-gray-100 text-primary border-2 border-primary px-6 py-2.5 rounded-lg font-bold transition-all duration-200 flex items-center gap-2 shadow-md">
+                <span>←</span>
+                <span>REGRESAR</span>
+            </button>
+            <!-- Botón VER CALENDARIO -->
+            <button onclick="window.location.href='calendario.html'" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-bold transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg">
+                <span>VER CALENDARIO</span>
+            </button>
+        </div>
     </div>
     <div class="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div class="space-y-8">
@@ -55,7 +60,6 @@
             </div>
             <div class="space-y-4">
                 <div class="flex items-center gap-3 border-b border-slate-100 pb-2">
-                  
                     <h3 class="text-slate-900 font-extrabold text-lg uppercase tracking-tight">Comentario del Pedido</h3>
                 </div>
                 <div class="bg-slate-50 p-4 rounded-xl"><p id="comentario-pedido" class="text-slate-700 text-sm leading-relaxed">-</p></div>
@@ -97,7 +101,6 @@
         </div>
     </div>
     <div class="p-8 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-end gap-8">
-       
         <div class="w-full md:w-85 space-y-3">
             <div class="flex justify-between items-center text-slate-500">
                 <span class="text-sm font-semibold uppercase tracking-wider">Subtotal</span>
@@ -192,9 +195,9 @@
             document.getElementById('direccion-texto').innerText = pedido.direccion || 'No especificada';
             document.getElementById('comentario-pedido').innerText = pedido.comentario || 'Sin comentarios';
             
-     // Fechas y tipo de entrega
-document.getElementById('fecha-pedido').innerText = pedido.fecha_pedido ? new Date(pedido.fecha_pedido).toLocaleDateString() : '-';
-document.getElementById('fecha-entrega').innerText = pedido.fecha_entrega ? new Date(pedido.fecha_entrega).toLocaleDateString() : '-';
+            // Fechas y tipo de entrega
+            document.getElementById('fecha-pedido').innerText = pedido.fecha_pedido ? new Date(pedido.fecha_pedido).toLocaleDateString() : '-';
+            document.getElementById('fecha-entrega').innerText = pedido.fecha_entrega ? new Date(pedido.fecha_entrega).toLocaleDateString() : '-';
             
             // Tipo de entrega con estilo visual
             const tipoEntregaElement = document.getElementById('tipo-entrega');
@@ -249,7 +252,7 @@ document.getElementById('fecha-entrega').innerText = pedido.fecha_entrega ? new 
                             <td class="px-6 py-5 text-right text-slate-600 font-medium">$${precioBase.toFixed(2)}</td>
                             <td class="px-6 py-5 text-right text-primary font-bold">$${precioDisenio.toFixed(2)}</td>
                             <td class="px-6 py-5 text-right text-slate-900 font-extrabold text-lg">$${subtotal.toFixed(2)}</td>
-                        </tr>
+                        </td>
                     `);
                 }
             } else {
