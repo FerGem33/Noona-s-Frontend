@@ -3,159 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Registrar Usuario - Nonna DB</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
-                colors: { "primary": "#5d1926", "background-light": "#febdc6", "background-dark": "#1f1315" },
-                fontFamily: { "display": ["Plus Jakarta Sans"] },
-                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
             },
         },
     }
 </script>
 <style>
-    /* Estilos para las notificaciones toast */
-    .toast-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        min-width: 280px;
-        max-width: 380px;
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        transform: translateX(400px);
-        transition: transform 0.3s ease-out;
-        border-left: 4px solid;
-        pointer-events: auto;
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .toast-notification.show {
-        transform: translateX(0);
-    }
-    .toast-notification.success {
-        border-left-color: #10b981;
-    }
-    .toast-notification.error {
-        border-left-color: #ef4444;
-    }
-    .toast-notification.warning {
-        border-left-color: #f59e0b;
-    }
-    .toast-notification.info {
-        border-left-color: #3b82f6;
-    }
-    .toast-icon {
-        flex-shrink: 0;
-    }
-    .toast-content {
-        flex: 1;
-        font-size: 0.875rem;
-        line-height: 1.4;
-    }
-    .toast-close {
-        cursor: pointer;
-        color: #9ca3af;
-        transition: color 0.2s;
-    }
-    .toast-close:hover {
-        color: #4b5563;
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%235d1927' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
     }
 </style>
-<title>Registro de Nuevo Usuario - Nonna DB</title>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100">
-<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
-    <header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 bg-white/80 backdrop-blur-md px-10 py-4 dark:bg-background-dark/80">
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[900px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
         <div class="flex items-center gap-4">
-            <a href="usuarios.html" class="flex items-center justify-center rounded-full p-2 text-primary hover:bg-primary/10 transition-colors">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </a>
-            <div class="flex items-center gap-2">
-                <div class="size-8 text-primary">
-                    <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-primary text-xl font-bold leading-tight tracking-tight">Nonna DB</h2>
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">person_add</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Registrar Nuevo Usuario</h1>
+                <p class="text-slate-500 text-sm">Complete la información para dar de alta el nuevo perfil.</p>
             </div>
         </div>
+        <a href="usuarios.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
     </header>
-    <main class="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
-        <div class="w-full max-w-2xl">
-            <nav class="flex items-center gap-2 mb-8 text-sm font-medium text-primary/70">
-                <a href="usuarios.html" class="hover:text-primary">Usuarios</a>
-                <span class="material-symbols-outlined text-xs">chevron_right</span>
-                <span class="text-primary font-bold">Registrar Nuevo Usuario</span>
-            </nav>
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-hidden border border-white/20">
-                <div class="p-8 border-b border-primary/10">
-                    <h1 class="text-primary dark:text-primary/90 text-2xl font-bold tracking-tight">REGISTRAR NUEVO USUARIO</h1>
-                    <p class="text-slate-500 dark:text-slate-400 mt-2">Complete la información requerida para el alta del nuevo perfil administrativo o de logística.</p>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-2xl mx-auto space-y-8">
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">manage_accounts</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos del Usuario</h2>
                 </div>
-                <form id="form-usuario" class="p-8 space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="col-span-2">
-                            <label class="block text-primary font-semibold text-sm mb-2">Nombre Completo</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">person</span>
-                                <input id="nombre" class="w-full pl-10 pr-4 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all dark:bg-slate-800" placeholder="Ej. Juan Pérez" type="text" required>
-                            </div>
-                        </div>
-                        <div class="col-span-2 md:col-span-1">
-                            <label class="block text-primary font-semibold text-sm mb-2">Rol del Usuario</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">badge</span>
-                                <select id="id_rol" class="w-full pl-10 pr-4 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all dark:bg-slate-800" required>
-                                    <option value="">Cargando roles...</option>
-                                </select>
-                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary/40 pointer-events-none">expand_more</span>
-                            </div>
-                        </div>
-                        <div class="col-span-2 md:col-span-1">
-                            <label class="block text-primary font-semibold text-sm mb-2">Contraseña</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40">lock</span>
-                                <input id="contrasena" class="w-full pl-10 pr-12 py-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all dark:bg-slate-800" placeholder="••••••••" type="password" required>
-                                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors toggle-password">
-                                    <span class="material-symbols-outlined">visibility</span>
-                                </button>
-                            </div>
-                            <p class="text-xs text-primary/60 mt-1">Mínimo 8 caracteres, una mayúscula y un número</p>
+                <form id="form-usuario" class="grid grid-cols-1 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Nombre Completo *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                            <input id="nombre" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. Juan Pérez" type="text" required>
                         </div>
                     </div>
-                    <div class="pt-6 flex flex-col sm:flex-row items-center gap-4">
-                        <button type="submit" id="btn-submit" class="w-full sm:flex-1 bg-primary text-white font-bold py-3.5 px-6 rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-xl">person_add</span>
-                            Crear Usuario
-                        </button>
-                        <a href="usuarios.html" class="w-full sm:w-auto border-2 border-primary text-primary font-bold py-3 px-8 rounded-lg hover:bg-primary/5 transition-all text-center">
-                            Cancelar
-                        </a>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Rol del Usuario *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">badge</span>
+                            <select id="id_rol" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-10 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all custom-select" required>
+                                <option value="">Cargando roles...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Contraseña *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+                            <input id="contrasena" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-12 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="••••••••" type="password" required>
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors toggle-password">
+                                <span class="material-symbols-outlined text-xl">visibility</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 ml-1">Mínimo 8 caracteres, una mayúscula y un número</p>
                     </div>
                 </form>
-                <div class="bg-primary/5 p-6 border-t border-primary/10">
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-primary mt-0.5">info</span>
-                        <div class="text-xs text-primary/80 leading-relaxed">
-                            <p class="font-bold mb-1">Nota de seguridad:</p>
-                            <p>Las contraseñas deben contener al menos 8 caracteres, incluyendo una letra mayúscula y un número para garantizar la integridad del sistema Nonna DB.</p>
-                        </div>
-                    </div>
+            </section>
+
+            <!-- Nota de seguridad -->
+            <div class="bg-primary/5 rounded-2xl p-5 border border-primary/10 flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary mt-0.5">info</span>
+                <div class="text-xs text-primary/80 leading-relaxed">
+                    <p class="font-bold mb-1">Nota de seguridad</p>
+                    <p>Las contraseñas deben contener al menos 8 caracteres, incluyendo una letra mayúscula y un número para garantizar la integridad del sistema Nonna DB.</p>
                 </div>
             </div>
         </div>
     </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="usuarios.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-usuario" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Crear Usuario
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
 </div>
 
 <script>
@@ -163,105 +144,47 @@
     const TOKEN = localStorage.token;
 
     function getHeaders() {
-        return {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${TOKEN}`,
-            'Content-Type': 'application/json'
+        return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+    }
+
+    // Funciones de modales centrales
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
         };
     }
 
-    // ---------- SISTEMA DE NOTIFICACIONES TOAST ----------
-    function showToast(message, type = 'info', duration = 4000) {
-        const toastContainer = document.getElementById('toast-container') || (() => {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.position = 'fixed';
-            container.style.top = '20px';
-            container.style.right = '20px';
-            container.style.zIndex = '1000';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.gap = '10px';
-            document.body.appendChild(container);
-            return container;
-        })();
-
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        
-        let icon = '';
-        if (type === 'success') icon = 'check_circle';
-        else if (type === 'error') icon = 'error';
-        else if (type === 'warning') icon = 'warning';
-        else icon = 'info';
-        
-        toast.innerHTML = `
-            <div class="toast-icon">
-                <span class="material-symbols-outlined" style="color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'}">${icon}</span>
-            </div>
-            <div class="toast-content">${message}</div>
-            <div class="toast-close">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        // Animación de entrada
-        setTimeout(() => toast.classList.add('show'), 10);
-        
-        // Configurar botón cerrar
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        });
-        
-        // Auto cerrar después de duration
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, duration);
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
     }
 
-    // ---------- VALIDACIÓN DE CONTRASEÑA ----------
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
     function validarContrasena(contrasena) {
-        if (contrasena.length < 8) {
-            return { valida: false, mensaje: 'La contraseña debe tener al menos 8 caracteres.' };
-        }
-        if (!/[A-Z]/.test(contrasena)) {
-            return { valida: false, mensaje: 'La contraseña debe contener al menos una letra mayúscula.' };
-        }
-        if (!/[0-9]/.test(contrasena)) {
-            return { valida: false, mensaje: 'La contraseña debe contener al menos un número.' };
-        }
+        if (contrasena.length < 8) return { valida: false, mensaje: 'La contraseña debe tener al menos 8 caracteres.' };
+        if (!/[A-Z]/.test(contrasena)) return { valida: false, mensaje: 'La contraseña debe contener al menos una letra mayúscula.' };
+        if (!/[0-9]/.test(contrasena)) return { valida: false, mensaje: 'La contraseña debe contener al menos un número.' };
         return { valida: true, mensaje: '' };
-    }
-
-    // ---------- CARGAR ROLES ----------
-    async function listarRoles() {
-        const res = await fetch(`${API_BASE}/rol/`, { headers: getHeaders() });
-        if (!res.ok) throw new Error('Error al cargar roles');
-        return res.json();
-    }
-
-    async function crearUsuario(datos) {
-        const res = await fetch(`${API_BASE}/usuario/`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify(datos)
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || 'Error al crear usuario');
-        }
-        return res.json();
     }
 
     async function cargarRoles() {
         try {
-            const roles = await listarRoles();
+            const res = await fetch(`${API_BASE}/rol/`, { headers: getHeaders() });
+            if (!res.ok) throw new Error('Error al cargar roles');
+            const roles = await res.json();
             const select = document.getElementById('id_rol');
             select.innerHTML = '<option value="">Seleccione un rol</option>';
             roles.forEach(rol => {
@@ -271,13 +194,17 @@
                 select.appendChild(option);
             });
         } catch (error) {
-            console.error(error);
-            showToast('No se pudieron cargar los roles. Verifique su conexión.', 'error');
+            mostrarError('No se pudieron cargar los roles. Verifique su conexión.');
             document.getElementById('id_rol').innerHTML = '<option value="">Error al cargar roles</option>';
         }
     }
 
-    // ---------- ENVÍO DEL FORMULARIO ----------
+    async function crearUsuario(datos) {
+        const res = await fetch(`${API_BASE}/usuario/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(datos) });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Error al crear usuario'); }
+        return res.json();
+    }
+
     const form = document.getElementById('form-usuario');
     const submitBtn = document.getElementById('btn-submit');
     let isSubmitting = false;
@@ -285,70 +212,44 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
-        
         const nombre = document.getElementById('nombre').value.trim();
         const id_rol = parseInt(document.getElementById('id_rol').value);
         const contrasena = document.getElementById('contrasena').value;
 
-        // Validaciones
-        if (!nombre) {
-            showToast('El nombre completo es obligatorio.', 'warning');
-            document.getElementById('nombre').focus();
-            return;
-        }
-        if (!id_rol) {
-            showToast('Debe seleccionar un rol para el usuario.', 'warning');
-            document.getElementById('id_rol').focus();
-            return;
-        }
-        if (!contrasena) {
-            showToast('La contraseña es obligatoria.', 'warning');
-            document.getElementById('contrasena').focus();
-            return;
-        }
-
+        if (!nombre) { mostrarWarning('El nombre completo es obligatorio.'); return; }
+        if (!id_rol) { mostrarWarning('Debe seleccionar un rol para el usuario.'); return; }
+        if (!contrasena) { mostrarWarning('La contraseña es obligatoria.'); return; }
         const validacionPass = validarContrasena(contrasena);
-        if (!validacionPass.valida) {
-            showToast(validacionPass.mensaje, 'warning');
-            document.getElementById('contrasena').focus();
-            return;
-        }
+        if (!validacionPass.valida) { mostrarWarning(validacionPass.mensaje); return; }
 
         isSubmitting = true;
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xl">progress_activity</span> Creando...';
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Creando...';
         submitBtn.disabled = true;
 
         try {
             await crearUsuario({ nombre, id_rol, contrasena });
-            showToast(`Usuario "${nombre}" creado correctamente.`, 'success');
-            setTimeout(() => {
+            mostrarExito(`Usuario "${nombre}" creado correctamente.`, () => {
                 window.location.href = 'usuarios.html';
-            }, 1500);
+            });
         } catch (error) {
             let errorMsg = error.message;
             if (errorMsg.includes('duplicate key') || errorMsg.toLowerCase().includes('unique')) {
-                errorMsg = 'Ya existe un usuario con ese nombre. Elija otro nombre.';
+                errorMsg = 'Ya existe un usuario con ese nombre.';
             }
-            showToast(`Error: ${errorMsg}`, 'error');
+            mostrarError(`Error: ${errorMsg}`);
             isSubmitting = false;
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
     });
 
-    // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = btn.previousElementSibling;
             const iconSpan = btn.querySelector('.material-symbols-outlined');
-            if (input.type === 'password') {
-                input.type = 'text';
-                iconSpan.innerText = 'visibility_off';
-            } else {
-                input.type = 'password';
-                iconSpan.innerText = 'visibility';
-            }
+            if (input.type === 'password') { input.type = 'text'; iconSpan.innerText = 'visibility_off'; }
+            else { input.type = 'password'; iconSpan.innerText = 'visibility'; }
         });
     });
 

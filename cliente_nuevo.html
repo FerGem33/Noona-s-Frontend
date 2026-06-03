@@ -1,165 +1,146 @@
 <!DOCTYPE html>
-<html class="light" lang="es">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Registro de Clientes - Nonna DB</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<title>Registrar Cliente - Nonna DB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
-                colors: {
-                    primary: "#5D1927",
-                    "background-light": "#FEBDC6",
-                    "background-dark": "#121212",
-                },
-                fontFamily: { display: ["Outfit", "sans-serif"] },
-                borderRadius: { DEFAULT: "0.75rem" },
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
             },
         },
-    };
+    }
 </script>
 <style>
-    body { font-family: 'Outfit', sans-serif; }
-    .cherry-outline { border: 2px solid #5D1927; color: #5D1927; }
-    .cherry-outline:hover { background-color: rgba(93, 25, 39, 0.05); }
-    
-    /* Estilos para las notificaciones toast */
-    .toast-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        min-width: 280px;
-        max-width: 380px;
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        transform: translateX(400px);
-        transition: transform 0.3s ease-out;
-        border-left: 4px solid;
-        pointer-events: auto;
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .toast-notification.show {
-        transform: translateX(0);
-    }
-    .toast-notification.success {
-        border-left-color: #10b981;
-    }
-    .toast-notification.error {
-        border-left-color: #ef4444;
-    }
-    .toast-notification.warning {
-        border-left-color: #f59e0b;
-    }
-    .toast-icon {
-        flex-shrink: 0;
-    }
-    .toast-content {
-        flex: 1;
-        font-size: 0.875rem;
-        line-height: 1.4;
-    }
-    .toast-close {
-        cursor: pointer;
-        color: #9ca3af;
-        transition: color 0.2s;
-    }
-    .toast-close:hover {
-        color: #4b5563;
-    }
-    
-    /* Estilos para el campo de teléfono cuando tiene error */
-    .input-error {
-        border-color: #ef4444 !important;
-        background-color: #fef2f2 !important;
-    }
-    
-    .error-message {
-        color: #ef4444;
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-        margin-left: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
+    .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+    .error-message { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem; }
 </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
-<div class="w-full max-w-2xl bg-white dark:bg-zinc-900 shadow-2xl rounded-3xl overflow-hidden">
-    <div class="px-8 pt-10 pb-6 text-center">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-            <span class="material-symbols-outlined text-primary text-3xl">person_add</span>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[900px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">person_add</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Registrar Nuevo Cliente</h1>
+                <p class="text-slate-500 text-sm">Complete la información y las direcciones del cliente.</p>
+            </div>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">Registrar Nuevo Cliente</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm">Complete la información y las direcciones del cliente.</p>
+        <a href="clientes.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-2xl mx-auto space-y-8">
+
+            <!-- Datos básicos -->
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <h2 class="text-lg font-bold text-slate-900">Datos del Cliente</h2>
+                </div>
+                <form id="form-cliente" class="grid grid-cols-1 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Nombre *</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                                <input id="nombre" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. María" required>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-700">Apellido *</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">badge</span>
+                                <input id="apellido" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. García" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Teléfono *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">phone</span>
+                            <input id="telefono" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. 5512345678" maxlength="10" required>
+                        </div>
+                        <div id="telefono-error" class="error-message hidden">
+                            <span class="material-symbols-outlined text-sm">error</span>
+                            <span>El teléfono solo debe contener números y máximo 10 dígitos</span>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Direcciones -->
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">location_on</span>
+                        <h2 class="text-lg font-bold text-slate-900">Direcciones</h2>
+                    </div>
+                    <button type="button" id="btn-agregar-direccion" class="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                        <span class="material-symbols-outlined text-lg">add_circle</span> Agregar dirección
+                    </button>
+                </div>
+                <div id="lista-direcciones" class="space-y-3">
+                    <p class="text-slate-400 text-sm">No hay direcciones agregadas.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="clientes.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button type="submit" form="form-cliente" id="btn-submit" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Guardar Cliente
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
     </div>
-    <form id="form-cliente" class="px-8 pb-10 space-y-6">
-        <!-- Datos básicos -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-2">
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Nombre</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">person</span>
-                    <input id="nombre" class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary dark:text-white transition-all outline-none" placeholder="Ej. María" required>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Apellido</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">badge</span>
-                    <input id="apellido" class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary dark:text-white transition-all outline-none" placeholder="Ej. García" required>
-                </div>
-            </div>
-        </div>
-        <div class="space-y-2">
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Teléfono</label>
-            <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">phone</span>
-                <input id="telefono" class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary dark:text-white transition-all outline-none" placeholder="Ej. 5512345678" maxlength="10" required>
-            </div>
-            <div id="telefono-error" class="error-message hidden">
-                <span class="material-symbols-outlined text-sm">error</span>
-                <span>El teléfono solo debe contener números y máximo 10 dígitos</span>
-            </div>
-        </div>
+</div>
 
-        <!-- Sección de direcciones -->
-        <div class="pt-2 border-t border-gray-100 dark:border-zinc-800">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Direcciones</h2>
-                <button type="button" id="btn-agregar-direccion" class="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
-                    <span class="material-symbols-outlined text-sm">add_circle</span>
-                    Agregar dirección
-                </button>
-            </div>
-            <div id="lista-direcciones" class="space-y-3">
-                <!-- mostraran las direcciones agregadas temporalmente -->
-            </div>
-        </div>
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
 
-        <!-- Botones de acción -->
-        <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button type="submit" id="btn-submit" class="flex-1 bg-primary text-white font-bold py-3.5 px-6 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-xl">save</span>
-                Guardar Cliente
-            </button>
-            <a href="clientes.html" class="flex-1 cherry-outline font-bold py-3.5 px-6 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 dark:border-primary dark:text-primary-light">
-                <span class="material-symbols-outlined text-xl">close</span>
-                Cancelar
-            </a>
-        </div>
-    </form>
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
 </div>
 
 <script>
@@ -170,199 +151,112 @@
         return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
     }
 
-    // ---------- SISTEMA DE NOTIFICACIONES TOAST ----------
-    function showToast(message, type = 'info', duration = 4000) {
-        const toastContainer = document.getElementById('toast-container') || (() => {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.position = 'fixed';
-            container.style.top = '20px';
-            container.style.right = '20px';
-            container.style.zIndex = '1000';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.gap = '10px';
-            document.body.appendChild(container);
-            return container;
-        })();
-
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        
-        let icon = '';
-        if (type === 'success') icon = 'check_circle';
-        else if (type === 'error') icon = 'error';
-        else if (type === 'warning') icon = 'warning';
-        else icon = 'info';
-        
-        toast.innerHTML = `
-            <div class="toast-icon">
-                <span class="material-symbols-outlined" style="color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'}">${icon}</span>
-            </div>
-            <div class="toast-content">${message}</div>
-            <div class="toast-close">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 10);
-        
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        });
-        
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, duration);
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
     }
 
-    // ---------- FUNCIONES DE VALIDACIÓN DEL TELÉFONO ----------
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
     function validarTelefono(telefono) {
-        // Expresión regular que solo permite números (0-9)
-        const soloNumerosRegex = /^[0-9]+$/;
-        
-        if (!telefono) {
-            return { valido: false, mensaje: 'El teléfono es obligatorio' };
-        }
-        
-        if (!soloNumerosRegex.test(telefono)) {
-            return { valido: false, mensaje: 'El teléfono solo debe contener números' };
-        }
-        
-        if (telefono.length !== 10 && telefono.length !== 0) {
-            return { valido: false, mensaje: 'El teléfono debe tener exactamente 10 dígitos' };
-        }
-        
+        if (!telefono) return { valido: false, mensaje: 'El teléfono es obligatorio' };
+        if (!/^[0-9]+$/.test(telefono)) return { valido: false, mensaje: 'El teléfono solo debe contener números' };
+        if (telefono.length !== 10) return { valido: false, mensaje: 'El teléfono debe tener exactamente 10 dígitos' };
         return { valido: true, mensaje: '' };
     }
-    
+
     function mostrarErrorTelefono(mostrar, mensaje = '') {
         const telefonoInput = document.getElementById('telefono');
         const errorDiv = document.getElementById('telefono-error');
-        
         if (mostrar) {
             telefonoInput.classList.add('input-error');
             errorDiv.classList.remove('hidden');
-            const errorSpan = errorDiv.querySelector('span:last-child');
-            if (errorSpan) {
-                errorSpan.textContent = mensaje || 'El teléfono solo debe contener números y máximo 10 dígitos';
-            }
+            const span = errorDiv.querySelector('span:last-child');
+            if (span) span.textContent = mensaje || 'El teléfono solo debe contener números y máximo 10 dígitos';
         } else {
             telefonoInput.classList.remove('input-error');
             errorDiv.classList.add('hidden');
         }
     }
-    
-    // Eventos de validación para el campo de teléfono
+
     const telefonoInput = document.getElementById('telefono');
-    
-    telefonoInput.addEventListener('input', function(e) {
-        // Obtener el valor actual
-        let valor = this.value;
-        
-        // Eliminar cualquier caracter que no sea número
-        let soloNumeros = valor.replace(/[^0-9]/g, '');
-        
-        // Limitar a máximo 10 dígitos
-        if (soloNumeros.length > 10) {
-            soloNumeros = soloNumeros.slice(0, 10);
-        }
-        
-        // Si el valor cambió, actualizarlo
-        if (valor !== soloNumeros) {
-            this.value = soloNumeros;
-        }
-        
-        // Validar y mostrar/ocultar error
+    telefonoInput.addEventListener('input', function() {
+        let soloNumeros = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+        this.value = soloNumeros;
         const validacion = validarTelefono(soloNumeros);
-        if (!validacion.valido && soloNumeros.length > 0) {
-            mostrarErrorTelefono(true, validacion.mensaje);
-        } else {
-            mostrarErrorTelefono(false);
-        }
+        if (!validacion.valido && soloNumeros.length > 0) mostrarErrorTelefono(true, validacion.mensaje);
+        else mostrarErrorTelefono(false);
     });
-    
     telefonoInput.addEventListener('blur', function() {
         const validacion = validarTelefono(this.value);
-        if (!validacion.valido && this.value.length > 0) {
-            mostrarErrorTelefono(true, validacion.mensaje);
-        } else if (this.value.length === 0) {
-            mostrarErrorTelefono(true, 'El teléfono es obligatorio');
-        } else {
-            mostrarErrorTelefono(false);
-        }
-    });
-    
-    telefonoInput.addEventListener('keypress', function(e) {
-        // Prevenir cualquier tecla que no sea número
-        const charCode = e.which ? e.which : e.keyCode;
-        const char = String.fromCharCode(charCode);
-        
-        // Permitir: números, backspace, delete, tab, enter, escape, flechas
-        if (charCode === 8 || charCode === 46 || charCode === 9 || charCode === 13 || 
-            charCode === 27 || (charCode >= 37 && charCode <= 40)) {
-            return;
-        }
-        
-        // Verificar si el caracter es un número
-        if (!/[0-9]/.test(char)) {
-            e.preventDefault();
-            showToast('Solo se permiten números en el teléfono', 'warning', 1500);
-        }
+        if (!validacion.valido) mostrarErrorTelefono(true, validacion.mensaje);
+        else mostrarErrorTelefono(false);
     });
 
-    // Almacenar direcciones temporalmente (sin enviar aún)
     let direccionesTemp = [];
 
     function renderizarDirecciones() {
         const container = document.getElementById('lista-direcciones');
         if (direccionesTemp.length === 0) {
-            container.innerHTML = '<p class="text-slate-500 text-sm">No hay direcciones agregadas.</p>';
+            container.innerHTML = '<p class="text-slate-400 text-sm">No hay direcciones agregadas.</p>';
             return;
         }
         container.innerHTML = '';
         direccionesTemp.forEach((dir, idx) => {
             const div = document.createElement('div');
-            div.className = 'p-4 bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800 rounded-xl flex items-center justify-between group';
+            div.className = 'flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100';
             div.innerHTML = `
                 <div class="flex items-start gap-3">
                     <span class="material-symbols-outlined text-primary mt-0.5">home</span>
                     <div>
-                        <p class="text-sm font-bold text-gray-900 dark:text-white">Dirección ${idx+1}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">${escapeHtml(dir.descripcion)}</p>
+                        <p class="text-sm font-bold text-slate-700">Dirección ${idx+1}</p>
+                        <p class="text-xs text-slate-500">${escapeHtml(dir.descripcion)}</p>
                     </div>
                 </div>
-                <button class="eliminar-direccion text-gray-400 hover:text-red-500 transition-colors" data-index="${idx}">
-                    <span class="material-symbols-outlined text-xl">delete</span>
+                <button class="eliminar-direccion text-slate-300 hover:text-red-500 transition-colors" data-index="${idx}">
+                    <span class="material-symbols-outlined">delete</span>
                 </button>
             `;
             container.appendChild(div);
         });
         document.querySelectorAll('.eliminar-direccion').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idx = parseInt(btn.dataset.index);
-                direccionesTemp.splice(idx, 1);
-                renderizarDirecciones();
-            });
+            btn.addEventListener('click', () => { direccionesTemp.splice(parseInt(btn.dataset.index), 1); renderizarDirecciones(); });
         });
     }
 
-    // Mostrar modal para agregar una nueva dirección (sin alert)
     function mostrarModalAgregarDireccion() {
         const modalDiv = document.createElement('div');
-        modalDiv.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+        modalDiv.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4';
         modalDiv.innerHTML = `
-            <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Nueva Dirección</h3>
-                <textarea id="nueva-descripcion" class="w-full border rounded-xl p-3" rows="3" placeholder="Calle, número, colonia, ciudad, CP..."></textarea>
+            <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">add_location</span>
+                    <h3 class="text-xl font-bold text-slate-900">Nueva Dirección</h3>
+                </div>
+                <textarea id="nueva-descripcion" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none" rows="3" placeholder="Calle, número, colonia, ciudad, CP..."></textarea>
                 <div class="flex justify-end gap-3 mt-6">
-                    <button id="cancelar-modal" class="px-4 py-2 border rounded-xl">Cancelar</button>
-                    <button id="confirmar-modal" class="px-4 py-2 bg-primary text-white rounded-xl">Guardar</button>
+                    <button id="cancelar-modal" class="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</button>
+                    <button id="confirmar-modal" class="px-8 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">add</span> Guardar
+                    </button>
                 </div>
             </div>
         `;
@@ -371,7 +265,7 @@
         modalDiv.querySelector('#confirmar-modal').onclick = () => {
             const descripcion = modalDiv.querySelector('#nueva-descripcion').value.trim();
             if (!descripcion) {
-                showToast('La dirección es obligatoria', 'warning');
+                mostrarWarning('La dirección es obligatoria');
                 return;
             }
             direccionesTemp.push({ descripcion });
@@ -380,92 +274,84 @@
         };
     }
 
-    // Crear cliente y luego sus direcciones con toasts
     async function crearClienteConDirecciones() {
         const nombre = document.getElementById('nombre').value.trim();
         const apellido = document.getElementById('apellido').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
-        
-        // Validaciones de campos obligatorios
+
         if (!nombre || !apellido) {
-            showToast('Nombre y apellido son obligatorios', 'warning');
+            mostrarWarning('Nombre y apellido son obligatorios');
             return;
         }
-        
-        // Validar teléfono antes de enviar
         const validacionTelefono = validarTelefono(telefono);
         if (!validacionTelefono.valido) {
             mostrarErrorTelefono(true, validacionTelefono.mensaje);
-            showToast(validacionTelefono.mensaje, 'warning');
+            mostrarWarning(validacionTelefono.mensaje);
             return;
         }
-        
+
         const submitBtn = document.getElementById('btn-submit');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xl">progress_activity</span> Guardando...';
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
         submitBtn.disabled = true;
-        
+
         let nuevoCliente;
         try {
-            const resCliente = await fetch(`${API_BASE}/cliente/`, {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify({ nombre, apellido, telefono })
+            const resCliente = await fetch(`${API_BASE}/cliente/`, { 
+                method: 'POST', 
+                headers: getHeaders(), 
+                body: JSON.stringify({ nombre, apellido, telefono }) 
             });
-            if (!resCliente.ok) {
-                const errData = await resCliente.json();
-                throw new Error(errData.detail || 'Error al crear cliente');
+            if (!resCliente.ok) { 
+                const errData = await resCliente.json(); 
+                throw new Error(errData.detail || 'Error al crear cliente'); 
             }
             nuevoCliente = await resCliente.json();
-            showToast(`Cliente "${nombre} ${apellido}" creado correctamente`, 'success');
         } catch (error) {
-            showToast(`Error al crear cliente: ${error.message}`, 'error');
+            mostrarError(`Error al crear cliente: ${error.message}`);
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
             return;
         }
-        
-        // Crear direcciones asociadas
+
         if (direccionesTemp.length > 0) {
             let errores = [];
             for (const dir of direccionesTemp) {
                 try {
-                    const resDir = await fetch(`${API_BASE}/direccion/`, {
-                        method: 'POST',
-                        headers: getHeaders(),
-                        body: JSON.stringify({ id_cliente: nuevoCliente.id_cliente, descripcion: dir.descripcion })
+                    const resDir = await fetch(`${API_BASE}/direccion/`, { 
+                        method: 'POST', 
+                        headers: getHeaders(), 
+                        body: JSON.stringify({ id_cliente: nuevoCliente.id_cliente, descripcion: dir.descripcion }) 
                     });
-                    if (!resDir.ok) {
-                        const errDir = await resDir.json();
-                        errores.push(`${dir.descripcion}: ${errDir.detail || 'error'}`);
+                    if (!resDir.ok) { 
+                        const errDir = await resDir.json(); 
+                        errores.push(`${dir.descripcion.substring(0, 30)}: ${errDir.detail || 'error'}`);
                     }
-                } catch (e) {
-                    errores.push(dir.descripcion);
+                } catch (e) { 
+                    errores.push(dir.descripcion.substring(0, 30)); 
                 }
             }
-            
             if (errores.length > 0) {
-                showToast(`Cliente creado, pero algunas direcciones fallaron: ${errores.join('; ')}`, 'warning');
-            } else {
-                showToast(`Todas las direcciones fueron agregadas correctamente.`, 'success');
+                mostrarWarning(`Cliente creado, pero algunas direcciones fallaron: ${errores.join('; ')}`);
             }
         }
-        
-        setTimeout(() => {
+
+        mostrarExito(`Cliente "${nombre} ${apellido}" creado correctamente.`, () => {
             window.location.href = 'clientes.html';
-        }, 2000);
+        });
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 
-    document.getElementById('form-cliente').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await crearClienteConDirecciones();
+    document.getElementById('form-cliente').addEventListener('submit', async (e) => { 
+        e.preventDefault(); 
+        await crearClienteConDirecciones(); 
     });
-    
     document.getElementById('btn-agregar-direccion').addEventListener('click', mostrarModalAgregarDireccion);
 
-    function escapeHtml(str) { 
-        if (!str) return ''; 
-        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
     }
 </script>
 </body>
