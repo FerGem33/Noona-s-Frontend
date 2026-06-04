@@ -59,18 +59,18 @@
             <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-primary">image</span>
-                    <h2 class="text-lg font-bold text-slate-900">Imagen del Producto</h2>
+                    <h2 class="text-lg font-bold text-slate-900">Imagen del Producto *</h2>
                 </div>
                 <div class="relative w-full h-44 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center mb-4">
                     <img id="preview-imagen" class="w-full h-full object-cover hidden" alt="Vista previa">
                     <div id="placeholder-imagen" class="flex flex-col items-center justify-center text-slate-300 gap-2">
                         <span class="material-symbols-outlined text-5xl">image</span>
-                        <span class="text-sm font-medium">Sin imagen seleccionada</span>
+                        <span class="text-sm font-medium">Seleccione una imagen</span>
                     </div>
                 </div>
                 <input type="file" id="imagen" accept="image/jpeg,image/png,image/jpg"
                     class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer">
-                <p class="text-xs text-slate-400 mt-2">Formatos aceptados: JPG, PNG · Máximo 5MB</p>
+                <p class="text-xs text-slate-400 mt-2">Formatos aceptados: JPG, PNG · Máximo 5MB · La imagen es obligatoria</p>
             </section>
 
             <!-- Información del producto -->
@@ -128,7 +128,7 @@
     <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
         <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
         <h3 class="text-xl font-bold text-slate-900" id="modal-titulo">Producto creado</h3>
-        <p class="text-slate-500 mt-2" id="modal-mensaje">El producto se ha guardado correctamente.</p>
+        <p class="text-slate-500 mt-2" id="modal-mensaje"></p>
         <button id="btn-cerrar-modal" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
     </div>
 </div>
@@ -141,6 +141,17 @@
         <h3 class="text-xl font-bold text-slate-900">Error</h3>
         <p class="text-slate-500 mt-2" id="error-mensaje"></p>
         <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Cerrar</button>
+    </div>
+</div>
+
+<!-- MODAL DE ADVERTENCIA (para imagen obligatoria) -->
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p class="text-slate-500 mt-2" id="warning-mensaje"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
     </div>
 </div>
 
@@ -168,6 +179,13 @@
         document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
     }
 
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
     const inputImagen = document.getElementById('imagen');
     const previewImg = document.getElementById('preview-imagen');
     const placeholderDiv = document.getElementById('placeholder-imagen');
@@ -175,6 +193,14 @@
     inputImagen.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
+            // Validar tamaño (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                mostrarWarning('La imagen no puede superar los 5MB. Por favor, selecciona una imagen más pequeña.');
+                inputImagen.value = '';
+                previewImg.classList.add('hidden');
+                placeholderDiv.classList.remove('hidden');
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImg.src = e.target.result;
@@ -259,6 +285,13 @@
 
     document.getElementById('form-producto').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        // ✅ VALIDACIÓN: LA IMAGEN ES OBLIGATORIA
+        if (!inputImagen.files.length || inputImagen.files.length === 0) {
+            mostrarWarning('La imagen del producto es obligatoria. Por favor, selecciona una imagen.');
+            return;
+        }
+
         const descripcion = document.getElementById('descripcion').value.trim();
         const id_categoria = parseInt(document.getElementById('id_categoria').value);
         const id_receta = parseInt(document.getElementById('id_receta').value);
@@ -271,7 +304,7 @@
         if (isNaN(precio_unitario) || precio_unitario <= 0) { mostrarError('Precio válido requerido'); return; }
 
         const duplicado = await verificarProductoDuplicado(descripcion);
-        if (duplicado) { mostrarError('Ya existe un producto con esa descripción. Por favor, elija otro nombre.'); return; }
+        if (duplicado) { mostrarWarning('Ya existe un producto con esa descripción. Por favor, elija otro nombre.'); return; }
 
         const datosProducto = { id_categoria, id_receta, descripcion, precio_unitario, imagen: "", activo };
         const btn = document.getElementById('btn-submit');
@@ -281,12 +314,8 @@
 
         try {
             const nuevoProducto = await crearProducto(datosProducto);
-            if (inputImagen.files.length > 0) {
-                await subirImagenProducto(nuevoProducto.id_producto, inputImagen.files[0]);
-                mostrarExito('¡Producto creado!', 'Producto e imagen guardados correctamente.', 'productos.html');
-            } else {
-                mostrarExito('¡Producto creado!', 'El producto se ha guardado correctamente.', 'productos.html');
-            }
+            await subirImagenProducto(nuevoProducto.id_producto, inputImagen.files[0]);
+            mostrarExito('¡Producto creado!', 'Producto e imagen guardados correctamente.', 'productos.html');
         } catch (error) {
             let errorMsg = error.message;
             if (errorMsg.includes('duplicate') || errorMsg.toLowerCase().includes('unique')) errorMsg = 'Ya existe un producto con esa descripción.';
