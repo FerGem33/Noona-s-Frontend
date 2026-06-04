@@ -4,17 +4,18 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
                 colors: {
-                    primary: "#ec1337",
+                    "primary": "#5d1927",
+                    "accent": "#febdc6",
                     "background-light": "#f8f6f6",
-                    "background-dark": "#221013",
+                    "background-dark": "#1f1316",
                 },
                 fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
                 borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
@@ -22,88 +23,88 @@
         },
     }
 </script>
+<title>Eliminar Cliente - Nonna</title>
 <style>
-    /* Estilos para las notificaciones toast */
-    .toast-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        min-width: 280px;
-        max-width: 380px;
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        transform: translateX(400px);
-        transition: transform 0.3s ease-out;
-        border-left: 4px solid;
-        pointer-events: auto;
-    }
-    .toast-notification.show {
-        transform: translateX(0);
-    }
-    .toast-notification.success {
-        border-left-color: #10b981;
-    }
-    .toast-notification.error {
-        border-left-color: #ef4444;
-    }
-    .toast-notification.warning {
-        border-left-color: #f59e0b;
-    }
-    .toast-icon {
-        flex-shrink: 0;
-    }
-    .toast-content {
-        flex: 1;
-        font-size: 0.875rem;
-        line-height: 1.4;
-    }
-    .toast-close {
-        cursor: pointer;
-        color: #9ca3af;
-        transition: color 0.2s;
-    }
-    .toast-close:hover {
-        color: #4b5563;
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #febdc6; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
 </style>
-<title>Nonna Admin - Confirmación de Eliminación</title>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display antialiased">
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-background-dark/80 backdrop-blur-[2px]">
-    <div class="relative w-full max-w-md transform overflow-hidden rounded-xl bg-white p-8 shadow-2xl transition-all dark:bg-slate-900 border-t-4 border-primary">
-        <div class="flex flex-col items-center text-center">
-            <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-[48px] font-light">warning</span>
+<body class="bg-accent min-h-screen flex items-center justify-center p-4">
+
+<!-- TARJETA PRINCIPAL -->
+<div class="fixed inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center p-6">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+        <!-- Franja superior -->
+        <div class="h-2 w-full bg-primary"></div>
+
+        <div class="p-8 md:p-10 flex flex-col items-center text-center">
+            <!-- Ícono -->
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-5xl">warning</span>
             </div>
-            <h2 class="mb-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">¿Eliminar este cliente?</h2>
-            <p class="mb-8 text-slate-500 dark:text-slate-400 leading-relaxed">
-                Estás a punto de eliminar permanentemente el registro del cliente:
-            </p>
-            <div class="mb-8 w-full rounded-lg bg-slate-50 p-4 text-left border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                <div class="flex flex-col gap-1">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Nombre Completo</span>
-                    <span id="nombre-cliente" class="text-lg font-bold text-primary">Cargando...</span>
-                </div>
+            <!-- Título -->
+            <h2 class="text-primary text-2xl md:text-3xl font-bold leading-tight mb-3">
+                ¿Eliminar este cliente?
+            </h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-primary/40 mb-6">MÓDULO DE CLIENTES</p>
+
+            <!-- Detalle del cliente -->
+            <div class="w-full bg-primary/5 rounded-lg p-4 mb-8 text-left border border-primary/10">
+                <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">Nombre Completo</span>
+                <p id="nombre-cliente" class="font-bold text-primary text-base">Cargando...</p>
             </div>
-            <div class="flex w-full flex-col gap-3 sm:flex-row">
-                <button id="btn-eliminar" class="flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-bold text-white transition-colors hover:bg-primary/90">
-                    Sí, Eliminar
-                </button>
-                <a href="clientes.html" class="flex flex-1 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-3 text-base font-bold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+
+            <!-- Advertencia -->
+            <p class="text-slate-400 text-xs mb-8">Esta acción no se puede deshacer y borrará todo el historial relacionado.</p>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <a href="clientes.html" class="flex-1 h-12 px-6 rounded-lg border-2 border-primary/20 bg-white text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center">
                     No, Mantener
                 </a>
+                <button id="btn-eliminar" class="flex-1 h-12 px-6 rounded-lg bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-xl">delete</span>
+                    Sí, Eliminar
+                </button>
             </div>
-            <p class="mt-6 text-xs text-slate-400 dark:text-slate-500">
-                Esta acción no se puede deshacer y borrará todo el historial relacionado.
-            </p>
         </div>
+
+        <!-- Footer -->
+        <div class="bg-primary/5 py-3 px-8 text-center border-t border-primary/10">
+            <p class="text-[10px] text-primary/40 uppercase font-bold tracking-[0.2em]">Nonna Administrative Module</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
     </div>
 </div>
 
@@ -119,66 +120,37 @@
         };
     }
 
-    // ---------- SISTEMA DE NOTIFICACIONES TOAST ----------
-    function showToast(message, type = 'info', duration = 4000) {
-        const toastContainer = document.getElementById('toast-container') || (() => {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.position = 'fixed';
-            container.style.top = '20px';
-            container.style.right = '20px';
-            container.style.zIndex = '1000';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.gap = '10px';
-            document.body.appendChild(container);
-            return container;
-        })();
-
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        
-        let icon = '';
-        if (type === 'success') icon = 'check_circle';
-        else if (type === 'error') icon = 'error';
-        else if (type === 'warning') icon = 'warning';
-        else icon = 'info';
-        
-        toast.innerHTML = `
-            <div class="toast-icon">
-                <span class="material-symbols-outlined" style="color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'}">${icon}</span>
-            </div>
-            <div class="toast-content">${message}</div>
-            <div class="toast-close">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 10);
-        
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        });
-        
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, duration);
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
     }
 
-    // Obtener ID del cliente desde la URL
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const clienteId = urlParams.get('id');
     if (!clienteId) {
-        showToast('No se especificó qué cliente eliminar.', 'error');
-        setTimeout(() => { window.location.href = 'clientes.html'; }, 1500);
+        mostrarWarning('No se especificó qué cliente eliminar.');
+        setTimeout(() => { window.location.href = 'clientes.html'; }, 2000);
     }
 
-    // Cargar datos del cliente para mostrar su nombre
     async function cargarCliente() {
         try {
             const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { headers: getHeaders() });
@@ -189,46 +161,42 @@
         } catch (error) {
             console.error(error);
             document.getElementById('nombre-cliente').innerText = 'Error al cargar datos';
-            showToast('No se pudo cargar la información del cliente.', 'error');
+            mostrarError('No se pudo cargar la información del cliente.');
         }
     }
 
-    // Eliminar cliente (sin confirm adicional)
     async function eliminarCliente() {
         const btn = document.getElementById('btn-eliminar');
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Eliminando...';
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Eliminando...';
         btn.disabled = true;
-        
+
         try {
-            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { 
-                method: 'DELETE', 
-                headers: getHeaders() 
-            });
-            
+            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { method: 'DELETE', headers: getHeaders() });
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.detail || 'Error al eliminar el cliente');
             }
-            
-            showToast('Cliente eliminado correctamente', 'success');
-            setTimeout(() => {
+            mostrarExito('Cliente eliminado correctamente', () => {
                 window.location.href = 'clientes.html';
-            }, 1500);
+            });
         } catch (error) {
             let errorMsg = error.message;
             if (errorMsg.includes('foreign key') || errorMsg.includes('referenced')) {
                 errorMsg = 'No se puede eliminar este cliente porque tiene pedidos o direcciones asociadas. Elimina esos registros primero.';
             }
-            showToast(`Error: ${errorMsg}`, 'error');
+            mostrarError(`Error: ${errorMsg}`);
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     }
 
-    // Evento del botón eliminar (ya no hay confirm adicional porque el modal pide confirmación)
     document.getElementById('btn-eliminar').addEventListener('click', () => {
-        eliminarCliente();
+        mostrarWarning('¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.');
+        document.getElementById('btn-cerrar-warning').onclick = () => {
+            document.getElementById('modal-warning').classList.add('hidden');
+            eliminarCliente();
+        };
     });
 
     cargarCliente();

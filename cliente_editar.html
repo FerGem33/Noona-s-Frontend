@@ -3,120 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Editar Datos del Cliente - Nonna</title>
+<title>Editar Cliente - Nonna</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
-                colors: {
-                    primary: "#5d1927",
-                    "background-light": "#f8f6f6",
-                    "background-dark": "#1f1315",
-                    "accent-pink": "#FEBDC6",
-                },
-                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
-                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                colors: { "primary": "#5d1927", "accent-pink": "#FEBDC6" },
+                fontFamily: { "sans": ["Montserrat", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
             },
         },
     }
 </script>
 <style>
-    /* Toast notifications */
-    .toast-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        min-width: 280px;
-        max-width: 380px;
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        transform: translateX(400px);
-        transition: transform 0.3s ease-out;
-        border-left: 4px solid;
-        pointer-events: auto;
+    body { font-family: "Montserrat", sans-serif; background-color: #FEBDC6; }
+    .modal-mensaje {
+        transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .toast-notification.show { transform: translateX(0); }
-    .toast-notification.success { border-left-color: #10b981; }
-    .toast-notification.error { border-left-color: #ef4444; }
-    .toast-notification.warning { border-left-color: #f59e0b; }
-    .toast-icon { flex-shrink: 0; }
-    .toast-content { flex: 1; font-size: 0.875rem; line-height: 1.4; }
-    .toast-close { cursor: pointer; color: #9ca3af; transition: color 0.2s; }
-    .toast-close:hover { color: #4b5563; }
 </style>
 </head>
-<body class="bg-accent-pink font-display min-h-screen flex items-center justify-center p-4 sm:p-8">
-<div class="w-full max-w-[1200px] bg-white rounded-xl shadow-xl overflow-hidden">
-    <main class="p-6 sm:p-10">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-slate-900 text-3xl font-extrabold tracking-tight">Editar Datos del Cliente</h1>
-            <p class="text-slate-500 mt-2">Modifique la información del perfil y las direcciones del cliente.</p>
+<body class="bg-[#FEBDC6] min-h-screen flex items-center justify-center p-4">
+<div class="bg-white w-full max-w-[1280px] max-h-[960px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+
+    <header class="flex items-center justify-between border-b border-slate-100 px-10 py-6 bg-white">
+        <div class="flex items-center gap-4">
+            <div class="bg-primary/10 p-3 rounded-xl text-primary">
+                <span class="material-symbols-outlined text-3xl">person_edit</span>
+            </div>
+            <div>
+                <h1 class="text-slate-900 text-2xl font-extrabold tracking-tight">Editar Datos del Cliente</h1>
+                <p class="text-slate-500 text-sm">Modifique la información del perfil y las direcciones del cliente.</p>
+            </div>
         </div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            <!-- Columna izquierda: datos básicos -->
-            <div class="lg:col-span-5 space-y-6">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">Información Básica</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block mb-2"><span class="text-slate-700 text-sm font-semibold">ID Cliente (No editable)</span></label>
-                        <input id="id_cliente" class="w-full bg-slate-50 border border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed focus:outline-none font-medium" readonly>
+        <a href="clientes.html" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-10 bg-slate-50/50">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Datos básicos -->
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <h2 class="text-lg font-bold text-slate-900">Información Básica</h2>
+                </div>
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">ID Cliente (No editable)</label>
+                        <input id="id_cliente" class="w-full rounded-xl border-slate-200 bg-slate-100 px-4 py-3 text-slate-400 cursor-not-allowed" readonly>
                     </div>
-                    <div>
-                        <label class="block mb-2"><span class="text-slate-700 text-sm font-semibold">Nombre</span></label>
-                        <input id="nombre" class="w-full border border-slate-200 rounded-lg h-12 px-4 text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" placeholder="Ingrese nombre" type="text" required>
-                    </div>
-                    <div>
-                        <label class="block mb-2"><span class="text-slate-700 text-sm font-semibold">Apellido</span></label>
-                        <input id="apellido" class="w-full border border-slate-200 rounded-lg h-12 px-4 text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" placeholder="Ingrese apellido" type="text" required>
-                    </div>
-                    <div>
-                        <label class="block mb-2"><span class="text-slate-700 text-sm font-semibold">Teléfono</span></label>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Nombre *</label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">+</span>
-                            <input id="telefono" class="w-full border border-slate-200 rounded-lg h-12 pl-10 pr-4 text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" placeholder="000 000 000" type="text">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                            <input id="nombre" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. María" type="text" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Apellido *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">badge</span>
+                            <input id="apellido" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Ej. García" type="text" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-bold text-slate-700">Teléfono</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">phone</span>
+                            <input id="telefono" class="w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="000 000 0000" type="text">
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Columna derecha: direcciones -->
-            <div class="lg:col-span-7 space-y-6">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">Direcciones del cliente</h3>
-                    <button id="btn-agregar-direccion" class="text-sm bg-primary/10 text-primary px-4 py-2 rounded-xl font-semibold hover:bg-primary/20 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-lg"></span> Agregar dirección
+            </section>
+
+            <!-- Direcciones -->
+            <section class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">location_on</span>
+                        <h2 class="text-lg font-bold text-slate-900">Direcciones del Cliente</h2>
+                    </div>
+                    <button id="btn-agregar-direccion" class="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                        <span class="material-symbols-outlined text-lg">add_circle</span> Agregar
                     </button>
                 </div>
-                <!-- Lista de direcciones -->
-                <div id="lista-direcciones" class="space-y-4">
-                    <p class="text-slate-500 text-sm">Cargando direcciones...</p>
+                <div id="lista-direcciones" class="space-y-3">
+                    <p class="text-slate-400 text-sm">Cargando direcciones...</p>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Botones de acción -->
-        <div class="flex flex-col sm:flex-row gap-4 pt-8 mt-10 border-t border-slate-100">
-            <button id="btn-guardar" class="bg-primary text-white font-bold px-8 py-4 rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 min-w-[200px] shadow-lg shadow-primary/10">
-                <span class="material-symbols-outlined"></span> Guardar Cambios
-            </button>
-            <a href="clientes.html" class="bg-transparent text-primary font-bold px-8 py-4 rounded-lg border-2 border-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 min-w-[200px]">
-                <span class="material-symbols-outlined"></span> Cancelar
-            </a>
+            </section>
         </div>
     </main>
+
+    <footer class="border-t border-slate-100 p-8 flex justify-end gap-4 bg-white">
+        <a href="clientes.html" class="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</a>
+        <button id="btn-guardar" class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/95 transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span> Guardar Cambios
+        </button>
+    </footer>
+</div>
+
+<!-- MODALES CENTRALES -->
+<div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span></div>
+        <h3 id="exito-titulo" class="text-xl font-bold text-slate-900">¡Éxito!</h3>
+        <p id="exito-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
+    </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-red-600 text-5xl">error</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
+</div>
+
+<div id="modal-warning" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+        <div class="mx-auto mb-4"><span class="material-symbols-outlined text-amber-600 text-5xl">warning</span></div>
+        <h3 class="text-xl font-bold text-slate-900">Aviso</h3>
+        <p id="warning-mensaje" class="text-slate-500 mt-2"></p>
+        <button id="btn-cerrar-warning" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
+    </div>
 </div>
 
 <script>
@@ -127,65 +147,38 @@
         return { 'accept': 'application/json', 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
     }
 
-    // ---------- SISTEMA DE NOTIFICACIONES TOAST ----------
-    function showToast(message, type = 'info', duration = 4000) {
-        const toastContainer = document.getElementById('toast-container') || (() => {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.position = 'fixed';
-            container.style.top = '20px';
-            container.style.right = '20px';
-            container.style.zIndex = '1000';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.gap = '10px';
-            document.body.appendChild(container);
-            return container;
-        })();
+    function mostrarExito(mensaje, callback) {
+        const modal = document.getElementById('modal-exito');
+        document.getElementById('exito-titulo').innerText = '¡Éxito!';
+        document.getElementById('exito-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-exito').onclick = () => {
+            modal.classList.add('hidden');
+            if (callback) callback();
+        };
+    }
 
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        
-        let icon = '';
-        if (type === 'success') icon = '';
-        else if (type === 'error') icon = 'error';
-        else if (type === 'warning') icon = 'warning';
-        else icon = 'info';
-        
-        toast.innerHTML = `
-            <div class="toast-icon">
-                <span class="material-symbols-outlined" style="color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'}">${icon}</span>
-            </div>
-            <div class="toast-content">${message}</div>
-            <div class="toast-close">
-                <span class="material-symbols-outlined text-sm"></span>
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 10);
-        
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        });
-        
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, duration);
+    function mostrarError(mensaje) {
+        const modal = document.getElementById('modal-error');
+        document.getElementById('error-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-error').onclick = () => modal.classList.add('hidden');
+    }
+
+    function mostrarWarning(mensaje) {
+        const modal = document.getElementById('modal-warning');
+        document.getElementById('warning-mensaje').innerText = mensaje;
+        modal.classList.remove('hidden');
+        document.getElementById('btn-cerrar-warning').onclick = () => modal.classList.add('hidden');
     }
 
     const urlParams = new URLSearchParams(window.location.search);
     const clienteId = urlParams.get('id');
     if (!clienteId) {
-        showToast('No se especificó qué cliente editar.', 'error');
-        setTimeout(() => { window.location.href = 'clientes.html'; }, 1500);
+        mostrarWarning('No se especificó qué cliente editar.');
+        setTimeout(() => { window.location.href = 'clientes.html'; }, 2000);
     }
 
-    // ---------- CARGAR DATOS DEL CLIENTE ----------
     async function cargarCliente() {
         try {
             const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { headers: getHeaders() });
@@ -195,82 +188,77 @@
             document.getElementById('nombre').value = cliente.nombre || '';
             document.getElementById('apellido').value = cliente.apellido || '';
             document.getElementById('telefono').value = cliente.telefono || '';
-        } catch (error) {
-            showToast('Error al cargar cliente: ' + error.message, 'error');
+        } catch (error) { 
+            mostrarError('Error al cargar cliente: ' + error.message);
             setTimeout(() => { window.location.href = 'clientes.html'; }, 2000);
         }
     }
 
-    // ---------- CARGAR DIRECCIONES ----------
     async function cargarDirecciones() {
         const container = document.getElementById('lista-direcciones');
-        container.innerHTML = '<p class="text-slate-500 text-sm">Cargando direcciones...</p>';
+        container.innerHTML = '<p class="text-slate-400 text-sm">Cargando direcciones...</p>';
         try {
             const res = await fetch(`${API_BASE}/direccion/`, { headers: getHeaders() });
-            if (!res.ok) {
-                let errorMsg = `HTTP ${res.status}`;
-                try {
-                    const errorData = await res.json();
-                    errorMsg = errorData.detail || errorMsg;
-                } catch(e) {}
-                throw new Error(errorMsg);
-            }
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const todas = await res.json();
             const misDirecciones = todas.filter(d => d.id_cliente == clienteId);
-            if (misDirecciones.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-sm">No hay direcciones registradas para este cliente.</p>';
-                return;
+            if (misDirecciones.length === 0) { 
+                container.innerHTML = '<p class="text-slate-400 text-sm">No hay direcciones registradas para este cliente.</p>'; 
+                return; 
             }
             container.innerHTML = '';
             misDirecciones.forEach(dir => {
                 const div = document.createElement('div');
-                div.className = 'p-4 border border-slate-200 rounded-xl flex justify-between items-center bg-slate-50/30';
+                div.className = 'flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100';
                 div.innerHTML = `
-                    <div>
-                        <p class="font-bold text-slate-900">Dirección</p>
-                        <p class="text-sm text-slate-500">${escapeHtml(dir.descripcion)}</p>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary mt-0.5">home</span>
+                        <div>
+                            <p class="font-bold text-slate-700 text-sm">Dirección</p>
+                            <p class="text-xs text-slate-500">${escapeHtml(dir.descripcion)}</p>
+                        </div>
                     </div>
-                    <button class="eliminar-direccion text-slate-400 hover:text-red-600 transition-colors" data-id="${dir.id_direccion}" title="Eliminar dirección">
-                        <span class="material-symbols-outlined">Eliminar</span>
+                    <button class="eliminar-direccion text-slate-300 hover:text-red-500 transition-colors" data-id="${dir.id_direccion}">
+                        <span class="material-symbols-outlined">delete</span>
                     </button>
                 `;
                 container.appendChild(div);
             });
-            // Eventos eliminar dirección con confirmación visual
             document.querySelectorAll('.eliminar-direccion').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    const confirmDelete = confirm('¿Eliminar esta dirección? Esta acción no se puede deshacer.');
-                    if (!confirmDelete) return;
+                    mostrarWarning('¿Eliminar esta dirección? Esta acción no se puede deshacer.');
+                    const confirmar = confirm('¿Estás seguro de eliminar esta dirección?');
+                    if (!confirmar) return;
                     try {
                         const delRes = await fetch(`${API_BASE}/direccion/${btn.dataset.id}`, { method: 'DELETE', headers: getHeaders() });
-                        if (!delRes.ok) {
-                            const errData = await delRes.json();
-                            throw new Error(errData.detail || 'Error al eliminar');
-                        }
-                        showToast('Dirección eliminada correctamente', 'success');
-                        cargarDirecciones(); // recargar lista
-                    } catch(e) {
-                        showToast('Error al eliminar dirección: ' + e.message, 'error');
-                    }
+                        if (!delRes.ok) { const errData = await delRes.json(); throw new Error(errData.detail || 'Error al eliminar'); }
+                        mostrarExito('Dirección eliminada correctamente', () => {
+                            cargarDirecciones();
+                        });
+                    } catch(e) { mostrarError('Error al eliminar dirección: ' + e.message); }
                 });
             });
         } catch (error) {
-            console.error('Error cargando direcciones:', error);
             container.innerHTML = `<p class="text-red-500 text-sm">Error al cargar direcciones: ${error.message}</p>`;
+            mostrarError('Error al cargar direcciones: ' + error.message);
         }
     }
 
-    // ---------- MODAL AGREGAR DIRECCIÓN ----------
     function mostrarModalAgregarDireccion() {
         const modalDiv = document.createElement('div');
-        modalDiv.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+        modalDiv.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4';
         modalDiv.innerHTML = `
-            <div class="bg-white rounded-2xl p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Agregar Dirección</h3>
-                <textarea id="nueva-descripcion" class="w-full border rounded-xl p-3" rows="3" placeholder="Calle, número, colonia, ciudad, CP..."></textarea>
+            <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary">add_location</span>
+                    <h3 class="text-xl font-bold text-slate-900">Nueva Dirección</h3>
+                </div>
+                <textarea id="nueva-descripcion" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none" rows="3" placeholder="Calle, número, colonia, ciudad, CP..."></textarea>
                 <div class="flex justify-end gap-3 mt-6">
-                    <button id="cancelar-modal" class="px-4 py-2 border rounded-xl">Cancelar</button>
-                    <button id="confirmar-modal" class="px-4 py-2 bg-primary text-white rounded-xl">Guardar</button>
+                    <button id="cancelar-modal" class="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancelar</button>
+                    <button id="confirmar-modal" class="px-8 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">add</span> Guardar
+                    </button>
                 </div>
             </div>
         `;
@@ -278,73 +266,56 @@
         modalDiv.querySelector('#cancelar-modal').onclick = () => modalDiv.remove();
         modalDiv.querySelector('#confirmar-modal').onclick = async () => {
             const descripcion = modalDiv.querySelector('#nueva-descripcion').value.trim();
-            if (!descripcion) {
-                showToast('La dirección es obligatoria', 'warning');
-                return;
-            }
+            if (!descripcion) { mostrarWarning('La dirección es obligatoria'); return; }
             try {
-                const res = await fetch(`${API_BASE}/direccion/`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ id_cliente: parseInt(clienteId), descripcion })
+                const res = await fetch(`${API_BASE}/direccion/`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ id_cliente: parseInt(clienteId), descripcion }) });
+                if (!res.ok) { const errData = await res.json(); throw new Error(errData.detail || 'Error al guardar'); }
+                mostrarExito('Dirección agregada correctamente', () => {
+                    modalDiv.remove();
+                    cargarDirecciones();
                 });
-                if (!res.ok) {
-                    const errData = await res.json();
-                    throw new Error(errData.detail || 'Error al guardar');
-                }
-                showToast('Dirección agregada correctamente', 'success');
-                modalDiv.remove();
-                cargarDirecciones(); // recargar lista
-            } catch(e) {
-                showToast('Error al guardar dirección: ' + e.message, 'error');
-            }
+            } catch(e) { mostrarError('Error al guardar dirección: ' + e.message); }
         };
     }
 
-    // ---------- ACTUALIZAR CLIENTE ----------
     async function actualizarCliente() {
         const nombre = document.getElementById('nombre').value.trim();
         const apellido = document.getElementById('apellido').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
-        
-        if (!nombre || !apellido) {
-            showToast('Nombre y apellido son obligatorios', 'warning');
-            return;
+        if (!nombre || !apellido) { 
+            mostrarWarning('Nombre y apellido son obligatorios'); 
+            return; 
         }
-        
+
         const btn = document.getElementById('btn-guardar');
         const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<span class="material-symbols-outlined animate-spin"></span> Guardando...';
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Guardando...';
         btn.disabled = true;
-        
+
         try {
-            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, {
-                method: 'PUT',
-                headers: getHeaders(),
-                body: JSON.stringify({ nombre, apellido, telefono })
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.detail || 'Error al actualizar');
+            const res = await fetch(`${API_BASE}/cliente/${clienteId}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify({ nombre, apellido, telefono }) });
+            if (!res.ok) { 
+                const err = await res.json(); 
+                throw new Error(err.detail || 'Error al actualizar'); 
             }
-            showToast('Cliente actualizado correctamente', 'success');
-            setTimeout(() => {
+            mostrarExito('Cliente actualizado correctamente', () => {
                 window.location.href = 'clientes.html';
-            }, 1500);
+            });
         } catch (error) {
-            showToast('Error: ' + error.message, 'error');
+            mostrarError('Error: ' + error.message);
             btn.innerHTML = originalHTML;
             btn.disabled = false;
         }
     }
 
-    // Event listeners
     document.getElementById('btn-guardar').addEventListener('click', actualizarCliente);
     document.getElementById('btn-agregar-direccion').addEventListener('click', mostrarModalAgregarDireccion);
-    
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
-    
-    // Inicializar
+
+    function escapeHtml(str) { 
+        if (!str) return ''; 
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); 
+    }
+
     cargarCliente();
     cargarDirecciones();
 </script>

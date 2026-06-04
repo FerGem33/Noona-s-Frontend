@@ -99,7 +99,7 @@
                 <thead>
                     <tr class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800">
                         <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold w-8"></th>
-                        <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold">ID</th>
+                        <!-- ✅ COLUMNA ID ELIMINADA - YA NO SE MUESTRA -->
                         <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold">Productos</th>
                         <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold text-right">Envío</th>
                         <th class="px-6 py-4 text-xs text-primary dark:text-pink-200 uppercase tracking-wider font-bold text-right">Subtotal</th>
@@ -108,7 +108,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabla-cotizaciones" class="divide-y divide-gray-100 dark:divide-zinc-800">
-                    <tr><td colspan="7" class="text-center py-10 text-primary/50">Cargando cotizaciones...</td></tr>
+                    <tr><td colspan="6" class="text-center py-10 text-primary/50">Cargando cotizaciones...NonNull
                 </tbody>
             </table>
         </div>
@@ -260,7 +260,7 @@
     function renderizarTabla(cotizaciones) {
         const tbody = document.getElementById('tabla-cotizaciones');
         if (!cotizaciones.length) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-primary/50">No hay cotizaciones. Crea la primera.</td></tr>`;
+            tbody.innerHTML = `<td><td colspan="6" class="text-center py-10 text-primary/50">No hay cotizaciones. Crea la primera.NonNull`;
             document.getElementById('total-registros').innerText = 'Mostrando 0 cotizaciones';
             return;
         }
@@ -275,12 +275,12 @@
             const resumenProductos = detalles.map(d => productosMap[d.id_producto] || `Prod ${d.id_producto}`).join(', ');
             const resumenCorto = resumenProductos.length > 50 ? resumenProductos.substring(0, 50) + '...' : resumenProductos;
 
+            // ✅ COLUMNA ID ELIMINADA - LA FILA PRINCIPAL YA NO MUESTRA EL ID
             const filaPrincipal = `
                 <tr class="cotizacion-row hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors">
                     <td class="px-4 py-4 text-center" onclick="toggleDetalles(${idCotizacion})">
                         <span class="material-symbols-outlined text-primary/60 cursor-pointer" id="icon-${idCotizacion}">chevron_right</span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold text-gray-900 dark:text-zinc-100" onclick="toggleDetalles(${idCotizacion})">#${idCotizacion}</td>
                     <td class="px-6 py-4" onclick="toggleDetalles(${idCotizacion})">
                         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-pink-100 text-primary">${cantidadProductos} producto${cantidadProductos !== 1 ? 's' : ''}</span>
                         <span class="text-gray-500 text-sm ml-2">${escapeHtml(resumenCorto)}</span>
@@ -305,8 +305,9 @@
 
             let detallesHtml = `
                 <tr id="detalles-${idCotizacion}" style="display: none;" class="detalle-row">
-                    <td colspan="7" class="py-3 px-6">
+                    <td colspan="6" class="py-3 px-6">
                         <div class="ml-8">
+                            <div class="mb-2 text-xs text-slate-400 font-mono">ID Cotización: #${idCotizacion}</div>
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="text-primary/60 border-b border-primary/10">
@@ -333,7 +334,7 @@
                         <td class="py-2 text-right">$${precioUnitario.toFixed(2)}</td>
                         <td class="py-2 text-right">$${precioDisenio.toFixed(2)}</td>
                         <td class="py-2 text-right font-semibold">$${subtotalDetalle.toFixed(2)}</td>
-                    </tr>
+                    </td>
                 `;
             });
 
@@ -364,14 +365,14 @@
 
     async function cargarYRenderizar() {
         const tbody = document.getElementById('tabla-cotizaciones');
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-primary/50">Cargando...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-primary/50">Cargando...NonNull`;
         try {
             await cargarProductos();
             todasCotizaciones = await listarCotizaciones();
             renderizarTabla(todasCotizaciones);
         } catch (error) {
             console.error(error);
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-red-500">Error al cargar: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">Error al cargar: ${error.message}NonNull`;
         }
     }
 

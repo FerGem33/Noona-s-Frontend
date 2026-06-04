@@ -1,99 +1,93 @@
 <!DOCTYPE html>
-<html class="light" lang="es">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Nonna - Confirmar Eliminación de Proveedor</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
                 colors: {
-                    primary: "#5d1927",
-                    "background-light": "#f1f5f9",
-                    "background-dark": "#0f172a",
+                    "primary": "#5d1927",
+                    "accent": "#febdc6",
+                    "background-light": "#f8f6f6",
+                    "background-dark": "#1f1316",
                 },
-                fontFamily: {
-                    display: ["Inter", "sans-serif"],
-                    sans: ["Inter", "sans-serif"],
-                },
-                borderRadius: { DEFAULT: "0.5rem" },
+                fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
             },
         },
-    };
-</script>
-<style>
-    body { font-family: 'Inter', sans-serif; }
-    .modal-mensaje {
-        transition: opacity 0.3s ease, visibility 0.3s ease;
     }
+</script>
+<title>Eliminar Proveedor - Nonna</title>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .modal-mensaje { transition: opacity 0.3s ease, visibility 0.3s ease; }
 </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-2xl border-t-8 border-primary overflow-hidden transform transition-all">
-        <div class="p-6">
-            <div class="flex items-center gap-4 mb-6">
-                <div class="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-primary">
-                    <span class="material-icons-outlined text-3xl">report_problem</span>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white leading-tight uppercase tracking-tight">
-                        Confirmar Eliminación
-                    </h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">MÓDULO DE PROVEEDORES</p>
-                </div>
+<body class="bg-accent min-h-screen flex items-center justify-center p-4">
+
+<!-- TARJETA PRINCIPAL -->
+<div class="fixed inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center p-6">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+        <!-- Franja superior -->
+        <div class="h-2 w-full bg-primary"></div>
+
+        <div class="p-8 md:p-10 flex flex-col items-center text-center">
+            <!-- Ícono -->
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-primary text-5xl">warning</span>
             </div>
-            <div class="mb-6">
-                <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
-                    ¿Estás seguro de que deseas eliminar este proveedor? <span class="font-semibold text-slate-800 dark:text-slate-100">Esta acción no se puede deshacer</span> y afectará los registros históricos asociados.
-                </p>
+            <!-- Título -->
+            <h2 class="text-primary text-2xl md:text-3xl font-bold leading-tight mb-3">
+                ¿Eliminar este proveedor?
+            </h2>
+            <p class="text-xs font-bold uppercase tracking-widest text-primary/40 mb-6">MÓDULO DE PROVEEDORES</p>
+
+            <!-- Detalle del proveedor -->
+            <div class="w-full bg-primary/5 rounded-lg p-4 mb-8 text-left border border-primary/10">
+                <span class="block text-[10px] font-bold text-primary/50 uppercase tracking-widest mb-1">Razón Social</span>
+                <p id="nombre-proveedor" class="font-bold text-primary text-base">Cargando...</p>
             </div>
-            <div class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4 mb-8">
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <span class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Razón Social</span>
-                        <span id="nombre-proveedor" class="text-base font-semibold text-slate-700 dark:text-slate-200">Cargando...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row-reverse gap-3">
-                <button id="btn-eliminar" class="w-full sm:w-auto px-6 py-2.5 bg-primary hover:bg-rose-900 text-white font-semibold rounded-lg shadow-sm transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">
-                    <span class="material-icons-outlined text-lg">delete_forever</span>
-                    Sí, Eliminar
-                </button>
-                <a href="proveedores.html" class="w-full sm:w-auto px-6 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-lg transition-all duration-200 text-center">
+
+            <!-- Advertencia -->
+            <p class="text-slate-400 text-xs mb-8">Esta acción no se puede deshacer y afectará los registros históricos asociados.</p>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <a href="proveedores.html" class="flex-1 h-12 px-6 rounded-lg border-2 border-primary/20 bg-white text-primary font-bold text-sm hover:bg-primary/5 transition-colors flex items-center justify-center">
                     No, Cancelar
                 </a>
+                <button id="btn-eliminar" class="flex-1 h-12 px-6 rounded-lg bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-xl">delete_forever</span>
+                    Sí, Eliminar
+                </button>
             </div>
         </div>
-        <div class="bg-slate-50 dark:bg-slate-800/30 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-            <div class="flex items-center gap-1.5 opacity-50">
-                <div class="w-2 h-2 rounded-full bg-slate-400"></div>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-tighter">Nonna System v2.4</span>
-            </div>
-            <button class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300" onclick="document.documentElement.classList.toggle('dark')">
-                <span class="material-icons-outlined text-sm">dark_mode</span>
-            </button>
+
+        <!-- Footer -->
+        <div class="bg-primary/5 py-3 px-8 text-center border-t border-primary/10">
+            <p class="text-[10px] text-primary/40 uppercase font-bold tracking-[0.2em]">Nonna Administrative Module</p>
         </div>
     </div>
 </div>
 
-<!-- MODAL DE CONFIRMACIÓN (reemplaza confirm nativo) -->
+<!-- MODAL DE CONFIRMACIÓN -->
 <div id="modal-confirmacion" class="fixed inset-0 flex items-center justify-center z-[70] hidden modal-mensaje">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
         <div class="mx-auto mb-4">
-            <span class="material-icons-outlined text-amber-600 text-5xl">warning</span>
+            <span class="material-symbols-outlined text-amber-600 text-5xl">warning</span>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Confirmar eliminación</h3>
-        <p id="confirmacion-mensaje" class="text-slate-500 dark:text-slate-300 mt-2 mb-6">¿Estás absolutamente seguro? Esta acción es irreversible.</p>
+        <h3 class="text-xl font-bold text-slate-900">Confirmar eliminación</h3>
+        <p id="confirmacion-mensaje" class="text-slate-500 mt-2 mb-6">¿Estás absolutamente seguro? Esta acción es irreversible.</p>
         <div class="flex gap-3">
-            <button id="btn-confirmar-cancelar" class="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Cancelar</button>
+            <button id="btn-confirmar-cancelar" class="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition-colors">Cancelar</button>
             <button id="btn-confirmar-aceptar" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">Eliminar</button>
         </div>
     </div>
@@ -102,12 +96,12 @@
 <!-- MODAL DE ÉXITO -->
 <div id="modal-exito" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
         <div class="mx-auto mb-4">
-            <span class="material-icons-outlined text-green-600 dark:text-green-400 text-5xl">check_circle</span>
+            <span class="material-symbols-outlined text-green-600 text-5xl">check_circle</span>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white">¡Proveedor eliminado!</h3>
-        <p class="text-slate-500 dark:text-slate-300 mt-2">El proveedor se ha eliminado correctamente.</p>
+        <h3 class="text-xl font-bold text-slate-900">¡Proveedor eliminado!</h3>
+        <p class="text-slate-500 mt-2">El proveedor se ha eliminado correctamente.</p>
         <button id="btn-cerrar-exito" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Continuar</button>
     </div>
 </div>
@@ -115,12 +109,12 @@
 <!-- MODAL DE ERROR -->
 <div id="modal-error" class="fixed inset-0 flex items-center justify-center z-[60] hidden modal-mensaje">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
+    <div class="relative bg-white rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl text-center">
         <div class="mx-auto mb-4">
-            <span class="material-icons-outlined text-red-600 dark:text-red-400 text-5xl">error</span>
+            <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Error</h3>
-        <p id="error-mensaje" class="text-slate-500 dark:text-slate-300 mt-2"></p>
+        <h3 class="text-xl font-bold text-slate-900">Error</h3>
+        <p id="error-mensaje" class="text-slate-500 mt-2"></p>
         <button id="btn-cerrar-error" class="mt-6 w-full bg-primary text-white font-bold py-2 px-4 rounded-xl hover:bg-primary/90 transition-colors">Aceptar</button>
     </div>
 </div>
@@ -133,9 +127,7 @@
         const errorModal = document.getElementById('modal-error');
         document.getElementById('error-mensaje').innerText = 'No hay sesión activa. Redirigiendo al login...';
         errorModal.classList.remove('hidden');
-        document.getElementById('btn-cerrar-error').onclick = () => {
-            window.location.href = 'index.html';
-        };
+        document.getElementById('btn-cerrar-error').onclick = () => { window.location.href = 'index.html'; };
     }
 
     function getHeaders() {
@@ -152,7 +144,6 @@
         mostrarError('No se especificó qué proveedor eliminar.', true);
     }
 
-    // ==================== MODALES ====================
     function mostrarExito(callback) {
         const modal = document.getElementById('modal-exito');
         modal.classList.remove('hidden');
@@ -182,15 +173,11 @@
             aceptarBtn.removeEventListener('click', aceptarHandler);
             cancelarBtn.removeEventListener('click', cerrar);
         };
-        const aceptarHandler = () => {
-            cerrar();
-            if (onConfirm) onConfirm();
-        };
+        const aceptarHandler = () => { cerrar(); if (onConfirm) onConfirm(); };
         aceptarBtn.addEventListener('click', aceptarHandler);
         cancelarBtn.addEventListener('click', cerrar);
     }
 
-    // ==================== CARGAR NOMBRE ====================
     async function cargarNombre() {
         try {
             const res = await fetch(`${API_BASE}/proveedor/${proveedorId}`, { headers: getHeaders() });
@@ -204,25 +191,18 @@
         }
     }
 
-    // ==================== ELIMINAR PROVEEDOR ====================
     async function eliminarProveedor() {
         const btn = document.getElementById('btn-eliminar');
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="material-icons-outlined animate-spin text-lg">progress_activity</span> Eliminando...';
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Eliminando...';
         btn.disabled = true;
-
         try {
-            const res = await fetch(`${API_BASE}/proveedor/${proveedorId}`, {
-                method: 'DELETE',
-                headers: getHeaders()
-            });
+            const res = await fetch(`${API_BASE}/proveedor/${proveedorId}`, { method: 'DELETE', headers: getHeaders() });
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.detail || 'Error al eliminar');
             }
-            mostrarExito(() => {
-                window.location.href = 'proveedores.html';
-            });
+            mostrarExito(() => { window.location.href = 'proveedores.html'; });
         } catch (error) {
             let errorMsg = error.message;
             if (errorMsg.includes('foreign key') || errorMsg.includes('referenced')) {
@@ -234,11 +214,8 @@
         }
     }
 
-    // ==================== EVENTO DEL BOTÓN ====================
     document.getElementById('btn-eliminar').addEventListener('click', () => {
-        mostrarConfirmacion(() => {
-            eliminarProveedor();
-        });
+        mostrarConfirmacion(() => { eliminarProveedor(); });
     });
 
     cargarNombre();
